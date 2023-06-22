@@ -491,7 +491,9 @@ function build_sequence takes nothing returns nothing
     // always rebuild heroes for defense
     //
     if c_altar_done >= 1 then
-        if b_hero1_done and MeleeDifficulty() != MELEE_NEWBIE then
+        if b_hero2_done and MeleeDifficulty() != MELEE_NEWBIE then
+            call SetBuildUnit( 1, hero_id3 )
+        elseif b_hero1_done and MeleeDifficulty() != MELEE_NEWBIE then
             call SetBuildUnit( 1, hero_id2 )
         else
             call SetBuildUnit( 1, hero_id )
