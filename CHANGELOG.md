@@ -175,6 +175,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
   - The function untested , but should can run
   - Add desperation_assault closing mechanism
   - Chcek Ally will check PLAYER_SLOT_STATE_PLAYING and Observer
+- HARASS add exit job mechanism
 - ZEPPELIN_MOVE now can take POWER FOUNTAIN
 - MANA_FOUNTAIN now can take POWER FOUNTAIN
 - GetBuildLocation return home_location , when not take front_loc[0] , prevent leakage and build location(0,0)
@@ -250,6 +251,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - Fixed windwalk Order if exist unit skills level
 - Fixed SELL_ZIGGURATS i always greater than ziggarray
 - Fixed GetEnemyAllyStrength check Observer
+- Fixed InitBuildArrayAM and SetBuildAllAMCore denominators are 0
 
 
 ## [2.6.2] - 2022-09-04
