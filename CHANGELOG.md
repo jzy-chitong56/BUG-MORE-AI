@@ -153,6 +153,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
   - Add exclude more Channeling skills ： healingspray , stampederainoffire , magicleash , cloudoffog , unstableconcoction , grabtree , possession , ambush , devour , 852487
   - RemoveFocusGroupUnit now is GroupRemoveGroupAM , as Public Code on common.eai
   - Add Deny
+  - Fixed AngleBetweenPoints loc setting error
 - NEUTRAL_GUARDED JOB just run on CheckNeutralQuick , CheckNeutral run is repeat
 - GlobalSettings.txt , ver_food_limit now use GetPlayerState(ai_player, PLAYER_STATE_FOOD_CAP_CEILING) , no longer is 100 , and DynamicSystem can keep building unit(I Sceptical)
 - GetWeakestEnemy , GetStrongestEnemy , GetWeakAndNearEnemy , GetSecondNearestEnemy check GetPlayerSlotState
