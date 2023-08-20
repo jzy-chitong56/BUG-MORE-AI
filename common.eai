@@ -8521,7 +8521,10 @@ endfunction
 
 //============================================================================
 function GetKeyUpgradeAdd takes integer sn returns integer
+  if sn != 0 then
   return KeyAddTimeModify(GetKeyUpgradeAddExt(key_upgrade1[sn]) + GetKeyUpgradeAddExt(key_upgrade2[sn]))
+  endif
+  return 0
 endfunction
 
 //============================================================================
@@ -11300,7 +11303,7 @@ function SleepInCombatAM takes nothing returns nothing
   endloop
   set count = 0
   loop
-    exitwhen count >= 8
+    exitwhen count >= 8 or town_threatened
     set count = count + 1
     call Sleep(1)
   endloop
