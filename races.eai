@@ -601,13 +601,6 @@ function build_sequence takes nothing returns nothing
       if builder[0] == null and tower_used_item == false and TownCountDone(racial_shop) > 0 and (TownCountDone(hero[1]) + TownCountDone(hero[2]) + TownCountDone(hero[3])) > 0 then
         call BuildItem(race_tower_item_quantity, race_tower_item, 220)
       endif
-      if builder[0] == null then
-        set builder[0] = GetItemHero(GetItemOfType(race_tower_item))
-      endif
-      if builder[0] != null then  //Avoid next judgment
-        call SetItemDroppable( GetItemOfTypeOnUnit(race_tower_item, builder[0]), false )  //prevent droppable
-        call SetItemPawnable( GetItemOfTypeOnUnit(race_tower_item, builder[0]), false )  //can selling
-      endif
     endif
   endif
   if strategy >= rp_strat_length then
@@ -715,7 +708,7 @@ function peon_assignment takes nothing returns nothing
   endif
 
   if race_manual_loading then
-    if TownHasMine(0)  and first_town_mine == 0 then
+    if TownHasMine(0) and first_town_mine == 0 then
       if FoodSpace() <= 0 and TownCount(racial_peon) == TownCountDone(racial_peon) and TownCount(racial_peon) <= 4 then
         call HarvestGold(0, 2)  // no foodspace , no peon , need one harvest mine peon build Farms
       elseif not hero_built[1] and TownCountDone(racial_peon) < 7 then  // game just started
