@@ -131,7 +131,7 @@ local location l = null
 		endif
 		//call GroupClear(g)
 		set l = GetUnitLoc(current_expansion)
-		set g = GetNearestSubGroupOfGroup(g, l, 3)
+		set g = GetNearestSubGroupOfGroup(g, l, 4)
 		call RemoveLocation(l)
 		set l = null
 		set militia_builder =FirstOfGroup(g)
