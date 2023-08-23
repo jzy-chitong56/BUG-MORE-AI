@@ -3596,16 +3596,16 @@ endfunction
 //==========================================================================
 // (AMAI)	CopyGroup
 //==========================================================================
-function CopyGroup takes group sg , group cg returns group
+function CopyGroup takes group sg , group copyg returns group
   local group gtemp = null
   local unit u = null
-  set cg = CreateGroup()
+  set copyg = CreateGroup()
   if FirstOfGroup(sg) != null then
     set gtemp = CreateGroup()
     loop
       set u = FirstOfGroup(sg)
       exitwhen u == null
-      call GroupAddUnit(cg,u)
+      call GroupAddUnit(copyg,u)
       call GroupAddUnit(gtemp,u)
       call GroupRemoveUnit(sg,u)
     endloop
@@ -3618,7 +3618,7 @@ function CopyGroup takes group sg , group cg returns group
     call DestroyGroup(gtemp)
     set gtemp = null
   endif
-  return cg
+  return copyg
 endfunction
 
 //==========================================================================
@@ -6642,16 +6642,19 @@ function GetExpFoe takes unit u returns unit
   local location l = null
   //local real i = expansion_radius
   //call Trace("Copy group")
-  set l = GetUnitLoc(current_expansion)
-  set g = CopyGroup(current_expansion_creeps,g)
-  set g = SelectByAlive(g, true)
-  set u = GetNearestOfGroup(u, g, l)
-  call RemoveLocation(l)
-  set l = null
-  call DestroyGroup(g)
-  set g = null
-  //call Trace("Have a foe")
-  return u
+  if FirstOfGroup(current_expansion_creeps) != null then
+    set l = GetUnitLoc(current_expansion)
+    set g = CopyGroup(current_expansion_creeps,g)
+    set g = SelectByAlive(g, true)
+    set u = GetNearestOfGroup(u, g, l)
+    call RemoveLocation(l)
+    set l = null
+    call DestroyGroup(g)
+    set g = null
+    //call Trace("Have a foe")
+    return u
+  endif
+  return null
 endfunction
 
 function GetNeutralGuard takes integer nn returns boolean
@@ -6659,7 +6662,7 @@ function GetNeutralGuard takes integer nn returns boolean
   local location l = null
   local unit u = null
   local boolean b = false
-  if nearest_neutral[nn] == null then
+  if nearest_neutral[nn] == null or FirstOfGroup(neutral_guards[nn]) == null then
     return b
   endif
   set g = CopyGroup(neutral_guards[nn],g)
@@ -6679,7 +6682,7 @@ function CanCreepGuardsSleep takes integer nn returns boolean
   local group g = null
   local unit u = null
   local boolean b = false
-  if nearest_neutral[nn] == null then
+  if nearest_neutral[nn] == null or FirstOfGroup(neutral_guards[nn]) == null then
     return b
   endif
   set g = CopyGroup(neutral_guards[nn],g)
