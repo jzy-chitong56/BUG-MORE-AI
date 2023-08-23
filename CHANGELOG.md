@@ -117,7 +117,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - MeleeDifficulty() use difficulty replace
   - official AI code not affected
 - Improved a small part of excretion (common.eai and B.eai) , now 24 player map run will 'smoothly'
+- (DevTools) Independent Path Unit ID
 - ZEPPELIN_FOLLOW will Remove follow_zeppelin out of Group , prevent affecting the current command
+- GetArmyHealthState no take UNIT_TYPE_SUMMONED
 - Build peon have compensate , when startloc have more mine
 - If race_manual_loading or race_uses_mine_expansion , GetMinesHarvested will return TownCountDone(mine)
 - Adjust HarvestGold mun, star game will have 4 peon HarvestGold , 1 peon HarvestWood(ELF is 2)
@@ -258,6 +260,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - Fixed SELL_ZIGGURATS i always greater than ziggarray
 - Fixed GetEnemyAllyStrength check Observer
 - Fixed InitBuildArrayAM and SetBuildAllAMCore denominators are 0
+- Fixed cannot use RITUAL_DAGGER
+- Fixed MILITIA_EXPAND GetNearestSubGroupOfGroup take 4 peon
 
 
 ## [2.6.2] - 2022-09-04
