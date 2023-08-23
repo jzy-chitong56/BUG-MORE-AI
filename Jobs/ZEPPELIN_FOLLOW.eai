@@ -3,7 +3,6 @@
 function ZeppelinFollowJob takes nothing returns nothing
   local real dist = 0
   local location l = null
-  local unit u = null
   local group g = CreateGroup()
   local location heroloc = null
   call DisplayToAllJobDebug("ZEPPELIN_FOLLOW Start")
