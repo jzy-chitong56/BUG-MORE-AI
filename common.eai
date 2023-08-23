@@ -3486,7 +3486,6 @@ function GetNearestEnemyToLoc_k takes location l returns player
   if min_p != 30 then
     return enemy_force[min_p]
   endif
-  call DisplayTimedTextToPlayer(Player(0),0,0,15,"4001")
   return null
 endfunction
 
@@ -3511,7 +3510,6 @@ function GetNearestEnemyToLoc_d takes location l returns player
   if min_p != 30 then
     return enemy_force[min_p]
   endif
-  call DisplayTimedTextToPlayer(Player(0),0,0,15,"4000")
   return null
 endfunction
 
@@ -11829,7 +11827,6 @@ function GetWeakestEnemy takes nothing returns player
   if pmin != 30 then
     return enemy_force[pmin]
   endif
-  call DisplayTimedTextToPlayer(Player(0),0,0,15,"4003")
   return null
 endfunction
 
@@ -11853,7 +11850,6 @@ function GetStrongestEnemy takes nothing returns player
   if pmax != 30 then
     return enemy_force[pmax]
   endif
-  call DisplayTimedTextToPlayer(Player(0),0,0,15,"4004")
   return null
 endfunction
 
@@ -11886,7 +11882,6 @@ function GetWeakAndNearEnemy takes nothing returns player
   if pmin != -1 then
     return enemy_force[pmin]
   endif
-  call DisplayTimedTextToPlayer(Player(0),0,0,15,"4005")
   return null
 endfunction
 
@@ -11911,7 +11906,6 @@ endloop
 if nearplayer != 30 then
   return enemy_force[nearplayer]
 endif
-call DisplayTimedTextToPlayer(Player(0),0,0,15,"4006")
 return null
 endfunction
 
@@ -11951,7 +11945,6 @@ function GetSecondNearestEnemy takes nothing returns player
   if spmin != -1 then
     return enemy_force[spmin]
   endif
-  call DisplayTimedTextToPlayer(Player(0),0,0,15,"4007")
   return null
 endfunction
 
