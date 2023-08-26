@@ -4664,6 +4664,7 @@ function GetNearestOfGroup takes unit ru, group g, location l returns unit
   local unit u = null
   local real sd = 1000000
   set ru = null
+if l != null then
   loop
     set u = FirstOfGroup(g)
     exitwhen u == null
@@ -4674,6 +4675,7 @@ function GetNearestOfGroup takes unit ru, group g, location l returns unit
     endif
     call GroupRemoveUnit(g, u )
   endloop
+endif
   return ru
 endfunction
 
@@ -6651,20 +6653,17 @@ endfunction
 function GetExpFoe takes unit u returns unit
   local group g = null
   local location l = null
-  if FirstOfGroup(current_expansion_creeps) != null then
-    set l = GetUnitLoc(current_expansion)
-    set current_expansion_creeps = SelectByAlive(current_expansion_creeps, true)
-    set g = CopyGroup(current_expansion_creeps,g)
-    //call Trace("Copy group")
-    set u = GetNearestOfGroup(u, g, l)
-    call RemoveLocation(l)
-    set l = null
-    call DestroyGroup(g)
-    set g = null
-    //call Trace("Have a foe")
-    return u
-  endif
-  return null
+  //call Trace("Copy group")
+  set l = GetUnitLoc(current_expansion)
+  set g = CopyGroup(current_expansion_creeps,g)
+  set g = SelectByAlive(g, true)
+  set u = GetNearestOfGroup(u, g, l)
+  call RemoveLocation(l)
+  set l = null
+  call DestroyGroup(g)
+  set g = null
+  //call Trace("Have a foe")
+  return u
 endfunction
 
 function GetNeutralGuard takes integer nn returns boolean
