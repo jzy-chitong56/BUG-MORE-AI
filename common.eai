@@ -6042,7 +6042,7 @@ function CheckExpansionTaken takes unit expa returns boolean
   call GroupEnumUnitsInRange(g, GetUnitX(expa), GetUnitY(expa), expansion_taken_radius, null)
   set g = SelectByPlayer(g, Player(PLAYERPASSIVE), false)
   set g = SelectUnittype(g, UNIT_TYPE_STRUCTURE, true)
-  // set g = SelectByAlive(g, true)
+  set g = SelectByAlive(g, true)
   set g = SelectByAlive2(g, true)
   call GroupRemoveUnit(g, expa)
   if FirstOfGroup(g) != null then
@@ -7995,6 +7995,7 @@ function InitTownBuilt takes nothing returns nothing
   loop
     exitwhen i >= max_towns
     set town_built[i] = false
+set exist_town[i] = Location(GetLocationX(home_location), GetLocationY(home_location))
     set i = i + 1
   endloop
   set town_built[0] = true
@@ -12551,7 +12552,7 @@ if not creeping_only then	// Do the normal attack sequence
     // take expansions as needed
     //
     if needs_exp then
-      if first_expansion_chosen and (current_expansion == null or not CheckExpansionTaken(current_expansion)) then
+      if first_expansion_chosen and (current_expansion == null or CheckExpansionTaken(current_expansion)) then
         call ChooseExpansion()
         if current_expansion == null then
           return
