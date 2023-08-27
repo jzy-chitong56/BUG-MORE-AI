@@ -211,6 +211,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
   - Adjust UPG_BOMBS BuildAdvUpgr2 chance unitcount to 0.2 , Maximum to 35 , In the test, after building COPTER, the enemy has no AIR , the COPTER no research UPG_BOMBS not useful
 - Remove Duplicates ROC GlobalSettings.txt front_base_distance
 - GetSumLoc no longer used within the loop , prevent loc exceeding map range
+- PathingThread Thread adjust to Last Run , prevent set own_town_mine[0] selecting too many path units
 - Zoom
    - zoom now use CAMERA_FIELD_TARGET_DISTANCE form W3C , max is 3000 , min is 1650
    - Observer zoom now is 2500
@@ -266,7 +267,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - Fixed cannot use RITUAL_DAGGER
 - Fixed MILITIA_EXPAND GetNearestSubGroupOfGroup take 4 peon
 - Fixed exp_prepared keep open after opening
-- Fixed CheckExpansionRebuild o check creep
+- Fixed CheckExpansionRebuild no check creep
+- Fixed needs_exp take player Taken current_expansion
 
 
 ## [2.6.2] - 2022-09-04
