@@ -269,8 +269,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - Fixed exp_prepared keep open after opening
 - Fixed CheckExpansionRebuild no check creep
 - Fixed BuyNeutral use local retreat_home
-- Fixed GetMana and SaveUnit no determine dawn
+- Fixed GetMana and SaveUnit no judge dawn
 - Fixed FocusGroupRemoveGuard cannot exit loop
+- Fixed HeroFleeRules no judge dawn
 
 ## [2.6.2] - 2022-09-04
 Jzy-chitong56 has provided various updates and ported features back to this older version of AMAI if you play on the older editions of warcraft 3.
