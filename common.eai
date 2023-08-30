@@ -4518,7 +4518,7 @@ function GetNearestNeutralQuick takes unit ru, integer id returns unit
   endloop
   call DestroyGroup(g)
   set g = null
-  if ru != null and GetUnitTypeId(u) == neutral_id[NEUTRAL_HEALWARD] and IsUnitType(ru, UNIT_TYPE_SUMMONED) then
+  if GetUnitTypeId(u) == neutral_id[NEUTRAL_HEALWARD] and ru != null and IsUnitType(ru, UNIT_TYPE_SUMMONED) then
     set ru = null
   endif
   return ru
@@ -4541,7 +4541,6 @@ function GetNearestNeutral takes unit ru, integer id returns unit
   local boolean pathingdone = true
   //local real totaltime = 0
   //local integer groundid = 'ewsp'
-  set ru = null
 //call DisplayTextToPlayer(GetLocalPlayer(), 0, 0, "get nearest neutral start")
 
 
@@ -4694,8 +4693,7 @@ function GetNearestSubGroupOfGroup takes group rg, location l, integer n returns
   local integer ru = 0
   local unit u = null
   local real d = 0
-  local group g = null
-  set g = rg
+  local group g = rg
   set rg = CreateGroup()
   loop
     set u = FirstOfGroup(g)
@@ -6090,11 +6088,10 @@ function GetCreepGuardGroup takes group g , integer nn returns group
   if g != null then
     call DestroyGroup(g)
   endif
+  set g = CreateGroup()
   if nearest_neutral[nn] == null then
-    set g = null
     return g
   endif
-  set g = CreateGroup()
   call GroupEnumUnitsInRange(g, GetUnitX(nearest_neutral[nn]), GetUnitY(nearest_neutral[nn]), 750, null)
   set g = SelectByPlayer(g, Player(PLAYERAGGRESSIVE), true)
   set g = SelectByAlive(g, true)
@@ -10364,7 +10361,7 @@ local unit    u = null
     endif
   endif
 
-  if current_expansion == null then
+  if current_expansion == null or CheckExpansionTaken(current_expansion) then
     call ChooseExpansion()
     if current_expansion == null then
       call Trace("AMAIStartexpa: Expansion Not Found")
@@ -10373,7 +10370,7 @@ local unit    u = null
   endif
   if CheckExpansionTaken(current_expansion) then
     set current_expansion = null
-return BUILT_ALL
+    return BUILT_ALL
   endif
   // call DisplayTextToPlayer(GetLocalPlayer(), 0, 0, "Expansion Taken Checked")
 
