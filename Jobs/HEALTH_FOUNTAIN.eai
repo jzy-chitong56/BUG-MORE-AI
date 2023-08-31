@@ -29,7 +29,7 @@ local unit fountain = GetHealthFountainUnit()
 local integer detectedenemies = 0
 local integer enemiesatfountain = 0
 local boolean creepsawake = false
-
+local location l = null
   call DisplayToAllJobDebug("HEALTH_FOUNTAIN Start")
 
   call RemoveGuardPosition(u)
@@ -58,18 +58,28 @@ local boolean creepsawake = false
     call TQAddUnitJob(2, RESET_GUARD_POSITION, p, u)
   else
 //    call DisplayToAll("Fountain Move to fountain")
-    if distance >= buy_distance then
-      if GetUnitAbilityLevel(u, 'Ashm') > 0 and GetLocationNonCreepStrength(GetUnitX(u), GetUnitY(u), 800) > 0 and (GetFloatGameState(GAME_STATE_TIME_OF_DAY) >= 18 or GetFloatGameState(GAME_STATE_TIME_OF_DAY) <= 6) then
-        call IssueImmediateOrder(u, "ambush")
-      else
-        if GetUnitCurrentOrder(u) != OrderId("move") then
-          call IssuePointOrder(u, "move", x, y)
-        endif
-      endif
-    elseif GetUnitAbilityLevel(u, 'Ashm') > 0 then
-      call IssueImmediateOrder(u, "ambush")
+if distance >= buy_distance then
+  if GetUnitAbilityLevel(u, 'Ashm') > 0 and GetLocationNonCreepStrength(GetUnitX(u), GetUnitY(u), 800) > 0 and (GetFloatGameState(GAME_STATE_TIME_OF_DAY) >= 18 or GetFloatGameState(GAME_STATE_TIME_OF_DAY) <= 6) then
+    call IssueImmediateOrder(u, "ambush")
+  else
+    if GetUnitCurrentOrder(u) != OrderId("move") then
+      call IssuePointOrder(u, "move", x, y)
     endif
-    call TQAddUnitJob(8, HEALTH_FOUNTAIN, p, u)
+  endif
+else
+  if IsUnitInvisible(u, Player(PLAYERAGGRESSIVE)) then  //no need do anything
+  elseif (GetUnitAbilityLevel(u, 'Ashm') > 0 and (GetFloatGameState(GAME_STATE_TIME_OF_DAY) >= 18 or GetFloatGameState(GAME_STATE_TIME_OF_DAY) <= 6)) then
+    call IssueImmediateOrder(u, "ambush")
+  else
+    if GetUnitCurrentOrder(u) != OrderId("patrol") then
+      set l = Location(x+GetRandomReal(-100,100),y+GetRandomReal(-100,100))
+      call IssuePointOrderLoc( u, "patrol", l)   //Prevent units from being blocked by other units coming from behind when leaving
+      call RemoveLocation(l)
+      set l = null
+    endif
+  endif
+endif
+call TQAddUnitJob(8, HEALTH_FOUNTAIN, p, u)
   endif
   set fountain = null
 endfunction
