@@ -198,6 +198,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - CheckTownBuilt max_towns take Max(max_towns,TownCountDone(racial_expansion)) , town_built[i] take have town
 - SleepUntilTownDefended and SleepInCombatAM no longer running simultaneously , the code seem to be in conflict
 - LocalizeNewTown no take hidden and die
+- GetLocationTowerStrength no check hidden
 - Strategy additional Improvements
   - AddUnitToAntiXX Computational UpgradeLevel
   - Harass no longer judge unit quantity , because dynamic strategy make it difficult to achieve quantity
