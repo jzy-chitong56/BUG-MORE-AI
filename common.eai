@@ -5448,8 +5448,8 @@ function GetLocationNonCreepStrength takes real x, real y, real radius returns i
   set g = SelectUnittype(g, UNIT_TYPE_STRUCTURE, false)
   set g = SelectByAlive(g, true)
   set g = SelectByHidden(g, false)
-  set g = SelectByPlayer(g, PLAYERAGGRESSIVE, false)
-  set g = SelectByPlayer(g, PLAYERPASSIVE, false)
+  set g = SelectByPlayer(g, Player(PLAYERAGGRESSIVE), false)
+  set g = SelectByPlayer(g, Player(PLAYERPASSIVE), false)
   loop
     set u = FirstOfGroup(g)
     exitwhen u == null
@@ -5477,8 +5477,8 @@ function GetLocationEnemyStructures takes real x, real y, real radius returns in
   set g = SelectUnittype(g, UNIT_TYPE_STRUCTURE, true)
   set g = SelectByAlive2(g, true)
   set g = SelectByHidden(g, false)
-  set g = SelectByPlayer(g, PLAYERAGGRESSIVE, false)
-  set g = SelectByPlayer(g, PLAYERPASSIVE, false)
+  set g = SelectByPlayer(g, Player(PLAYERAGGRESSIVE), false)
+  set g = SelectByPlayer(g, Player(PLAYERPASSIVE), false)
   loop
     set u = FirstOfGroup(g)
     exitwhen u == null
