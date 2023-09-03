@@ -276,6 +276,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - Fixde use MOONSTONE no check dawn
 - Fixed GetArmyHealthState fountain_available no determine dawn
 - Fixed ZeppelinMoveJob unloadall fail , some time unloadall location cannot unloadall unit , now take ZTargetLocation random coordinate unloadall
+- Fixed GetHeroToBuyItem would try to buy an item regardless of free slots.(@SMUnlimited)
+
 
 
 ## [2.6.2] - 2022-09-04
