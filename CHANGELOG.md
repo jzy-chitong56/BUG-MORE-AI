@@ -159,6 +159,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
   - 'ohwd' and 'hphx' is UNIT_TYPE_SUMMONED , so now no exclude UNIT_TYPE_SUMMONED
 - FOCUSFIRE_CONTROL add FOCUS FIRE special_unit , now special_unit have 'hpxe' and 'espv' and 'ngsp' , Phoenix and Soul of Revenge and GoblinSapper
   - Add exclude more Channeling skills ： healingspray , stampederainoffire , magicleash , cloudoffog , unstableconcoction , grabtree , possession , ambush , devour , 852487
+  - Add no single point continuous treatment during combat , avoid unit wandering and can send home
   - RemoveFocusGroupUnit now is GroupRemoveGroupAM , as Public Code on common.eai
   - Add Deny
   - Fixed AngleBetweenPoints loc setting error
