@@ -126,7 +126,9 @@ function HarassJob takes integer ht, unit targ, group harasser returns nothing
   endif
 
   if town_threatened and (not state_attacking or hero_harass) then
-    call TQAddGroupJob(5 * sleep_multiplier, HARASS, ht, target, harasser)
+    //call TQAddGroupJob(5 * sleep_multiplier, HARASS, ht, target, harasser)
+    call SaveBoolean(additional_info, key, STATE_RETREAT , false)
+    call GroupRecycleHarrassPositionInstant(harasser)
     set target = null
     set hu = null
     return
@@ -284,7 +286,7 @@ function HarassJob takes integer ht, unit targ, group harasser returns nothing
     elseif strength_sum >= strength_limit*2 then
       call SaveBoolean(additional_info, key, STATE_RETREAT, true)
       call GroupPointOrder(harasser, "move", GetLocationX(home_location), GetLocationY(home_location))
-      call SaveBoolean(additional_info, key, STATE_ATTACKING, false)	
+      call SaveBoolean(additional_info, key, STATE_ATTACKING, false)
       //call GroupRecycleGuardPosition(harasser)
     else
       call SaveBoolean(additional_info, key, STATE_RETREAT, true)
