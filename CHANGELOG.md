@@ -216,6 +216,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - Zoom
    - zoom now use CAMERA_FIELD_TARGET_DISTANCE form W3C , max is 3000 , min is 1650
    - Observer zoom now is 2500
+- debug show PingFrontPoints
 - AMAI VS AI
    - BlizzardVAI.eai Add zoom function
    - BlizzardVAI.eai ai script file read race.txt 1% and 2%
@@ -277,7 +278,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - Fixed GetArmyHealthState fountain_available no determine dawn
 - Fixed ZeppelinMoveJob unloadall fail , some time unloadall location cannot unloadall unit , now take ZTargetLocation random coordinate unloadall
 - Fixed GetHeroToBuyItem would try to buy an item regardless of free slots.(@SMUnlimited)
-
+- Fixed CheckExpansionTaken ancient expansion and item expansion return , if return false , then peon will expansion
 
 
 ## [2.6.2] - 2022-09-04
