@@ -7020,7 +7020,7 @@ function GetHeroToBuyItem takes unit shop, real limit, boolean is_healing_includ
     exitwhen i > 3
     if hero_built[i] and UnitAlive(hero_unit[i]) then
       if GetSlotsFreeOnUnit(hero_unit[i]) > 0 and DistanceBetweenUnits(hero_unit[i], shop) < limit and not IsUnitInGroup(hero_unit[i], unit_buying_tavern) and not IsUnitInGroup(hero_unit[i], unit_buying_merc) and not IsUnitInGroup(hero_unit[i], unit_harassing) then
-        if IsUnitInGroup(hero_unit[i], unit_healing) == is_healing_included then
+        if IsUnitInGroup(hero_unit[i], unit_healing) and is_healing_included then
         else
           return hero_unit[i]
         endif
@@ -8991,7 +8991,7 @@ function GetMinesHarvested takes nothing returns integer
   if race_manual_loading then
     set mine = race_manual_loading_mine
   endif
-  if first_town_mine > 0 then  //home_location have multiple mine or just one mine but UD and ELF cannot harvested
+  if first_town_mine > 0 or race_manual_loading or race_uses_mine_expansion then  //home_location have multiple mine or just one mine but UD and ELF cannot harvested
     set twm = TownCountDone(mine)
     set i = twm
   endif
@@ -9603,6 +9603,7 @@ function AddHarassUnittype takes integer groupnum, integer harassnum, group g, g
   local group cg = null
   local unit u = null
   local real player_sum = 0
+  local real unit_total = 0
   set cg = CopyGroup(g,cg)
   set cg = SelectNumberOfId(cg, harass_qty[harassnum*max_harass_groups + groupnum], old_id[harass_units[harassnum*max_harass_groups + groupnum]])
   loop
@@ -9612,12 +9613,15 @@ function AddHarassUnittype takes integer groupnum, integer harassnum, group g, g
     call RemoveGuardPosition(u)
     call GroupAddUnit(harasser,u)
     set player_sum = player_sum + GetUnitStrength(u)
+    set unit_total = unit_total + 1
     call GroupRemoveUnit(cg,u)
     call GroupRemoveUnit(g,u)
   endloop
   call DestroyGroup(cg)
   set cg = null
-  call SaveReal(additional_info, key, START_STRENGTH, player_sum)
+  if unit_total >= harass_qty[harassnum*max_harass_groups + groupnum] then
+    call SaveReal(additional_info, key, START_STRENGTH, player_sum)
+  endif
   return harasser
 endfunction
 
@@ -9632,8 +9636,8 @@ function StartHarass takes integer groupnum, integer harass_target, boolean avoi
   endif
   set harass_group = Max(harass_group + 1,0)
   set harasser = CreateGroup()
-  set g = CreateGroup()
   set key = GetHandleId(harasser)
+  set g = CreateGroup()
   call GroupEnumUnitsOfPlayer(g, ai_player, null)
   set g = SelectByHidden(g, false)
   set g = SelectByAlive(g, true)
@@ -9647,11 +9651,18 @@ function StartHarass takes integer groupnum, integer harass_target, boolean avoi
       set harass_qty[i*max_harass_groups + groupnum] = 12 - harass_qty[i*max_harass_groups + groupnum]
       set t = 12
     endif
-    set harasser = AddHarassUnittype(groupnum, i , g, harasser, key)
+    if harass_qty[i*max_harass_groups + groupnum] > 0 then
+      set harasser = AddHarassUnittype(groupnum, i , g, harasser, key)
+    endif
     set i = i + 1
   endloop
   call DestroyGroup(g)
   set g = null
+  if FirstOfGroup(harasser) == null then
+    call DestroyGroup(harasser)
+    set harasser = null
+    return
+  endif
   set harass_time[groupnum] = ai_time
   call SaveBoolean(additional_info, key, AVOID_TOWERS, avoid_towers)
   //if avoid_towers and GetLocationTowerStrength(GetUnitX(target), GetUnitY(target), ver_tower_check_radius) > 0
@@ -12357,7 +12368,7 @@ endfunction
 //============================================================================
 // AMAI SingleMeleeAttack
 //============================================================================
-function SingleMeleeAttackAM takes boolean needs_exp, boolean has_siege, integer ai_strength returns nothing
+function SingleMeleeAttackAM takes boolean needs_exp, boolean has_siege, boolean br_rush, integer ai_strength returns nothing
 local unit hall = null
 local unit mega = null
 local unit creep = null
@@ -12573,7 +12584,7 @@ if not creeping_only then	// Do the normal attack sequence
 
   // ELF BR
   //
-  if rushcreep_target != null and UnitAlive(rushcreep_target) then
+  if br_rush and rushcreep_target != null and UnitAlive(rushcreep_target) then
     call Trace("ELF BR Attack")
     call FormGroupAM(3)
     call BRRush()  //try BR
@@ -13044,6 +13055,7 @@ endfunction
 function universal_attack_sequence takes nothing returns nothing
   local boolean needs_exp = false
   local boolean has_siege = false
+  local boolean br_rush = false
   local integer ai_strength = 0
   //local integer ai_antiair_strength = 0
   local integer exp_strength = 0
@@ -13057,6 +13069,9 @@ function universal_attack_sequence takes nothing returns nothing
   if current_expansion != null then
     set exp_strength = GetExpansionStrength()
   endif
+  if rushcreep_target != null and UnitAlive(rushcreep_target) then
+    set br_rush = GetLocationCreepStrength(GetUnitX(rushcreep_target), GetUnitY(rushcreep_target), 510) <= ai_strength * 0.7
+  endif
   set most_threatened_town = Max(most_threatened_town,0)
   if major_hero == null or not UnitAlive(major_hero) or not IsStandardUnit(major_hero) or (IsUnitType(major_hero, UNIT_TYPE_HERO) == false and ver_heroes) then
     set major_hero = GetMajorHero(major_hero)
@@ -13068,7 +13083,7 @@ function universal_attack_sequence takes nothing returns nothing
   set has_siege        = has_siege or TownCountDone(%1) > 0
 #ENDINCLUDE
 
-  call SingleMeleeAttackAM(needs_exp,has_siege,ai_strength)
+  call SingleMeleeAttackAM(needs_exp,has_siege,br_rush,ai_strength)
   set added_target_aggression = 0
   set added_racial_aggression = 0
 
