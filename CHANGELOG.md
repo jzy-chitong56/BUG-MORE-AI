@@ -283,6 +283,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - Fixed GetHeroToBuyItem would try to buy an item regardless of free slots.(@SMUnlimited)
 - Fixed CheckExpansionTaken ancient expansion and item expansion return , if return false , then peon will expansion
 - Fixed GetHeroToBuyItem no check is_healing_included
+- Fixed GroupOrderAttack_d no Recycle Guard Position
 
 
 ## [2.6.2] - 2022-09-04
