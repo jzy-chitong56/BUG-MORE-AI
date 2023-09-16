@@ -91,7 +91,7 @@ function SaveUnit takes unit u , integer id returns nothing
   if healer != null then  //and not IsUnitType(u, UNIT_TYPE_MECHANICAL) then  //Repetitive judgment
     set healertepy = healer_type[GetHealerId(GetUnitTypeId(healer))]
     if not CaptainInCombat(true) or (healertepy == HEALER_TYPE_NO_TARGET or healertepy == HEALER_TYPE_WARD or GetUnitState(u, UNIT_STATE_LIFE) > GetUnitState(u, UNIT_STATE_MAX_LIFE) * 55) then
-        
+      call CreateDebugTag("Going to Healer", 10, u, 3.00, 1.50)
       // Captain In Combat , if healer no Immediate and extensive treatment , urgent healing need go home , avoid staying on the battlefield
       set unitloc = Location(GetUnitX(healer),GetUnitY(healer))
       if GetLocationX(last_enemy_loc) != 0 and GetLocationY(last_enemy_loc) != 0 then
@@ -201,9 +201,9 @@ function MicroUnitsJob takes nothing returns nothing
 
   //call GroupEnumUnitsInRange(g,GetUnitX(major_hero),GetUnitY(major_hero),battle_radius,null)
   call GroupEnumUnitsOfPlayer(g, ai_player, null)
-  set g = SelectByIllusion(g, false)
   set g = SelectUnittype(g,UNIT_TYPE_PEON,false)
   set g = SelectUnittype(g,UNIT_TYPE_STRUCTURE,false)
+  set g = SelectByIllusion(g, false)
   set g = SelectByUnitStandard(g, true)
   //set g = SelectUnittype(g,UNIT_TYPE_SUMMONED,false)  // need search 'ohwd' and 'hphx'
   //call DisplayToAll("MICRO_UNITS: Group made")
