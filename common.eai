@@ -7323,6 +7323,14 @@ endfunction
 //============================================================================
 function TQLoop takes nothing returns nothing
   local real i = 0
+  local texttag t = null
+  if debugging then
+    set t = CreateTextTag()
+    call SetTextTagText(t, null, 0.1)
+    call SetTextTagPos(t, GetLocationX(home_location) + 300, GetLocationY(home_location) + 300, 0)
+    call SetDebugTagColor(t)
+    call SetTextTagPermanent(t, true)
+  endif
   set tq_time[0] = 0
   call TimerStart(tq_timer, 1000000, false, null)
   //call Trace("Starting Job Loop Thread")
@@ -7332,6 +7340,9 @@ function TQLoop takes nothing returns nothing
     exitwhen player_defeated
     if tq_length > 0 then
       if not TQHandleOnce() then
+        if debugging then
+          call SetTextTagText(t, Int2Str(tq_jid[1]), 0.1)
+        endif
         set i = tq_time[1] - TimerGetElapsed(tq_timer) + 0.05
         if i > 0 then
           call Sleep(RMin(i ,1))
@@ -7344,6 +7355,9 @@ function TQLoop takes nothing returns nothing
       call Sleep(sleep_multiplier)
     endif
   endloop
+  if debugging then
+    call SetTextTagText(t, "Shutting down Job Thread", 0.1)
+  endif
   call Trace("Shutting down Job Thread")
   loop
     call ExchangeOnce()
@@ -8024,12 +8038,12 @@ function InitTownBuilt takes nothing returns nothing
   loop
     exitwhen i >= max_towns
     set town_built[i] = false
-set exist_town[i] = home_location
+    set exist_town[i] = home_location
     set i = i + 1
   endloop
   set town_built[0] = true
   set own_town_loc[0] = Location(GetLocationX(home_location), GetLocationY(home_location))
-set exist_town[0] = home_location
+  set exist_town[0] = home_location
   set own_town_dist[0] = 0
   set own_town_mine[0] = GetMineNearLoc(own_town_mine[0] ,home_location, 1500)
 endfunction
@@ -11717,6 +11731,13 @@ function AttackMoveTowerRush takes nothing returns nothing
 	endif
 	call DestroyGroup(g)
 	set g = null
+  if c_ally_user_total == 0 then  //prevent send out signal , tell human player enemy position
+		call SetAllianceTarget(builder[20])
+	else
+		if towers_built != 0 then
+			call SetAllianceTarget(builder[20])
+		endif
+	endif
 	loop
 		exitwhen not towerrush
 		exitwhen town_threatened and town_threat[most_threatened_town] >= teleport_low_threat + 60
@@ -13061,6 +13082,7 @@ function universal_attack_sequence takes nothing returns nothing
     call Sleep(sleep_multiplier)
     return
   endif
+  call SetTargetHeroes(difficulty != EASY)
   set ai_strength = GetOwnStrength()
   //set ai_antiair_strength = air_strength
   if current_expansion != null then
