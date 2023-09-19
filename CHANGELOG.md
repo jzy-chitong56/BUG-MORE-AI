@@ -192,7 +192,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
   - Chcek Ally will check PLAYER_SLOT_STATE_PLAYING and Observer
 - StartHarass check unit num , because Group Order max control 12 unit
   - START_STRENGTH should be stacked in the same JOB
-  - HARASS JOB max num is 1 , prevent JOB to much , because no longer judge unit quantity
 - ZEPPELIN_MOVE now can take POWER FOUNTAIN
 - MANA_FOUNTAIN now can take POWER FOUNTAIN
 - GetBuildLocation return home_location , when not take front_loc[0] , prevent leakage and build location(0,0)
@@ -292,7 +291,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - Fixed GroupOrderAttack_d no Recycle Guard Position
 - Fixed AncientExpansionJob recursion
 - Fixed issues with SetTargetHeroes proper recovery after shutdown
-
+- Fixed GetHarassGroupStrength strength statistical error
+- Fixed harass_size[groupnum] no reset
 
 ## [2.6.2] - 2022-09-04
 Jzy-chitong56 has provided various updates and ported features back to this older version of AMAI if you play on the older editions of warcraft 3.
