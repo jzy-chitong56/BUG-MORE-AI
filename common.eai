@@ -3965,11 +3965,27 @@ endfunction
 // (AMAI)	SelectByUserData
 //==========================================================================
 function IsStandardUnit takes unit u returns boolean
-  return not IsUnitInGroup(u, unit_healing) and not IsUnitInGroup(u, unit_rescueing) and not IsUnitInGroup(u, unit_harassing) and not IsUnitInGroup(u, unit_zepplin_move)
+  if IsUnitInGroup(u, unit_healing) then
+    return false
+  elseif IsUnitInGroup(u, unit_rescueing) then
+    return false
+  elseif IsUnitInGroup(u, unit_harassing) then
+    return false
+  elseif IsUnitInGroup(u, unit_zepplin_move) then
+    return false
+  endif
+  return true
 endfunction
 
 function IsUnitBuying takes unit u returns boolean
-  return IsUnitInGroup(u, unit_buying_item) or IsUnitInGroup(u, unit_buying_merc) or IsUnitInGroup(u, unit_buying_tavern)
+  if IsUnitInGroup(u, unit_buying_item) then
+    return true
+  elseif IsUnitInGroup(u, unit_buying_merc) then
+    return true
+  elseif IsUnitInGroup(u, unit_buying_tavern) then
+    return true
+  endif
+  return false
 endfunction
 
 function SelectByUnitStandard takes group rg, boolean has_data returns group
@@ -5494,7 +5510,10 @@ endfunction
 
 //============================================================================
 function IsUnitTower takes unit u returns boolean
-  return IsUnitType(u, UNIT_TYPE_STRUCTURE) == true and IsUnitType(u, UNIT_TYPE_RANGED_ATTACKER) == true and not IsUnitHidden(u)
+  if IsUnitType(u, UNIT_TYPE_STRUCTURE) == true and IsUnitType(u, UNIT_TYPE_RANGED_ATTACKER) == true and not IsUnitHidden(u) then
+    return true
+  endif
+  return false
 endfunction
 
 //============================================================================
@@ -11528,7 +11547,7 @@ function CommonSleepUntilTargetDeadAM takes unit target, boolean iscreeping, boo
     set attack_length_counter = 5000  // Force army to regroup to try and get ghouls to go along
   endif
   loop
-    exitwhen town_threat_break and town_threatened and town_threat[most_threatened_town] >= teleport_low_threat and not desperation_assault
+    exitwhen town_threat_break and town_threatened and most_threatened_town >= 0 and town_threat[most_threatened_town] >= teleport_low_threat and not desperation_assault
     exitwhen break_attack and not desperation_assault
     //exitwhen captain_flee and CaptainRetreating()
     exitwhen isfleeing and CaptainRetreating() and not desperation_assault
@@ -11619,7 +11638,7 @@ endfunction
 function SleepUntilAtGoalAM takes nothing returns nothing
   local integer lcount = 0
   loop
-    exitwhen town_threatened and town_threat[most_threatened_town] >= teleport_low_threat
+    exitwhen town_threatened and most_threatened_town >= 0 and town_threat[most_threatened_town] >= teleport_low_threat
     set lcount = lcount + 1
     call Sleep(sleep_multiplier)
     exitwhen break_attack
@@ -11762,7 +11781,7 @@ function AttackMoveTowerRush takes nothing returns nothing
 
 	loop
 		exitwhen not towerrush
-		exitwhen town_threatened and town_threat[most_threatened_town] >= teleport_low_threat + 60
+		exitwhen town_threatened and most_threatened_town >= 0 and town_threat[most_threatened_town] >= teleport_low_threat + 60
 		exitwhen break_attack
 		exitwhen CaptainIsEmpty()       // all units died
 		if (builder[20] == null or GetUnitState(builder[20], UNIT_STATE_LIFE) <= 0) then
