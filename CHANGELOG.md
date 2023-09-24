@@ -296,6 +296,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - Fixed issues with SetTargetHeroes proper recovery after shutdown
 - Fixed GetHarassGroupStrength strength statistical error
 - Fixed harass_size[groupnum] no reset
+- Fixed buying tavern hero not add buy unit to unit_buying_tavern group
 
 ## [2.6.2] - 2022-09-04
 Jzy-chitong56 has provided various updates and ported features back to this older version of AMAI if you play on the older editions of warcraft 3.
