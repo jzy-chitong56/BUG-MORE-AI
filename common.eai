@@ -7931,6 +7931,9 @@ function cmd_misc takes integer cmd, integer data returns nothing
   elseif cmd == 53 then
     set strat_change_allowed = not strat_change_allowed
 
+  elseif cmd == 54 then
+    set surrender_allowed = not surrender_allowed
+
   elseif cmd == 60 then // Show strat name
     call DisplayToAllies(GetCurrentStrategyReport() + GetCurrentDynamicReport())
 
