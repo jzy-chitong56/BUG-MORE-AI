@@ -1698,6 +1698,7 @@ function AddCommandDialog takes integer i returns nothing
   local dialog next_dialog = null
   local boolean next_dialog_strat = false
   local string current_name = ""
+  local string switch = null
 
   if command_dlg3[i] != "" then
     if command_dlg3[i] == "#" then
