@@ -67,7 +67,7 @@ local boolean creepsawake = false
       if IsUnitInvisible(u, Player(PLAYERAGGRESSIVE)) then  //no need do anything
       elseif GetUnitAbilityLevel(u, 'AIhm') > 0 or (GetUnitAbilityLevel(u, 'Ashm') > 0 and (GetFloatGameState(GAME_STATE_TIME_OF_DAY) >= 18 or GetFloatGameState(GAME_STATE_TIME_OF_DAY) <= 6)) then
         call IssueImmediateOrder(u, "ambush")
-      elseif not IsUnitType(u, UNIT_TYPE_FLYING) and if GetUnitCurrentOrder(u) != OrderId("patrol") then
+      elseif not IsUnitType(u, UNIT_TYPE_FLYING) and GetUnitCurrentOrder(u) != OrderId("patrol") then
         call IssuePointOrder( u, "patrol", x + GetRandomReal(-100,100), y + GetRandomReal(-100,100))  //Prevent units from being blocked by other units coming from behind when leaving
       endif
     endif
