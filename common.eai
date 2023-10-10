@@ -5502,6 +5502,8 @@ function GetLocationEnemyStrength takes real x, real y, real radius, boolean onl
   set g = SelectByPlayer(g, Player(PLAYERPASSIVE), false)
   if only_structures then
     set g = SelectUnittype(g, UNIT_TYPE_STRUCTURE, true)
+  else
+    set g = SelectUnittype(g, UNIT_TYPE_PEON, false)
   endif
   set g = SelectByAlive2(g, true)
   set g = SelectByHidden(g, false)
