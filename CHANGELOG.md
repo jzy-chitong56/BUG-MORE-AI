@@ -316,6 +316,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - Fixed Debug Mode and Balancin Mode restore console settings , set on AI Setting
 - Fixed Console cannot set not ally's CHATTER , DEBUG , BALANCE , LANGUAGE
 - Fixed add water_expansion_list no check Resource Amount
+- Fixed harvesting ghouls unable to take effect
 
 ## [2.6.2] - 2022-09-04
 Jzy-chitong56 has provided various updates and ported features back to this older version of AMAI if you play on the older editions of warcraft 3.
