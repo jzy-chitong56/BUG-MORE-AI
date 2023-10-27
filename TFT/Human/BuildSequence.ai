@@ -9,6 +9,7 @@ function global_init_strategy takes nothing returns nothing
     call AddBlock(1, BARRACKS, false, 0, LUMBER_MILL, 14)
     call AddBlock(1, BARRACKS, true, 0, ARCANE_VAULT, 16)
     call AddBlock(1, BARRACKS, false, 0, BLACKSMITH, 10)
+    call AddBlock(1, BLACKSMITH, false, 0, WATCH_TOWER, 14)
     call AddHarass(1, 2, FOOTMAN)
     call AddHarass(3, 2, GRYPHON)
     call AddHarass(4, 1, PALADIN)
@@ -69,59 +70,65 @@ function global_init_strategy takes nothing returns nothing
 
 
 
-
-
-
 endfunction
 function global_build_sequence takes nothing returns nothing
-	  call DefendTownsDone(2, GUARD_TOWER, 75)
-	  call DefendTownsDone(1, ARCANE_TOWER, 70)
-
-      call BuildFront(2, GUARD_TOWER, 40)
-      call BuildFront(1, ARCANE_TOWER, 50)
-
-    if tier == 3 and GetGold() > 2000 then
-      call DefendTownsDone(2, GUARD_TOWER, 75)
+    // Anti rush
+    if GetRushFactor() < 5000 then
+      call BuildUnit(2, ARCANE_TOWER, 60)
+      call BuildAtMine(1, GUARD_TOWER, 45)
+    endif
+    // home_location tower
+    if tier < 3 then
+      call BuildFront(2, GUARD_TOWER, 45)
+      call BuildFront(2, ARCANE_TOWER, 45)
+    endif
+    // exp tower
+    if GetMinesOwned() > 1 or (TownCount(TOWN_HALL) > 1 and GetMinesOwned() > 0) then
+      call DefendTownsDone(1, GUARD_TOWER, 75)
       call DefendTownsDone(1, ARCANE_TOWER, 70)
-      call DefendTownsDone(3, GUARD_TOWER, 35)
-      call DefendTownsDone(2, ARCANE_TOWER, 35)
-      call BuildFront(2, GUARD_TOWER, 35)
-      call BuildFront(2, ARCANE_TOWER, 35)
-      if TownCount(GUARD_TOWER) >= 4 and TownCount(ARCANE_VAULT) < 2 then
-        call DefendTownsDone(1, ARCANE_VAULT, 40)
+      if tier == 3 and GetGold() > 2000 then
+        call DefendTownsDone(2, GUARD_TOWER, 35)
+        call DefendTownsDone(2, ARCANE_TOWER, 35)
+        if TownCount(GUARD_TOWER) >= 4 and TownCount(ARCANE_VAULT) < 2 then
+          call DefendTownsDone(1, ARCANE_VAULT, 40)
+        endif
       endif
-      if TownCount(WORKSHOP) >= 1 then
+    endif
+    // routine build
+    if TownCountDone(WATCH_TOWER) > 0 then
+      if TownCount(WORKSHOP) > 0 then
         call BuildUnit(1, CANNON_TOWER, 40)
+      else
+        call BuildUnit(1, ARCANE_TOWER, 45)
       endif
-    endif
-    if TownCountDone(WATCH_TOWER) > 0 and GetGold() > 800 then
+    elseif GetGold() > 800 then
+      call BuildUnit(1, GUARD_TOWER, 32)
       call BuildUnit(1, ARCANE_TOWER, 45)
+      call BuildFront(1, ARCANE_TOWER, 30)
     endif
 
-          // Anti rush
-          if GetRushFactor() < 5000 then
-            call BuildUnit(2, ARCANE_TOWER, 60)
-          endif
+    call BuildItem(1, SCROLL_OF_REGENERATION, 90)
+    call BuildItem(1, M_SCROLL_OF_HEALING, 40)
 
-          call BuildItem(1, SCROLL_OF_REGENERATION, 90)
-          call BuildItem(1, M_SCROLL_OF_HEALING, 40)
-
-          call BuildItem(1, SCROLL_OF_PROTECTION, 40)
-          call BuildItem(1, POTION_OF_LESSER_INVULNERBILITY, 50)
-      if tier == 1 then
-            call BuildItem(1, M_TOWN_PORTAL, 100)
+    call BuildItem(1, SCROLL_OF_PROTECTION, 40)
+    call BuildItem(1, POTION_OF_LESSER_INVULNERBILITY, 50)
+    if tier == 1 then
+      call BuildItem(1, M_TOWN_PORTAL, 100)
+    endif
+    if tier > 1 then
+      call BuildItem(1, HEALING_POTION, 80)
+      call BuildItem(1, TOWN_PORTAL, 180)
+      if c_ally_total > 0 then
+        call BuildItem(1, STAFF_OF_PRESERVATION, 30)
       endif
-          if tier > 1 then
-            call BuildItem(1, HEALING_POTION, 80)
-            call BuildItem(1, TOWN_PORTAL, 150)
-          endif
-          if tier == 3 then
-            call BuildItem(1, STAFF_OF_SANCTUARY, 70)
-          endif
-          call BuildUnit(1, ARCANE_VAULT, 45+30*(tier-1))
+    endif
+    if tier == 3 then
+      call BuildItem(1, STAFF_OF_SANCTUARY, 70)
+    endif
 
+    call BuildUnit(1, ARCANE_VAULT, 45+30*(tier-1))
 
-	// DYNAMIC
+	// DYNAMIC and Global Mercenaries
 	call ResetDynamicSystem()
 	if tier == 1 then
 		call AddUnitToAntiair(RIFLEMAN,29)
@@ -201,59 +208,53 @@ function global_build_sequence takes nothing returns nothing
 		call BuildUnit(1, dragons[3], 65)
 	endif
 
-    // Global Upgrades
+	// Global Upgrades
+	call BuildAdvUpgr2(3, UPG_MELEE, 1,TownCountDone(FOOTMAN) + TownCountDone(KNIGHT) + TownCountDone(SPELL_BREAKER) + TownCountDone(HUMAN_DRAGON_HAWK) + TownCountDone(GRYPHON), 3,5,35)
+	call BuildAdvUpgr2(3, UPG_ARMOR, 1,TownCountDone(FOOTMAN) + TownCountDone(KNIGHT) + TownCountDone(SPELL_BREAKER) + TownCountDone(COPTER) + TownCountDone(TANK), 3,5,35)
+	call BuildAdvUpgr2(3, UPG_RANGED, 1,TownCountDone(RIFLEMAN) + TownCountDone(COPTER) + TownCountDone(TANK) + TownCountDone(MORTAR), 3,5,35)
+	call BuildAdvUpgr2(3, UPG_LEATHER, 1,TownCountDone(RIFLEMAN) + TownCountDone(GRYPHON) + TownCountDone(HUMAN_DRAGON_HAWK) + TownCountDone(MORTAR), 3,5,35)
+	call BuildAdvUpgr(3, UPG_MASONRY,1,1,1,5,20)
 
 	// TIER 1 UPGRADES
 	//--------------------------------------------------------
-		if tier == 1 then
-		endif
-        	call BuildAdvUpgr2(1, UPG_DEFEND, 1,TownCountDone(FOOTMAN), 0.33, 15, 60)
-		//if towerrush then
-		//	call BuildUpgr(1, UPG_MASONRY, 100)
-		//endif		
-		call BuildAdvUpgr(1, UPG_MASONRY,1,1,1,5,20)
-		call BuildAdvUpgr2(3, UPG_MELEE, 1,TownCountDone(FOOTMAN) + TownCountDone(KNIGHT) + TownCountDone(SPELL_BREAKER) + TownCountDone(HUMAN_DRAGON_HAWK) + TownCountDone(GRYPHON), 3,5,35)
-		call BuildAdvUpgr2(3, UPG_ARMOR, 1,TownCountDone(FOOTMAN) + TownCountDone(KNIGHT) + TownCountDone(SPELL_BREAKER) + TownCountDone(COPTER) + TownCountDone(TANK), 3,5,35)
-   		call BuildAdvUpgr2(3, UPG_RANGED, 1,TownCountDone(RIFLEMAN) + TownCountDone(COPTER) + TownCountDone(TANK) + TownCountDone(MORTAR), 3,5,35)
-  		call BuildAdvUpgr2(3, UPG_LEATHER, 1,TownCountDone(RIFLEMAN) + TownCountDone(GRYPHON) + TownCountDone(HUMAN_DRAGON_HAWK) + TownCountDone(MORTAR), 3,5,35)
-
-    // TIER 2 UPGRADES
-    //--------------------------------------------------------
-	if tier >= 2 then
-		call BuildUpgr(1, UPG_WOOD, 40)
+	if tier == 1 then
 	endif
-		call BuildAdvUpgr(2, UPG_MASONRY,1,1,1,5,20)
-		call BuildAdvUpgr2(1, UPG_SENTINEL, 2, TownCountDone(WATCH_TOWER) + c_enemy[R_ELF],2, 5, 25) 
-		call BuildAdvUpgr2(1, UPG_BOMBS, 2,TownCountDone(COPTER),0.2,35, 40)
-		call BuildAdvUpgr2(1, UPG_FLAK, 2,TownCountDone(COPTER),0.33,15, 40)
-		call BuildAdvUpgr2(1, UPG_GUN_RANGE, 2,TownCountDone(RIFLEMAN),1,10, 40)
-		call BuildAdvUpgr2(1, UPG_CONT_MAGIC, 2,TownCountDone(SPELL_BREAKER), 0.5, 10, 50)
-		call BuildAdvUpgr2(1, UPG_SIGHT, 2,TownCountDone(MORTAR),1,5, 25)
-		call BuildAdvUpgr2(2, UPG_PRAYING, 2,TownCountDone(PRIEST), 0.33, 15, 80)
-		call BuildAdvUpgr2(2, UPG_SORCERY,2,TownCountDone(SORCERESS), 0.33, 15, 80)	
+	call BuildAdvUpgr2(1, UPG_DEFEND, 1,TownCountDone(FOOTMAN), 0.33, 15, 60)
 
-    // TIER 3 UPGRADES
-    //--------------------------------------------------------
-		if tier == 3 then
-                  call BuildUpgr(2, UPG_WOOD, 40)
-                  call BuildUpgr(1, UPG_SUN_BLADE, 40) 
+	// TIER 2 UPGRADES
+	//--------------------------------------------------------
+	if tier >= 2 then
+	endif
+	call BuildAdvUpgr(2, UPG_WOOD,2,1,1,5,40)
+	call BuildAdvUpgr2(1, UPG_SENTINEL, 2, TownCountDone(WATCH_TOWER) + c_enemy[R_ELF],2, 5, 25) 
+	call BuildAdvUpgr2(1, UPG_GUN_RANGE, 2,TownCountDone(RIFLEMAN),1,10, 40)
+	call BuildAdvUpgr2(1, UPG_SIGHT, 2,TownCountDone(MORTAR),1,5, 25)
+	call BuildAdvUpgr2(2, UPG_PRAYING, 2,TownCountDone(PRIEST), 0.33, 15, 80)
+	call BuildAdvUpgr2(2, UPG_SORCERY,2,TownCountDone(SORCERESS), 0.33, 15, 80)	
+
+	// TIER 3 UPGRADES
+	//--------------------------------------------------------
+	if tier == 3 then
+		call BuildUpgr(1, UPG_SUN_BLADE, 40)
+	endif
+	call BuildAdvUpgr2(1, UPG_FLAK, 3,TownCountDone(COPTER),0.33,15, 40)
+	call BuildAdvUpgr2(1, UPG_BOMBS, 3,TownCountDone(COPTER),0.2,35, 40)
+	call BuildAdvUpgr2(1, UPG_FRAGS, 3,TownCountDone(MORTAR), 0.33,15, 40)
+	call BuildAdvUpgr2(1, UPG_CONT_MAGIC, 3,TownCountDone(SPELL_BREAKER), 0.5, 10, 50)
+	call BuildAdvUpgr2(1, UPG_CLOUD, 3, TownCountDone(HUMAN_DRAGON_HAWK),0.33,15, 70)
+	call BuildAdvUpgr2(1, UPG_HAMMERS, 3,TownCountDone(GRYPHON), 0.33,15, 60)
+	call BuildAdvUpgr2(1, UPG_BREEDING, 3,TownCountDone(KNIGHT) + TownCountDone(GRYPHON) + TownCountDone(HUMAN_DRAGON_HAWK),1,15, 60)
+	call BuildAdvUpgr2(1, UPG_TANK, 3, TownCountDone(TANK),0.25,15, 50)
+
+
+	// Harass
+	if not towerrush and not town_threatened then
+		call Harass(1, HARASS_TARGET_PEONS, true, 5, 0.75, 0, GetPlayerRace(nearest_enemy) != RACE_UNDEAD , 50, 80)
+		call Harass(3, HARASS_TARGET_PEONS, true, 5, 0.75, 0, GetPlayerRace(nearest_enemy) != RACE_UNDEAD , 80, 100)
+		if GetUnitCountDone(old_id[PALADIN]) > 0 then
+			call Harass(4, HARASS_TARGET_PEONS, true, 4, 0.75, 0, GetPlayerRace(nearest_enemy) == RACE_UNDEAD , 50, 80)
 		endif
-		call BuildAdvUpgr(3, UPG_MASONRY,1,1,1,5,20)
-		call BuildAdvUpgr2(1, UPG_FRAGS, 3,TownCountDone(MORTAR), 0.33,15, 40)
-		call BuildAdvUpgr2(1, UPG_HAMMERS, 3,TownCountDone(GRYPHON), 0.33,15, 60)
-		call BuildAdvUpgr2(1, UPG_BREEDING, 3,TownCountDone(KNIGHT) + TownCountDone(GRYPHON) + TownCountDone(HUMAN_DRAGON_HAWK),1,15, 60)
-		call BuildAdvUpgr2(1, UPG_TANK, 3, TownCountDone(TANK),0.25,15, 50)
-
-      // Global Mercenaries
-
-          // Harass
-		if not towerrush and not town_threatened then
-			call Harass(1, HARASS_TARGET_PEONS, true, 5, 0.75, 0, GetPlayerRace(nearest_enemy) != RACE_UNDEAD , 50, 80)
-			call Harass(3, HARASS_TARGET_PEONS, true, 5, 0.75, 0, GetPlayerRace(nearest_enemy) != RACE_UNDEAD , 80, 100)
-			if GetUnitCountDone(old_id[PALADIN]) > 0 then
-			  call Harass(4, HARASS_TARGET_PEONS, true, 4, 0.75, 0, GetPlayerRace(nearest_enemy) == RACE_UNDEAD , 50, 80)
-			endif
-		endif
+	endif
 
 
 
@@ -363,7 +364,6 @@ if tier == 3 then
       call BuildUnit(1, hero[1], 80)
       call BuildUnit(1, hero[2], 60)
       call BuildUnit(1, hero[3], 40)
-      call BuildFront(1, ARCANE_TOWER, 55)
       call BuildUnit(1, ZEPPELIN, 50)
       call BuildUpgr(1, UPG_TANK, 115)
       call BuildUpgr(2, UPG_SORCERY, 58)
@@ -390,13 +390,11 @@ if tier == 3 then
 
 
 
-
 elseif tier == 2 then
 
       call BuildUnit(1, hero[1], 80)
       call BuildUnit(8, FOOTMAN, 65)
       call BuildUnit(4, RIFLEMAN, 55)
-      call BuildFront(1, ARCANE_TOWER, 57)
       call BuildUnit(1, hero[2], 50)
       call BuildUnit(2, SORCERESS, 40)
       call BuildUnit(2, PRIEST, 40)
@@ -435,7 +433,6 @@ else
         call BuildUnit(1, hero[1], 80)
         call BuildUnit(8, FOOTMAN , 65)
         call BuildUnit(4, RIFLEMAN , 55)
-        call BuildFront(1, ARCANE_TOWER, 45)
         call BuildUnit(4, RIFLEMAN, 43)
         call BuildUnit(1, KEEP, 55)
 
@@ -508,8 +505,7 @@ if tier == 3 then
       call BuildUnit(1, hero[1], 80)
       call BuildUnit(1, hero[2], 60)
       call BuildUnit(1, hero[3], 40)
-      
-      call BuildUnit(3, ARCANE_TOWER, 55)
+
       call BuildUpgr(2, UPG_SORCERY, 84)
       call BuildUpgr(2, UPG_PRAYING, 82)
 
@@ -550,8 +546,7 @@ elseif tier == 2 then
       call BuildUnit(10, PRIEST, 44)
       call BuildUnit(4, FOOTMAN, 55)
       call BuildUnit(4, RIFLEMAN, 55)
-      
-      call BuildUnit(2, ARCANE_TOWER, 55)
+
       call BuildUpgr(1, UPG_SORCERY, 64)
       call BuildUpgr(1, UPG_PRAYING, 64)
 
@@ -586,11 +581,9 @@ elseif tier == 2 then
 
 else
 
-	    call BuildUnit(1, hero[1], 80)
-        call SetBuildReact(32, 4, FOOTMAN, 2, RIFLEMAN, (enemy_unarmored + (enemy_lightarmor * 2) + enemy_air + enemy_magic - (enemy_normal * 2)), 4, 25, 38) 
-        call BuildUnit(1, KEEP, 50)
-        call BuildFront(1, ARCANE_TOWER, 50)
-
+      call BuildUnit(1, hero[1], 80)
+      call SetBuildReact(32, 4, FOOTMAN, 2, RIFLEMAN, (enemy_unarmored + (enemy_lightarmor * 2) + enemy_air + enemy_magic - (enemy_normal * 2)), 4, 25, 38) 
+      call BuildUnit(1, KEEP, 50)
 
 
 
@@ -661,7 +654,7 @@ if tier == 3 then
       call BuildUnit(1, ZEPPELIN, 50)
       call BuildUpgr(1, UPG_FLAK, 115)
       call BuildUpgr(1, UPG_BOMBS, 105)
-      call BuildUpgr(1, UPG_BREEDING, 80)      
+      call BuildUpgr(1, UPG_BREEDING, 80)
       call BuildUpgr(1, UPG_HAMMERS, 55)
       call BuildUpgr(2, UPG_PRAYING, 58)
       call BuildUpgr(1, UPG_SUN_BLADE, 40) 
@@ -690,9 +683,8 @@ elseif tier == 2 then
       call BuildUnit(6, RIFLEMAN, 55)
       call BuildUnit(8, COPTER, 100)
       call BuildUnit(4, PRIEST, 40)
-      call BuildFront(2, GUARD_TOWER, 55)
       call BuildUnit(1, CASTLE,70)
-      
+
       call BuildUnit(1, ZEPPELIN, 50)
       call BuildUpgr(1, UPG_PRAYING, 58)
       call BuildUpgr(1, UPG_FLAK, 115)
@@ -720,10 +712,7 @@ else
 
       call BuildUnit(1, hero[1], 80)
       call SetBuildReact(32, 4, FOOTMAN, 2, RIFLEMAN, (enemy_unarmored + (enemy_lightarmor * 2) + enemy_air + enemy_magic - (enemy_normal * 2)), 4, 25, 44) 
-      call BuildFront(1, GUARD_TOWER, 45)
       call BuildUnit(1, KEEP,50)
-      call BuildFront(1, ARCANE_TOWER, 55)
-
 
 
 
@@ -863,11 +852,9 @@ elseif tier == 2 then
 
 else
 
-	call BuildUnit(1, hero[1], 80)
+    call BuildUnit(1, hero[1], 80)
     call SetBuildReact(32, 4, FOOTMAN, 2, RIFLEMAN, (enemy_unarmored + (enemy_lightarmor * 2) + enemy_air + enemy_magic - (enemy_normal * 2)), 4, 25, 38) 
     call BuildUnit(1, KEEP, 50)
-    call BuildFront(1, ARCANE_TOWER, 50)
-
 
 
 
@@ -1401,8 +1388,7 @@ if tier == 3 then
       call BuildUnit(1, hero[1], 100)
       call BuildUnit(1, hero[2], 80)
       call BuildUnit(1, hero[3], 60)
-      
-      call BuildUnit(3, ARCANE_TOWER, 55)
+
 
       call BuildUpgr(1, UPG_CONT_MAGIC, 100)
       call BuildUpgr(2, UPG_PRAYING, 90)
@@ -1446,8 +1432,7 @@ elseif tier == 2 then
       call BuildUnit(1, CASTLE, 55)
       call BuildUnit(1, hero[1], 80)
       call BuildUnit(1, hero[2], 70)
-      
-      call BuildUnit(2, ARCANE_TOWER, 55)
+
       call BuildUpgr(1, UPG_CONT_MAGIC, 60)
       call BuildUpgr(1, UPG_PRAYING, 90)
 
@@ -1489,7 +1474,6 @@ else
       call BuildUnit(1, hero[1], 80)
       call SetBuildReact(32, 4, FOOTMAN, 2, RIFLEMAN, (enemy_unarmored + (enemy_lightarmor * 2) + enemy_air + enemy_magic - (enemy_normal * 2)), 4, 25, 38) 
       call BuildUnit(1, KEEP, 50)
-      call BuildFront(1, ARCANE_TOWER, 50)
 
 
 
@@ -1642,11 +1626,9 @@ elseif tier == 2 then
 
 
 else
-	call BuildUnit(1, hero[1], 80)
+    call BuildUnit(1, hero[1], 80)
     call SetBuildReact(32, 4, FOOTMAN, 2, RIFLEMAN, (enemy_unarmored + (enemy_lightarmor * 2) + enemy_air + enemy_magic - (enemy_normal * 2)), 4, 25, 38) 
     call BuildUnit(1, KEEP, 50)
-	call BuildFront(1, ARCANE_TOWER, 50)
-
 
 
 
@@ -1962,7 +1944,6 @@ else
       call BuildUnit(1, hero[1], 80)
       call SetBuildReact(32, 4, FOOTMAN, 2, RIFLEMAN, (enemy_unarmored + (enemy_lightarmor * 2) + enemy_air + enemy_magic - (enemy_normal * 2)), 4, 25, 38) 
       call BuildUnit(1, KEEP, 50)
-      call BuildFront(1, ARCANE_TOWER, 75)
 
 
 
