@@ -23,6 +23,7 @@
 #INCLUDETABLE <$VER$\SaveItems.txt> #EFR
   boolean array %3itemsave
   item array %3item
+  real array %3cd  // old war3 no API check CD
 #ENDINCLUDE
 #ELSE
 
@@ -99,6 +100,7 @@ endfunction
 function ItemSaveHero takes integer hn returns boolean
   local integer i = 1  // only supports three heroes
   local integer id = 0
+  local real t = TimerGetElapsed(tq_timer)
   loop
     exitwhen i > 3
     if i != hn and UnitAlive(hero_unit[i]) and CheckUseSaveItem(i) and DistanceBetweenUnits(hero_unit[i],hero_unit[hn]) < 700 then
@@ -129,7 +131,7 @@ function ExecuteSaveHero takes integer hn, integer a, unit healer returns nothin
   if a != ACTION_DO_NOTHING and a != ACTION_TP then
     call RemoveGuardPosition(hero_unit[hn])
     if GetUnitAbilityLevel(hero_unit[hn], 'AOwk') > 0 or GetUnitAbilityLevel(hero_unit[hn], 'ANwk') > 0 then
-      if not IsUnitInvisible(hero_unit[hn], Player(PLAYER_NEUTRAL_AGGRESSIVE)) then
+      if not IsUnitInvisible(hero_unit[hn], Player(PLAYERAGGRESSIVE)) then
         call IssueImmediateOrder(hero_unit[hn], "windwalk")
       endif
     endif
@@ -253,7 +255,7 @@ function MicroHeroJob takes integer hn returns nothing
       endif
     endif
     set herouseitemsave[hn] = saveitemlength > 0 and not healing and not IsUnitInGroup(hero_unit[hn], unit_harassing) and not IsUnitBuying(hero_unit[hn])
-        set new_hp = GetUnitState(hero_unit[hn], UNIT_STATE_LIFE) / GetUnitState(hero_unit[hn], UNIT_STATE_MAX_LIFE)
+    set new_hp = GetUnitState(hero_unit[hn], UNIT_STATE_LIFE) / GetUnitState(hero_unit[hn], UNIT_STATE_MAX_LIFE)
     set current_order = GetUnitCurrentOrder(hero_unit[hn])
 
     //  call DisplayToAll("MicroH Start")

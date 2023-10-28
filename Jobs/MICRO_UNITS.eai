@@ -57,7 +57,7 @@ endfunction
 
 //============================================================================
 function DenyUnit takes unit u , integer id returns nothing
-  if id != 'ugrm' and id != 'ohwd' and not IsUnitType(u, UNIT_TYPE_ETHEREAL) and not IsUnitInvisible(u, Player(PLAYER_NEUTRAL_AGGRESSIVE)) then
+  if id != 'ugrm' and id != 'ohwd' and not IsUnitType(u, UNIT_TYPE_ETHEREAL) and not IsUnitInvisible(u, Player(PLAYERAGGRESSIVE)) then
     set deny_unit = u
   endif
 endfunction
@@ -66,6 +66,7 @@ endfunction
 function ItemSaveUnit takes unit u returns boolean
   local integer i = 1  // only supports three heroes
   local integer id = 0
+  local real t = TimerGetElapsed(tq_timer)
   loop
     exitwhen i > 3
     if herouseitemsave[i] and UnitAlive(hero_unit[i]) and DistanceBetweenUnits(hero_unit[i],u) < 700 then
@@ -104,7 +105,7 @@ function SaveUnit takes unit u , integer id, boolean itemsave returns nothing
   endif
   call RemoveGuardPosition(u)
   if GetUnitAbilityLevel(u, 'AOwk') > 0 or GetUnitAbilityLevel(u, 'ANwk') > 0 then
-    if not IsUnitInvisible(u, Player(PLAYER_NEUTRAL_AGGRESSIVE)) then
+    if not IsUnitInvisible(u, Player(PLAYERAGGRESSIVE)) then
       call IssueImmediateOrder(u, "windwalk")
     endif
   elseif u != deny_unit and itemsave and ItemSaveUnit(u) then
