@@ -108,13 +108,13 @@ function ItemSingetp takes integer hn, boolean retreat returns boolean
   local real t = TimerGetElapsed(tq_timer)
 #INCLUDETABLE <$VER$\StandardUnits.txt> #EFR #COND "%4" =~ /\bsinge_tp\b/
   if retreat then
-    set %4cd = t
+    set %4cd[hn] = t
     return UnitUseItemTarget(hero_unit[hn],%4[hn], own_town_tp[GetRandomInt(0,Max(exist_town_num-1,0))])
   elseif major_hero != null and UnitAlive(major_hero) then
     set l = GetUnitLoc(major_hero)
     set u = GetUnitHeroReplacement(u,l)  //hope don't interrupt casting
     if u != null and not IsUnitType(u, UNIT_TYPE_FLYING) and not IsUnitType(u, UNIT_TYPE_HERO) then
-      set %4cd = t
+      set %4cd[hn] = t
       set b = UnitUseItemTarget(hero_unit[hn],%4[hn],u)  //teleport to battle
     endif
     call RemoveLocation(l)
@@ -130,7 +130,7 @@ function ItemSaveHero takes integer hn returns boolean
   local integer id = 0
   local real t = TimerGetElapsed(tq_timer)
 #INCLUDETABLE <$VER$\StandardUnits.txt> #EFR #COND "%4" =~ /\bsinge_tp\b/
-  if %4[hn] != null and t > %4cd + 90 and ItemSingetp(hn,true) then
+  if %4[hn] != null and t > %4cd[hn] + 90 and ItemSingetp(hn,true) then
     return true
   endif
 #ENDINCLUDE
