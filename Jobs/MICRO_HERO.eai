@@ -25,6 +25,10 @@
   item array %3item
   real array %3cd  // old war3 no API check CD
 #ENDINCLUDE
+#INCLUDETABLE <$VER$\StandardUnits.txt> #EFR #COND "%4" =~ /\bsinge_tp\b/
+  item array %4
+  real array %4cd
+#ENDINCLUDE
 #ELSE
 
 function TeleportHome takes integer hn returns nothing
@@ -97,10 +101,38 @@ function TeleportToLoc takes unit u, location l returns nothing
   set loc = null
 endfunction
 
+function ItemSingetp takes integer hn, boolean retreat returns boolean
+  local unit u = null
+  local location l = null
+  local boolean b = false
+  local real t = TimerGetElapsed(tq_timer)
+#INCLUDETABLE <$VER$\StandardUnits.txt> #EFR #COND "%4" =~ /\bsinge_tp\b/
+  if retreat then
+    set %4cd = t
+    return UnitUseItemTarget(hero_unit[hn],%4[hn], own_town_tp[GetRandomInt(0,Max(exist_town_num-1,0))])
+  endif
+  set l = GetUnitLoc(major_hero)
+  set u = GetUnitHeroReplacement(u,l)  //hope don't interrupt casting
+  if u != null and not IsUnitType(u, UNIT_TYPE_FLYING) and not IsUnitType(u, UNIT_TYPE_HERO) then
+    set %4cd = t
+    set b = UnitUseItemTarget(hero_unit[hn],%4[hn],u)  //teleport to battle
+  endif
+  call RemoveLocation(l)
+  set l = null
+  set u = null
+#ENDINCLUDE
+  return b
+endfunction
+
 function ItemSaveHero takes integer hn returns boolean
   local integer i = 1  // only supports three heroes
   local integer id = 0
   local real t = TimerGetElapsed(tq_timer)
+#INCLUDETABLE <$VER$\StandardUnits.txt> #EFR #COND "%4" =~ /\bsinge_tp\b/
+  if %4[hn] != null and t > %4cd + 90 and ItemSingetp(hn,true) then
+    return true
+  endif
+#ENDINCLUDE
   loop
     exitwhen i > 3
     if i != hn and UnitAlive(hero_unit[i]) and CheckUseSaveItem(i) and DistanceBetweenUnits(hero_unit[i],hero_unit[hn]) < 700 then
@@ -127,7 +159,7 @@ function ExecuteSaveHero takes integer hn, integer a, unit healer returns nothin
   local location loc = null
   local integer hFountainID = GetHealthFountainID()
   local integer mFountainID = GetManaFountainID()
-852093
+
   if a != ACTION_DO_NOTHING and a != ACTION_TP then
     call RemoveGuardPosition(hero_unit[hn])
     if GetUnitAbilityLevel(hero_unit[hn], 'AOwk') > 0 or GetUnitAbilityLevel(hero_unit[hn], 'ANwk') > 0 then
@@ -249,6 +281,7 @@ function MicroHeroJob takes integer hn returns nothing
         call CreateDebugTag("HERO: Healing Bug Fix Job", 10, hero_unit[hn], 4.00, 2.00)
         call RecycleGuardPosition(hero_unit[hn])
         call GroupRemoveUnit(unit_healing, hero_unit[hn])
+        call ItemSingetp(hn,false)
       else
         set healing = true
         set herouseitemsave[hn] = false
@@ -323,6 +356,10 @@ function MicroHeroJob takes integer hn returns nothing
     #INCLUDETABLE <$VER$\SaveItems.txt> #EFR
     elseif %3item[hn] == null then
       set %3item[hn] = GetItemOfTypeOnUnit(%1,hero_unit[hn])
+    #ENDINCLUDE
+    #INCLUDETABLE <$VER$\StandardUnits.txt> #EFR #COND "%4" =~ /\bsinge_tp\b/
+    elseif %4[hn] == null then
+      set %4[hn] = GetItemOfTypeOnUnit(%1,hero_unit[hn])
     #ENDINCLUDE
     endif
   endif
