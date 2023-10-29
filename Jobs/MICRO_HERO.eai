@@ -281,7 +281,9 @@ function MicroHeroJob takes integer hn returns nothing
         call CreateDebugTag("HERO: Healing Bug Fix Job", 10, hero_unit[hn], 4.00, 2.00)
         call RecycleGuardPosition(hero_unit[hn])
         call GroupRemoveUnit(unit_healing, hero_unit[hn])
-        call ItemSingetp(hn,false)
+        if DistanceBetweenUnits(major_hero,hero_unit[hn]) > 2000 then
+          call ItemSingetp(hn,false)
+        endif
       else
         set healing = true
         set herouseitemsave[hn] = false
