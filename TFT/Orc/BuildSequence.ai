@@ -69,63 +69,64 @@ endfunction
 function global_build_sequence takes nothing returns nothing
     // Anti rush
     if TownCountTown(ORC_WATCH_TOWER,0) < 6 then
-        call BuildAtMine(1, ORC_WATCH_TOWER, 45)
-      endif
-      // home_location tower
-      if tier < 3 then
-        call BuildFront(2, ORC_WATCH_TOWER, 40)
-      endif
-      // exp tower
-      if GetMinesOwned() > 1 or (TownCount(TREE_LIFE) > 1 and GetMinesOwned() > 0) then
+      call BuildAtMine(1, ORC_WATCH_TOWER, 42)
+      call BuildFront(1, ORC_WATCH_TOWER, 45)
+    endif
+    // home_location tower
+    if tier < 3 then
+      call BuildUnit(2, ORC_WATCH_TOWER, 40)
+    endif
+    // exp tower
+    if GetMinesOwned() > 1 or (TownCount(TREE_LIFE) > 1 and GetMinesOwned() > 0) then
+      call DefendTownsDone(1, BURROW, 70)
+      call DefendTownsDone(2, ORC_WATCH_TOWER, 70)
+      if tier == 3 and GetGold() > 2000 then
         call DefendTownsDone(1, BURROW, 70)
-        call DefendTownsDone(2, ORC_WATCH_TOWER, 70)
-        if tier == 3 and GetGold() > 2000 then
-          call DefendTownsDone(1, BURROW, 70)
-          call DefendTownsDone(4, ORC_WATCH_TOWER, 35)
-          if TownCount(ORC_WATCH_TOWER) >= 4 and TownCount(VOODOO_LOUNGE) < 2 then
-            call DefendTownsDone(1, VOODOO_LOUNGE, 40)
-          endif
+        call DefendTownsDone(4, ORC_WATCH_TOWER, 35)
+        if TownCount(ORC_WATCH_TOWER) >= 4 and TownCount(VOODOO_LOUNGE) < 2 then
+          call DefendTownsDone(1, VOODOO_LOUNGE, 40)
         endif
       endif
-      // routine build
-      if GetGold() > 800 then
-        call BuildUnit(2, ORC_WATCH_TOWER, 40)
-        call BuildFront(2, ORC_WATCH_TOWER, 35)
-      endif
+    endif
+    // routine build
+    if GetGold() > 800 then
+      call BuildUnit(2, ORC_WATCH_TOWER, 40)
+      call BuildFront(2, ORC_WATCH_TOWER, 35)
+    endif
 
-      if urgent_healing_count > 3 then
-          call BuildItem(1, HEALING_SALVE, 120)
-      else
-          call BuildItem(1, HEALING_SALVE, 50)
-      endif
-      if urgent_healing_count > 2 then
-        call BuildItem(2, HEALING_SALVE, 50)
-      endif
-      call BuildItem(1, M_SCROLL_OF_HEALING, 55)
+    if urgent_healing_count > 3 then
+      call BuildItem(1, HEALING_SALVE, 120)
+    else
+      call BuildItem(1, HEALING_SALVE, 50)
+    endif
+    if urgent_healing_count > 2 then
+      call BuildItem(2, HEALING_SALVE, 50)
+    endif
+    call BuildItem(1, M_SCROLL_OF_HEALING, 55)
 
-      call BuildItem(1, SCROLL_OF_SPEED, 40)
-      call BuildItem(1, POTION_OF_LESSER_INVULNERBILITY, 50)
-      call BuildItem(1, LESSER_CLARITY_POTION, 35)
-      if tier == 1 then
-        call BuildItem(1, M_TOWN_PORTAL, 100)
+    call BuildItem(1, SCROLL_OF_SPEED, 40)
+    call BuildItem(1, POTION_OF_LESSER_INVULNERBILITY, 50)
+    call BuildItem(1, LESSER_CLARITY_POTION, 35)
+    if tier == 1 then
+      call BuildItem(1, M_TOWN_PORTAL, 100)
+    endif
+    if tier > 1 then
+      call BuildItem(1, HEALING_POTION, 70)
+      call BuildItem(1, TOWN_PORTAL, 180)
+      if c_ally_total > 0 then
+        call BuildItem(1, STAFF_OF_PRESERVATION, 30)
       endif
-      if tier > 1 then
-        call BuildItem(1, HEALING_POTION, 70)
-        call BuildItem(1, TOWN_PORTAL, 180)
-        if c_ally_total > 0 then
-            call BuildItem(1, STAFF_OF_PRESERVATION, 30)
-          endif
+    endif
+    if tier == 3 then
+      if c_ally_total > 0 then
+        call BuildItem(1, STAFF_OF_SANCTUARY, 30)
       endif
-      if tier == 3 then
-        if c_ally_total > 0 then
-          call BuildItem(1, STAFF_OF_SANCTUARY, 30)
-        endif
-      endif
-      if GetGold() > 1000 then
-        call BuildItem(1, STAFF_OF_TELEPORTATION, 35)
-      endif
+    endif
+    if GetGold() > 1000 then
+      call BuildItem(1, STAFF_OF_TELEPORTATION, 35)
+    endif
 
-      call BuildUnit(1, VOODOO_LOUNGE, 45+30*(tier-1))
+    call BuildUnit(1, VOODOO_LOUNGE, 45+30*(tier-1))
 
     // DYNAMIC and Global Mercenaries
     call ResetDynamicSystem()
