@@ -107,36 +107,30 @@ function ItemSingetp takes integer hn, boolean retreat returns boolean
   local unit u = null
   local location l = null
   local group g = null
-  local integer i = 0
   local real t = TimerGetElapsed(tq_timer)
   if %4[hn] == null or t < %4cd[hn] + 90 then
     return b
   endif
   if retreat then
-    set l = exist_town[GetRandomInt(0,Max(exist_town_num-1,0))]
+    set u = tp_town[GetRandomInt(0,Max(exist_town_num-1,0))]
   else
-    set l = GetUnitLoc(major_hero)  //teleport to battle
-    set i = 1
-  endif
-  if l != null then
+    set l = GetUnitLoc(major_hero)  //teleport to battle , hope don't interrupt casting
     set g = CreateGroup()
-    call GroupEnumUnitsInRangeOfLoc(g, l, 500, null)
+    call GroupEnumUnitsInRangeOfLoc(g, l, 300, null)
     loop
       set u = FirstOfGroup(g)
       exitwhen u == null or (UnitAlive(u) and not IsUnitHidden(u) and not IsUnitLoaded(u) and not IsUnitType(u, UNIT_TYPE_FLYING) and not IsUnitType(u, UNIT_TYPE_HERO))
       call GroupRemoveUnit(g, u)
     endloop
-    if u != null then
-      set %4cd[hn] = t
-      set b = UnitUseItemTarget(hero_unit[hn],%4[hn], u)  //hope don't interrupt casting
-    endif
     call DestroyGroup(g)
     set g = null
-    set u = null
-    if i == 1 then
-      call RemoveLocation(l)
-    endif
+    call RemoveLocation(l)
     set l = null
+  endif
+  if u != null and UnitAlive(u) then
+    set %4cd[hn] = t
+    set b = UnitUseItemTarget(hero_unit[hn],%4[hn], u)
+    set u = null
   endif
 #ENDINCLUDE
   return b
