@@ -1334,12 +1334,6 @@ function CreateDebugTagLoc takes string s, real fontsize, real posx, real posy, 
 		call SetTextTagFadepoint(tt, fadespan)
 		set tt = null
 	endif
-
-  set t = CreateTextTag()
-  call SetTextTagText(t, null, 0.1)
-  call SetTextTagPos(t, GetLocationX(home_location) + 300, GetLocationY(home_location) + 300, 0)
-  call SetDebugTagColor(t)
-  call SetTextTagPermanent(t, true)
 endfunction
 
 // Create a texttag over a specific unit for a certain amount of time
