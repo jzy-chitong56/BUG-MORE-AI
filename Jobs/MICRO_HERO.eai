@@ -119,7 +119,7 @@ function ItemSingetp takes integer hn, boolean retreat returns boolean
     call GroupEnumUnitsInRangeOfLoc(g, l, 300, null)
     loop
       set u = FirstOfGroup(g)
-      exitwhen u == null or (UnitAlive(u) and not IsUnitHidden(u) and not IsUnitLoaded(u) and not IsUnitType(u, UNIT_TYPE_FLYING) and not IsUnitType(u, UNIT_TYPE_HERO))
+      exitwhen u == null or (UnitAlive(u) and not IsUnitHidden(u) and not IsUnitLoaded(u) and not IsUnitType(u, UNIT_TYPE_FLYING) and not IsUnitType(u, UNIT_TYPE_HERO) and GetUnitState(u, UNIT_STATE_LIFE) / GetUnitState(u, UNIT_STATE_MAX_LIFE) > 0.5)
       call GroupRemoveUnit(g, u)
     endloop
     call DestroyGroup(g)
