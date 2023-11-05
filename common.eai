@@ -2018,8 +2018,7 @@ endfunction
   loop
     set u = FirstOfGroup(g)
     exitwhen u == null
-    exitwhen  GetUnitTypeId(u) == old_id[racial_peon] and UnitAlive(u) and (GetUnitCurrentOrder(u) == OrderId("harvest") or GetUnitCurrentOrder(u) == 0) and not IsUnitHidden(u) and not IsUnitLoaded(u)  // and not IsUnitInGroup(u, unit_buying_tavern) and not IsUnitInGroup(u, unit_buying_merc) and not IsUnitInGroup(u, unit_buying_item) and not IsUnitInGroup(u, unit_zepplin_move))  // if too much IsUnitInGroup , the game will laggy and collapse
-    call GroupRemoveUnit(g, u)
+    exitwhen  GetUnitTypeId(u) == old_id[racial_peon] and UnitAlive(u) and (GetUnitCurrentOrder(u) == OrderId("harvest") or GetUnitCurrentOrder(u) == 0) and not IsUnitHidden(u) and not IsUnitLoaded(u)
   endloop
   call DestroyGroup(g)
   set g = null
@@ -4112,7 +4111,7 @@ function GroupRemoveGroupAM takes group sourcegroup , group removegroup returns 
   set ug = CopyGroup(sourcegroup,ug)
   loop
     set u = FirstOfGroup(ug)
-    exitwhen u == null
+    exitwhen u == null or FirstOfGroup(removegroup) == null
     call GroupRemoveUnit(removegroup,u)
     call GroupRemoveUnit(ug,u)
   endloop
@@ -4997,11 +4996,11 @@ endfunction
 
 function GetUnitHeroReplacement takes unit u , location l returns unit
   local group g = CreateGroup()
-  call GroupEnumUnitsOfPlayer(g,ai_player,null)
+  call GroupEnumUnitsInRangeOfLoc(g, l, battle_radius, null)
   loop
     set u = FirstOfGroup(g)
     exitwhen u == null
-    if IsUnitInRangeLoc(u, l, battle_radius) and UnitAlive(u) and not IsUnitHidden(u) and IsUnitType(u, UNIT_TYPE_STRUCTURE) == false and IsUnitType(u, UNIT_TYPE_PEON) == false and IsStandardUnit(u) then
+    if UnitAlive(u) and not IsUnitHidden(u) and GetOwningPlayer(u) == ai_player and IsUnitType(u, UNIT_TYPE_STRUCTURE) == false and IsUnitType(u, UNIT_TYPE_PEON) == false and IsStandardUnit(u) then
       call DestroyGroup(g)
       set g = null
       return u
