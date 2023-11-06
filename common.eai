@@ -527,12 +527,32 @@ globals
     integer racial_lumber = 0
     integer racial_rushcreep = 0
     unit rushcreep_target = null
+    integer array racial_barracks2  // tier2
+    integer racial_barracks2_total = 0
+    integer array racial_barracks3  // tier3
+    integer racial_barracks3_total = 0
+    integer racial_highlv_barracks = 0
     integer neutral_shredder = 0
     integer neutral_zeppelin = 0
     integer tp_item = 0
+    boolean array herouseitemsave
+  #INCLUDETABLE <$VER$\SaveItems.txt> #EFR
+    integer %3_item = %1
+    boolean array %3itemsave
+    item array %3item
+    real array %3cd  // old war3 no API check CD
+    #AFTERINCLUDE
+    integer saveitemlength = %row  // ROC no this function
+  #ENDINCLUDE
+  #INCLUDETABLE <$VER$\StandardUnits.txt> #EFR #COND "%4" =~ /\bsinge_tp\b/
+    integer singe_tp_item = %1
+    item array %4
+    real array %4cd
+  #ENDINCLUDE
     integer tiernum = 3
     integer mapSize = 0
     boolean firstattackhp = false  //big map or more player first attack human player?
+    boolean take_all_ghouls_along = false
 
     integer array hero
     integer array hero_skills // The skill line chosen for the hero, major, minor or rare
@@ -8325,8 +8345,6 @@ function InitHeroArrays takes nothing returns nothing
     #ENDINCLUDE
     #INCLUDETABLE <$VER$\SaveItems.txt> #EFR
     set %3cd[i] = -45
-    #AFTERINCLUDE
-    set saveitemlength = %row
     #ENDINCLUDE
     #INCLUDETABLE <$VER$\StandardUnits.txt> #EFR #COND "%4" =~ /\bsinge_tp\b/
     set %4cd[i] = -90
@@ -11523,7 +11541,7 @@ function FormGroupAM takes integer seconds returns nothing
     if count >= desire then
       call AddAssault(desire,old_id[unitid])
     else
-      if unitid != racial_ghoul or (GetWood() > TownCountDone(racial_ghoul)) then  // take_all_ghouls_along is true
+      if unitid != racial_ghoul or take_all_ghouls_along then
         set desire = attack_qty[index]
       endif
       if count < desire then
