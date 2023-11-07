@@ -857,7 +857,8 @@ function build_sequence_all takes nothing returns nothing
       //call DisplayToAlliesImportant( GetCurrentStrategyReport() + GetCurrentDynamicReport())
       //call DisplayToObserversImportant( GetCurrentStrategyReport() + GetCurrentDynamicReport())
     endif
-
+    set racial_barracks2_total = -1
+    set racial_barracks3_total = -1
     set new_tier = GetTier()
     if tier != new_tier then
       set tier = new_tier
