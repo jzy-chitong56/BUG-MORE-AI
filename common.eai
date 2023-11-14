@@ -4176,6 +4176,7 @@ function GroupRemoveGroupAM takes group sourcegroup , group removegroup returns 
   endloop
   call DestroyGroup(ug)
   set ug = null
+  set u = null
 endfunction
 
 //==========================================================================
