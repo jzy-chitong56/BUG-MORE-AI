@@ -88,6 +88,23 @@ function global_build_sequence takes nothing returns nothing
       call BuildFront(3, ANCIENT_PROTECT, 36)  // ELF not run BuildUnit 
     endif
 
+    // transition train , sequence should be at the beginning
+    if tier == 2 and racial_highbuild_lv2_total < 2 and GetGold() > 600 then
+      call BuildUnit(TownCountDone(HUNTRESS) + difficulty, HUNTRESS, 46)
+      call BuildUnit(TownCountDone(ARCHER) + difficulty, ARCHER, 42)
+      call BuildUnit(1, BALLISTA, 10)
+    elseif tier == 3 and racial_highbuild_lv3_total < 2 and GetGold() > 800 then
+      call BuildUnit(TownCountDone(DRUID_CLAW)+difficulty, DRUID_CLAW, 42+racial_highbuild_lv2_total*5)
+      call BuildUnit(TownCountDone(DRYAD)+1, DRYAD, 40+racial_highbuild_lv2_total*5)
+      call BuildUnit(TownCountDone(DRUID_TALON)+1, DRUID_TALON, 32+racial_highbuild_lv2_total*5)
+      call BuildUnit(TownCountDone(FAERIE_DRAGON)+1, FAERIE_DRAGON, 28+racial_highbuild_lv2_total*5)
+      call BuildUnit(TownCountDone(HUNTRESS) + difficulty, HUNTRESS, 26-racial_highbuild_lv2_total*5)
+      call BuildUnit(TownCountDone(ARCHER) + difficulty, ARCHER, 22-racial_highbuild_lv2_total*5)
+      call BuildUnit(1, HIPPO, 20+racial_highbuild_lv2_total*5)
+      call BuildUnit(1, HIPPO_RIDER, 18+racial_highbuild_lv2_total*5)
+      call BuildUnit(1, BALLISTA, 16-racial_highbuild_lv2_total*5)
+    endif
+
     // Global Items
     call BuildItem(1, M_SCROLL_OF_HEALING, 40)
     //call BuildItem(1, SCROLL_OF_PROTECTION, 30)
@@ -118,7 +135,9 @@ function global_build_sequence takes nothing returns nothing
     call BuildUnit(1, DEN_OF_WONDERS, 45+30*(tier-1))
 
     // DYNAMIC and Global Mercenaries
-    call BuildUnit(1, SHREDDER, 70)
+    if tier > 1 and GetGold() > 600 and GetWood() > 360 then
+      call BuildUnit(1, ZEPPELIN, 50)
+    endif
     call ResetDynamicSystem()
     if tier == 1 then
       call AddUnitToAntiair(ARCHER,29)
@@ -314,6 +333,7 @@ function global_build_sequence takes nothing returns nothing
 
 
 
+
 endfunction
 
 //============================================================================
@@ -354,23 +374,19 @@ function build_sequence_NormalElf takes nothing returns nothing
 if tier == 3 then
 
       call BuildUnit(3, MOUNTAIN_GIANT, 60)
-      call BuildUnit(7, HUNTRESS, 50)
+      call BuildUnit(8, HUNTRESS, 50)
       call BuildUnit(4, DRYAD, 58)
-      call BuildUnit(3, ARCHER, 54)
-      call BuildUnit(2, DRUID_CLAW, 64)
+      call BuildUnit(4, ARCHER, 54)
+      call BuildUnit(3, DRUID_CLAW, 64)
       call BuildUnit(2, FAERIE_DRAGON, 64)
       call BuildUnit(2, DRUID_TALON, 64)
       call BuildUnit(2, CHIMAERA, 62)
       call BuildUnit(1, hero[1], 80)
       call BuildUnit(1, hero[2], 64)
       call BuildUnit(1, hero[3], 60)
+
       call BuildUpgr(2, UPG_DRUID_CLAW, 40)
-      call BuildUpgr(3, UPG_MOON_ARMOR, 40)
-      call BuildUpgr(3, UPG_STR_MOON, 41)
-      call BuildUpgr(3, UPG_HIDES, 35)
-      call BuildUpgr(3, UPG_STR_WILD, 36)
-      
-      call BuildUnit(1, ZEPPELIN, 50)
+
 
 
 
@@ -409,10 +425,6 @@ elseif tier == 2 then
       call BuildUnit(1, TREE_ETERNITY, 45)
       call BuildUnit(1, hero[1], 80)
       call BuildUnit(1, hero[2], 70)
-      call BuildUpgr(1, UPG_MOON_ARMOR, 20)
-      call BuildUpgr(1, UPG_STR_MOON, 21)
-      call BuildUpgr(1, UPG_HIDES, 15)
-      call BuildUpgr(1, UPG_STR_WILD, 16)
 
 
 
@@ -444,8 +456,8 @@ elseif tier == 2 then
 else
 
       call BuildUnit(1, hero[1], 80)
-      call BuildUnit(14, ARCHER, 60)
-      call BuildUnit(8, HUNTRESS, 50)
+      call BuildUnit(10, ARCHER, 60)
+      call BuildUnit(5, HUNTRESS, 50)
       call BuildUnit(1, TREE_AGES, 50)
 
 
@@ -518,11 +530,12 @@ function build_sequence_MassHD takes nothing returns nothing
 if tier == 3 then
 
       call BuildUnit(2, MOUNTAIN_GIANT, 60)
-      call SetBuildReact(40, 20, HUNTRESS, 0, ARCHER, enemy_air, 5, 20, 50)
+      call SetBuildReact(52, 20, HUNTRESS, 0, ARCHER, enemy_air, 5, 20, 50)
       call BuildUnit(12, DRYAD, 70)
       call BuildUnit(1, hero[1], 90)
       call BuildUnit(1, hero[2], 60)
       call BuildUnit(1, hero[3], 40)
+
       call BuildUpgr(1, UPG_ABOLISH, 86)
       call BuildUpgr(1, UPG_GLAIVE, 70)
       call BuildUpgr(1, UPG_HARD_SKIN, 30)
@@ -555,11 +568,11 @@ elseif tier == 2 then
 
       call BuildUnit(1, MOUNTAIN_GIANT, 50)
       call BuildUnit(6, DRYAD, 70)
-      call SetBuildReact(30, 12, HUNTRESS, 0, BALLISTA, enemy_unarmored, 4, 8, 50)
+      call SetBuildReact(40, 12, HUNTRESS, 0, BALLISTA, enemy_unarmored, 4, 8, 50)
       call BuildUnit(1, TREE_ETERNITY, 45)
       call BuildUnit(1, hero[1], 80)
       call BuildUnit(1, hero[2], 60)
-      call BuildUpgr(1, UPG_GLAIVE, 70)
+
       call BuildUpgr(1, UPG_ABOLISH, 78)
 
 
@@ -663,6 +676,7 @@ if tier == 3 then
       call BuildUnit(1, hero[1], 80)
       call BuildUnit(1, hero[2], 60)
       call BuildUnit(1, hero[3], 40)
+
       call BuildUpgr(2, UPG_DRUID_CLAW, 115)
       call BuildUpgr(2, UPG_DRUID_TALON, 115)
       call BuildUpgr(1, UPG_ABOLISH, 65)
@@ -702,7 +716,7 @@ elseif tier == 2 then
       call BuildUnit(1, TREE_ETERNITY, 80)
       call BuildUnit(1, hero[1], 80)
       call BuildUnit(1, hero[2], 60)
-      
+
       call BuildUpgr(1, UPG_DRUID_CLAW, 65)
       call BuildUpgr(1, UPG_ABOLISH, 65)
       call BuildUpgr(1, UPG_DRUID_TALON, 65)
@@ -736,7 +750,7 @@ elseif tier == 2 then
 
 else
 
-      call SetBuildReact(32, 6, ARCHER, 0, HUNTRESS, (enemy_normal + enemy_mediumarmor - (enemy_air * 2) - enemy_piercing - enemy_siege), 4, 25, 38) 
+      call SetBuildReact(24, 6, ARCHER, 0, HUNTRESS, (enemy_normal + enemy_mediumarmor - (enemy_air * 2) - enemy_piercing - enemy_siege), 4, 25, 38) 
       call BuildUnit(4, HUNTRESS, 52)
       call BuildUnit(1, TREE_AGES, 55)
       call BuildUnit(1, hero[1], 80)
@@ -814,10 +828,11 @@ if tier == 3 then
       call BuildUnit(1, hero[1], 80)
       call BuildUnit(1, hero[2], 60)
       call BuildUnit(1, hero[3], 40)
+
       call BuildUpgr(1, UPG_HIPPO_TAME, 70)
       call BuildUpgr(1, UPG_BOWS, 70  )
       call BuildUpgr(1, UPG_MARKSMAN, 70)
-      
+
 
 
 
@@ -861,6 +876,7 @@ elseif tier == 2 then
       call BuildUnit(1, TREE_ETERNITY, 50)
       call BuildUnit(1, hero[1], 80)
       call BuildUnit(1, hero[2], 60)
+
       call BuildUpgr(1, UPG_HIPPO_TAME, 60)
       call BuildUpgr(1, UPG_BOWS, 70  )
 
@@ -896,7 +912,7 @@ elseif tier == 2 then
 
 else
 
-      call SetBuildReact(32, 6, ARCHER, 0, HUNTRESS, (enemy_normal + enemy_mediumarmor - (enemy_air * 2) - enemy_piercing - enemy_siege), 4, 25, 38) 
+      call SetBuildReact(24, 6, ARCHER, 0, HUNTRESS, (enemy_normal + enemy_mediumarmor - (enemy_air * 2) - enemy_piercing - enemy_siege), 4, 25, 38) 
       call BuildUnit(4, HUNTRESS, 52)
       call BuildUnit(1, TREE_AGES, 50)
       call BuildUnit(1, hero[1], 80)
@@ -970,8 +986,6 @@ if tier == 3 then
       call BuildUnit(1, hero[1], 80)
       call BuildUnit(1, hero[2], 60)
       call BuildUnit(1, hero[3], 40)
-      
-      call BuildUnit(1, ZEPPELIN, 50)
 
       call BuildUpgr(1, UPG_BOLT, 72)
       call BuildUpgr(1, UPG_ABOLISH, 79)
@@ -1001,8 +1015,6 @@ elseif tier == 2 then
       call BuildUnit(1, TREE_ETERNITY, 50)
       call BuildUnit(1, hero[1], 80)
       call BuildUnit(1, hero[2], 60)
-      
-      call BuildUnit(1, ZEPPELIN, 50)
 
       call BuildUpgr(1, UPG_BOLT, 70)
       call BuildUpgr(1, UPG_ABOLISH, 67)
@@ -1025,9 +1037,9 @@ elseif tier == 2 then
 
 else
 
-      call BuildUnit(10, ARCHER, 50)
-      call BuildUnit(6, HUNTRESS, 50)
-      call BuildUnit(4, BALLISTA, 50)
+      call BuildUnit(6, ARCHER, 50)
+      call BuildUnit(5, HUNTRESS, 50)
+      call BuildUnit(3, BALLISTA, 50)
       call BuildUnit(1, TREE_AGES, 50)
       call BuildUnit(1, hero[1], 80)
 
@@ -1101,6 +1113,7 @@ if tier == 3 then
       call BuildUnit(1, hero[1], 80)
       call BuildUnit(1, hero[2], 70)
       call BuildUnit(1, hero[3], 60)
+
       call BuildUpgr(2, UPG_DRUID_TALON, 120)
       call BuildUpgr(1, UPG_MARK_TALON, 100)
 
@@ -1143,7 +1156,7 @@ elseif tier == 2 then
       call BuildUnit(1, TREE_ETERNITY, 55)
       call BuildUnit(1, hero[1], 80)
       call BuildUnit(1, hero[2], 60)
-      
+
       call BuildUpgr(1, UPG_DRUID_TALON, 65)
 
 
@@ -1181,7 +1194,7 @@ elseif tier == 2 then
 
 else
 
-      call SetBuildReact(32, 6, ARCHER, 0, HUNTRESS, (enemy_normal + enemy_mediumarmor - (enemy_air * 2) - enemy_piercing - enemy_siege), 4, 25, 38) 
+      call SetBuildReact(24, 6, ARCHER, 0, HUNTRESS, (enemy_normal + enemy_mediumarmor - (enemy_air * 2) - enemy_piercing - enemy_siege), 4, 25, 38) 
       call BuildUnit(4, HUNTRESS, 52)
       call BuildUnit(1, TREE_AGES, 50)
       call BuildUnit(1, hero[1], 80)
@@ -1273,7 +1286,7 @@ if tier == 3 then
       call BuildUnit(1, hero[1], 80)
       call BuildUnit(1, hero[2], 70)
       call BuildUnit(1, hero[3], 60)
-      
+
       call BuildUpgr(1, UPG_BOWS, 52)
       call BuildUpgr(1, UPG_MARKSMAN, 52)
       call BuildUpgr(1, UPG_HIPPO_TAME, 54)
@@ -1322,6 +1335,7 @@ elseif tier == 2 then
       call BuildUnit(1, TREE_ETERNITY, 55)
       call BuildUnit(1, hero[1], 80)
       call BuildUnit(1, hero[2], 60)
+
       call BuildUpgr(1, UPG_BOWS, 52)
       call BuildUpgr(1, UPG_HIPPO_TAME, 54)
 
@@ -1359,7 +1373,7 @@ elseif tier == 2 then
 
 else
 
-      call SetBuildReact(32, 6, ARCHER, 0, HUNTRESS, (enemy_normal + enemy_mediumarmor - (enemy_air * 2) - enemy_piercing - enemy_siege), 4, 25, 38) 
+      call SetBuildReact(24, 6, ARCHER, 0, HUNTRESS, (enemy_normal + enemy_mediumarmor - (enemy_air * 2) - enemy_piercing - enemy_siege), 4, 25, 38) 
       call BuildUnit(4, HUNTRESS, 52)
       call BuildUnit(1, TREE_AGES, 55)
       call BuildUnit(1, hero[1], 80)
@@ -1446,7 +1460,7 @@ if tier == 3 then
       call BuildUnit(1, hero[1], 80)
       call BuildUnit(1, hero[2], 70)
       call BuildUnit(1, hero[3], 60)
-      
+
       call BuildUpgr(1, UPG_CHIM_ACID, 60)
       call BuildUpgr(1, UPG_ABOLISH, 60)
 
@@ -1484,14 +1498,14 @@ if tier == 3 then
 
 elseif tier == 2 then
 
-      call BuildUnit(6, ARCHER, 40)
+      call BuildUnit(8, ARCHER, 40)
       call BuildUnit(8, DRYAD, 46)
       call BuildUnit(1, MOUNTAIN_GIANT, 45)
-      call BuildUnit(1, FAERIE_DRAGON, 55)
+      call BuildUnit(3, FAERIE_DRAGON, 55)
       call BuildUnit(1, TREE_ETERNITY, 55)
       call BuildUnit(1, hero[1], 80)
       call BuildUnit(1, hero[2], 60)
-      
+
       call BuildUpgr(1, UPG_ABOLISH, 50)
 
 
@@ -1528,7 +1542,7 @@ elseif tier == 2 then
 
 else
 
-      call SetBuildReact(32, 6, ARCHER, 0, HUNTRESS, (enemy_normal + enemy_mediumarmor - (enemy_air * 2) - enemy_piercing - enemy_siege), 4, 25, 38) 
+      call SetBuildReact(24, 6, ARCHER, 0, HUNTRESS, (enemy_normal + enemy_mediumarmor - (enemy_air * 2) - enemy_piercing - enemy_siege), 4, 25, 38) 
       call BuildUnit(4, HUNTRESS, 52)
       call BuildUnit(1, TREE_AGES, 50)
       call BuildUnit(1, hero[1], 80)
@@ -1607,7 +1621,7 @@ if tier == 3 then
       call BuildUnit(1, hero[1], 80)
       call BuildUnit(1, hero[2], 75)
       call BuildUnit(1, hero[3], 70)
-      
+
       call BuildUpgr(1, UPG_BOWS, 72)
       call BuildUpgr(1, UPG_MARKSMAN, 72)
       call BuildUpgr(Min(((TownCountDone(HUNTRESS)/2)-2),1), UPG_GLAIVE, 50)
@@ -1635,12 +1649,12 @@ if tier == 3 then
 
 elseif tier == 2 then
 
-      call SetBuildReact(14, 0, ARCHER, 0, BALLISTA, enemy_unarmored, 4, 8, 50)
+      call SetBuildReact(18, 0, ARCHER, 0, BALLISTA, enemy_unarmored, 4, 8, 50)
       call BuildUnit(22, ARCHER, 30)
       call BuildUnit(1, TREE_ETERNITY, 45)
       call BuildUnit(1, hero[1], 80)
       call BuildUnit(1, hero[2], 70)
-      
+
       call BuildUpgr(1, UPG_BOWS, 66)
 
 
@@ -1666,7 +1680,7 @@ elseif tier == 2 then
 
 else
 
-      call SetBuildReact(40, 12, ARCHER, 0, HUNTRESS, (enemy_normal + enemy_mediumarmor - (enemy_air * 2) - enemy_piercing - enemy_siege), 4, 25, 40) 
+      call SetBuildReact(32, 12, ARCHER, 0, HUNTRESS, (enemy_normal + enemy_mediumarmor - (enemy_air * 2) - enemy_piercing - enemy_siege), 4, 25, 40) 
       call BuildUnit(1, TREE_AGES, 50)
       call BuildUnit(1, hero[1], 80)
 
@@ -1729,13 +1743,11 @@ function build_sequence_DotC takes nothing returns nothing
 if tier == 3 then
 
       call BuildUnit(2, MOUNTAIN_GIANT, 70)
-      call BuildUnit(15, DRUID_CLAW, 45)
+      call BuildUnit(16, DRUID_CLAW, 45)
       call BuildUnit(8, DRYAD, 70)
       call BuildUnit(1, hero[1], 80)
       call BuildUnit(1, hero[2], 70)
       call BuildUnit(1, hero[3], 60)
-      
-      call BuildUnit(1, ZEPPELIN, 50)
 
       call BuildUpgr(2, UPG_DRUID_CLAW, 75)
       call BuildUpgr(1, UPG_MARK_CLAW, 60)
@@ -1773,7 +1785,7 @@ elseif tier == 2 then
       call BuildUnit(1, TREE_ETERNITY, 80)
       call BuildUnit(1, hero[1], 80)
       call BuildUnit(1, hero[2], 60)
-      
+
       call BuildUpgr(1, UPG_DRUID_CLAW, 56)
       call BuildUpgr(1, UPG_ABOLISH, 50)
 
@@ -1802,7 +1814,7 @@ elseif tier == 2 then
 
 else
 
-      call SetBuildReact(32, 6, ARCHER, 0, HUNTRESS, (enemy_normal + enemy_mediumarmor - (enemy_air * 2) - enemy_piercing - enemy_siege), 4, 25, 38) 
+      call SetBuildReact(24, 6, ARCHER, 0, HUNTRESS, (enemy_normal + enemy_mediumarmor - (enemy_air * 2) - enemy_piercing - enemy_siege), 4, 25, 38) 
       call BuildUnit(4, HUNTRESS, 52)
       call BuildUnit(1, TREE_AGES, 55)
       call BuildUnit(1, hero[1], 80)
@@ -1877,16 +1889,16 @@ endfunction
 function build_sequence_MassHuntress takes nothing returns nothing
 if tier == 3 then
 
-      call SetBuildReact(20, 0, HUNTRESS, 0, BALLISTA, enemy_unarmored, 4, 8, 50)
-      call SetBuildReact(42, 15, HUNTRESS, 0, ARCHER, enemy_air, 5, 20, 50)
+      call SetBuildReact(22, 0, HUNTRESS, 0, BALLISTA, enemy_unarmored, 4, 8, 50)
+      call SetBuildReact(46, 15, HUNTRESS, 0, ARCHER, enemy_air, 5, 20, 50)
       call BuildUnit(1, hero[1], 90)
       call BuildUnit(1, hero[2], 60)
       call BuildUnit(1, hero[3], 40)
 
       call BuildUpgr(1, UPG_GLAIVE, 70)
       call BuildUpgr(Min((TownCountDone(BALLISTA)/2),1), UPG_BOLT, 50)
-      call BuildUpgr(Min(((TownCountDone(ARCHER)/2)-3),1), UPG_MARKSMAN, 40)
-      call BuildUpgr(Min(((TownCountDone(ARCHER)/2)-2),1), UPG_BOWS, 50)
+      call BuildUpgr(Min((TownCountDone(ARCHER)/2),1), UPG_MARKSMAN, 40)
+      call BuildUpgr(Min((TownCountDone(ARCHER)/2),1), UPG_BOWS, 50)
 
 
 
@@ -1924,7 +1936,7 @@ elseif tier == 2 then
       call BuildUnit(1, TREE_ETERNITY, 45)
       call BuildUnit(1, hero[1], 80)
       call BuildUnit(1, hero[2], 60)
-      call BuildUpgr(1, UPG_GLAIVE, 70)
+
       call BuildUpgr(Min((TownCountDone(BALLISTA)/2),1), UPG_BOLT, 50)
 
 
@@ -1959,7 +1971,7 @@ elseif tier == 2 then
 
 else
 
-      call SetBuildReact(36, 8, HUNTRESS, 4, ARCHER, (enemy_unarmored + (enemy_lightarmor * 2) + enemy_air + enemy_magic - (enemy_normal * 2)), 3, 18, 20) 
+      call SetBuildReact(32, 8, HUNTRESS, 4, ARCHER, (enemy_unarmored + (enemy_lightarmor * 2) + enemy_air + enemy_magic - (enemy_normal * 2)), 3, 18, 20) 
       call BuildUnit(1, TREE_AGES, 50)
       call BuildUnit(1, hero[1], 80)
 
@@ -2034,6 +2046,7 @@ if tier == 3 then
       call BuildUnit(1, hero[1], 80)
       call BuildUnit(1, hero[2], 60)
       call BuildUnit(1, hero[3], 40)
+
       call BuildUpgr(1, UPG_ABOLISH, 87)
       call BuildUpgr(1, UPG_HARD_SKIN, 62)
       call BuildUpgr(1, UPG_RESIST_SKIN, 60)
@@ -2065,11 +2078,11 @@ if tier == 3 then
 
 elseif tier == 2 then
       call BuildUnit(4, MOUNTAIN_GIANT, 63)
-      call BuildUnit(12, DRYAD, 55)
+      call BuildUnit(14, DRYAD, 55)
       call BuildUnit(1, TREE_ETERNITY, 55)
       call BuildUnit(1, hero[1], 80)
       call BuildUnit(1, hero[2], 60)
-      
+
       call BuildUpgr(1, UPG_ABOLISH, 71)
 
 
@@ -2101,7 +2114,7 @@ elseif tier == 2 then
 
 else
 
-      call SetBuildReact(32, 6, ARCHER, 0, HUNTRESS, (enemy_normal + enemy_mediumarmor - (enemy_air * 2) - enemy_piercing - enemy_siege), 4, 25, 38) 
+      call SetBuildReact(24, 6, ARCHER, 0, HUNTRESS, (enemy_normal + enemy_mediumarmor - (enemy_air * 2) - enemy_piercing - enemy_siege), 4, 25, 38) 
       call BuildUnit(4, HUNTRESS, 52)
       call BuildUnit(1, TREE_AGES, 50)
       call BuildUnit(1, hero[1], 80)
@@ -2182,15 +2195,14 @@ endfunction
 function build_sequence_AoWMix takes nothing returns nothing
 if tier == 3 then
 
-      call SetBuildReact(20, 2, ARCHER, 3, BALLISTA, (enemy_unarmored + enemy_towers + enemy_casters)/2, 4, 25, 50)
+      call SetBuildReact(22, 2, ARCHER, 3, BALLISTA, (enemy_unarmored + enemy_towers + enemy_casters)/2, 4, 25, 50)
       call SetBuildReact(50, 15, HUNTRESS, 10, ARCHER, (enemy_unarmored + enemy_air - enemy_normal), 4, 25, 50)
       call BuildUnit(1, hero[1], 90)
       call BuildUnit(1, hero[2], 60)
       call BuildUnit(1, hero[3], 40)
-      
-      call BuildUpgr(Min((((TownCountDone(ARCHER) + TownCountDone(HUNTRESS))/3)-2),3), UPG_STR_MOON, 50)
-      call BuildUpgr(Min(((TownCountDone(ARCHER)/2)-3),1), UPG_MARKSMAN, 40)
-      call BuildUpgr(Min(((TownCountDone(ARCHER)/2)-2),1), UPG_BOWS, 50)
+
+      call BuildUpgr(Min((TownCountDone(ARCHER)/2),1), UPG_MARKSMAN, 40)
+      call BuildUpgr(Min((TownCountDone(ARCHER)/2),1), UPG_BOWS, 50)
       call BuildUpgr(Min(((TownCountDone(HUNTRESS)/2)-2),1), UPG_GLAIVE, 50)
       call BuildUpgr(Min((TownCountDone(BALLISTA)/2),1), UPG_BOLT, 50)
 
@@ -2230,14 +2242,13 @@ if tier == 3 then
 
 elseif tier == 2 then
 
-      call SetBuildReact(14, 2, ARCHER, 3, BALLISTA, (enemy_unarmored + enemy_towers + enemy_casters)/2, 4, 25, 50)
-      call SetBuildReact(40, 10, HUNTRESS, 8, ARCHER, (enemy_unarmored + enemy_air - enemy_normal), 4, 25, 50)
+      call SetBuildReact(16, 2, ARCHER, 3, BALLISTA, (enemy_unarmored + enemy_towers + enemy_casters)/2, 4, 25, 50)
+      call SetBuildReact(45, 10, HUNTRESS, 8, ARCHER, (enemy_unarmored + enemy_air - enemy_normal), 4, 25, 50)
       call BuildUnit(1, TREE_ETERNITY, 50)
       call BuildUnit(1, hero[1], 80)
       call BuildUnit(1, hero[2], 60)
-      
-      call BuildUpgr(Min((((TownCountDone(ARCHER) + TownCountDone(HUNTRESS))/3)-2),2), UPG_STR_MOON, 50)
-      call BuildUpgr(Min(((TownCountDone(ARCHER)/2)-2),1), UPG_BOWS, 50)
+
+      call BuildUpgr(Min((TownCountDone(ARCHER)/2),1), UPG_BOWS, 50)
       call BuildUpgr(Min((TownCountDone(BALLISTA)/2),1), UPG_BOLT, 50)
 
 
@@ -2276,7 +2287,7 @@ elseif tier == 2 then
 
 else
 
-      call SetBuildReact(48, 8, HUNTRESS, 4, ARCHER, (enemy_unarmored + (enemy_lightarmor * 2) + enemy_air + enemy_magic - (enemy_normal * 2)), 3, 18, 35) 
+      call SetBuildReact(32, 8, HUNTRESS, 4, ARCHER, (enemy_unarmored + (enemy_lightarmor * 2) + enemy_air + enemy_magic - (enemy_normal * 2)), 3, 18, 35) 
       call BuildUnit(1, TREE_AGES, 55)
       call BuildUnit(1, hero[1], 80)
 
@@ -2370,14 +2381,12 @@ if tier == 3 then
       call BuildUnit(1, hero[1], 90)
       call BuildUnit(1, hero[2], 60)
       call BuildUnit(1, hero[3], 40)
-      call BuildUpgr(3, UPG_HIDES, 30)
-      call BuildUpgr(Min((((TownCountDone(DRYAD)*2) + TownCountDone(DRUID_CLAW) + TownCountDone(MOUNTAIN_GIANT))/5),3), UPG_STR_WILD, 50)
-      call BuildUpgr(Min(((TownCountDone(DRYAD)/2)-2),1), UPG_ABOLISH, 50)
+
+      call BuildUpgr(Min((TownCountDone(DRYAD)/2),1), UPG_ABOLISH, 50)
       call BuildUpgr(Min((TownCountDone(DRUID_CLAW)/2),2), UPG_DRUID_CLAW, 70)
       call BuildUpgr(Min((TownCountDone(DRUID_CLAW)/4),1), UPG_MARK_CLAW, 40)
       call BuildUpgr(Min((TownCountDone(MOUNTAIN_GIANT)/2),1), UPG_HARD_SKIN, 50)
       call BuildUpgr(Min((TownCountDone(MOUNTAIN_GIANT)/2),1), UPG_RESIST_SKIN, 50)
-      
       call BuildUpgr(1, UPG_CHIM_ACID, 40)
 
 
@@ -2426,10 +2435,9 @@ elseif tier == 2 then
       call BuildUnit(1, TREE_ETERNITY, 80)
       call BuildUnit(1, hero[1], 80)
       call BuildUnit(1, hero[2], 60)
-      call BuildUpgr(2, UPG_HIDES, 30)
+
       call BuildUpgr(Min((TownCountDone(DRUID_CLAW)/2),1), UPG_DRUID_CLAW, 70)
-      call BuildUpgr(Min((((TownCountDone(DRYAD)*2) + TownCountDone(DRUID_CLAW) + TownCountDone(MOUNTAIN_GIANT))/5),2), UPG_STR_WILD, 50)
-      call BuildUpgr(Min(((TownCountDone(DRYAD)/2)-2),1), UPG_ABOLISH, 50)
+      call BuildUpgr(Min((TownCountDone(DRYAD)/2),1), UPG_ABOLISH, 50)
 
 
 
@@ -2473,7 +2481,7 @@ elseif tier == 2 then
 
 else
 
-      call SetBuildReact(32, 6, ARCHER, 0, HUNTRESS, (enemy_normal + enemy_mediumarmor - (enemy_air * 2) - enemy_piercing - enemy_siege), 4, 25, 38)
+      call SetBuildReact(24, 6, ARCHER, 0, HUNTRESS, (enemy_normal + enemy_mediumarmor - (enemy_air * 2) - enemy_piercing - enemy_siege), 4, 25, 38)
       call BuildUnit(4, HUNTRESS, 52)
       call BuildUnit(1, TREE_AGES, 55)
       call BuildUnit(1, hero[1], 80)
@@ -2574,7 +2582,7 @@ if tier == 3 then
       call BuildUnit(1, hero[1], 90)
       call BuildUnit(1, hero[2], 60)
       call BuildUnit(1, hero[3], 40)
-      
+
       call BuildUpgr(1, UPG_CHIM_ACID, 70)
       call BuildUpgr(1, UPG_HARD_SKIN, 62)
       call BuildUpgr(1, UPG_RESIST_SKIN, 60)
@@ -2603,7 +2611,7 @@ elseif tier == 2 then
       call BuildUnit(1, TREE_ETERNITY, 50)
       call BuildUnit(1, hero[1], 80)
       call BuildUnit(1, hero[2], 60)
-      
+
       call BuildUpgr(1, UPG_BOLT, 70)
 
 
@@ -2627,12 +2635,12 @@ elseif tier == 2 then
 
 else
 
-      call BuildUnit(6, ARCHER, 42)
-      call BuildUnit(6, HUNTRESS, 30)
+      call BuildUnit(4, ARCHER, 42)
+      call BuildUnit(5, HUNTRESS, 30)
       call BuildUnit(8, BALLISTA, 20)
       call BuildUnit(1, TREE_AGES, 50)
       call BuildUnit(1, hero[1], 80)
-      call BuildUpgr(Min((TownCountDone(BALLISTA)/2),1), UPG_BOLT, 50)
+
 
 
 
