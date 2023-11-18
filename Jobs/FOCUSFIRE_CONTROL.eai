@@ -131,7 +131,7 @@ function FilterFocusFireGroupIfFacing takes group g, unit target returns nothing
 	local group ug = null
 	set ug = CopyGroup(g,ug)
 	loop
-		set u = FirstOfGroup(g)
+		set u = FirstOfGroup(ug)
 		exitwhen u == null
 		if IsUnitFacingUnit(u, target) then
 			call GroupRemoveUnit(focus_fire_group,u)
