@@ -148,7 +148,7 @@ function global_build_sequence takes nothing returns nothing
     call BuildUnit(1, VOODOO_LOUNGE, 45+30*(tier-1))
 
     // DYNAMIC and Global Mercenaries
-    if tier > 1 and GetGold() > 600 and GetWood() > 360 then
+    if GetGold() > 600 and GetWood() > 360 then
       call BuildUnit(1, ZEPPELIN, 50)
     endif
     call ResetDynamicSystem()
@@ -166,8 +166,7 @@ function global_build_sequence takes nothing returns nothing
       call AddUnitToAntimediumarmor(GRUNT,30)
       call AddUnitToAntiheavyarmor(GRUNT,29)
       call DynamicBuildUnit(40, 40)
-      call BuildUnit(1, merc_healer, 65)
-      call BuildUnit(1, merc_rush, 65)
+      call MercBuilder(merc_stopper,merc_healer)
     elseif tier == 2 then
       call AddUnitToAntiair(HEAD_HUNTER,1)
       call AddUnitToAntiair(BATRIDER,1)
@@ -199,8 +198,7 @@ function global_build_sequence takes nothing returns nothing
       call AddUnitToAntiheavyarmor(SPIRIT_WALKER,3)
       call AddUnitToAntiheavyarmor(WYVERN,5)
       call DynamicBuildUnit(64, 40)
-      call BuildUnit(1, dragons[3], 65)
-      call BuildUnit(1, merc_caster, 65)
+      call MercBuilder(merc_rush,merc_healer)
     else
       call AddUnitToAntiair(HEAD_HUNTER,1)
       call AddUnitToAntiair(BATRIDER,1)
@@ -231,8 +229,7 @@ function global_build_sequence takes nothing returns nothing
       call AddUnitToAntiheavyarmor(SPIRIT_WALKER,3)
       call AddUnitToAntiheavyarmor(WYVERN,5)
       call DynamicBuildUnit(100, 40)
-      call BuildUnit(1, dragons[3], 65)
-      call BuildUnit(1, merc_caster, 65)
+      call DragonAndMercBuilder()
     endif
 
     // Global upgrades
