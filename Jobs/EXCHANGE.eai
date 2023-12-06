@@ -24,8 +24,10 @@ function DistributeGold takes integer value returns nothing
   local integer i = 0
   loop
     exitwhen i >= force_number
-    call IncreasePlayerGold(own_force[i], p_amount)
-    set amount = amount - p_amount
+    if GetPlayerSlotState(own_force[i]) == PLAYER_SLOT_STATE_PLAYING then
+      call IncreasePlayerGold(own_force[i], p_amount)
+      set amount = amount - p_amount
+    endif
     set i = i + 1
   endloop
   call IncreasePlayerGold(ai_player,amount)
@@ -37,8 +39,10 @@ function DistributeWood takes integer value returns nothing
   local integer i = 0
   loop
     exitwhen i >= force_number
-    call IncreasePlayerWood(own_force[i], p_amount)
-    set amount = amount - p_amount
+    if GetPlayerSlotState(own_force[i]) == PLAYER_SLOT_STATE_PLAYING then
+      call IncreasePlayerWood(own_force[i], p_amount)
+      set amount = amount - p_amount
+    endif
     set i = i + 1
   endloop
   call IncreasePlayerWood(ai_player,amount)
@@ -64,8 +68,6 @@ endfunction
 function ExchangeJob takes nothing returns nothing
   call DisplayToAllJobDebug("EXCHANGE JOB Start")
   call ExchangeOnce()
-  if not pathing_done then
-    call TQAddJob(30 * sleep_multiplier, EXCHANGE, 0)
-  endif
+  call TQAddJob(30 * sleep_multiplier, EXCHANGE, 0)
 endfunction
 #ENDIF
