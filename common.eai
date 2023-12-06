@@ -9041,13 +9041,13 @@ endfunction
 //============================================================================
 function remove_hero takes integer h returns nothing
   local integer i = h
+  set hero_number = hero_number - 1
   loop
     exitwhen i >= hero_number
     set hero_rp[i] = hero_rp[i + 1]
     set all_heroes[i] = all_heroes[i + 1]
     set i = i + 1
   endloop
-  set hero_number = hero_number - 1
 endfunction
 
 //============================================================================
