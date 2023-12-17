@@ -117,6 +117,7 @@ function SaveUnit takes unit u , integer id, boolean itemsave returns nothing
   endif
   if GetUnitAbilityLevel(u, 'AOwk') > 0 or GetUnitAbilityLevel(u, 'ANwk') > 0 then
     if not IsUnitInvisible(u, Player(PLAYERAGGRESSIVE)) then
+      call RemoveGuardPosition(u)
       call IssueImmediateOrder(u, "windwalk")
     endif
   elseif u != deny_unit and itemsave and ItemSaveUnit(u) then

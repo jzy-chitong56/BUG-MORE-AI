@@ -26,15 +26,18 @@ endfunction
 
 function CheckSellZiggurat takes unit u returns nothing
   local group g = CreateGroup()
+  local unit tempu = FirstOfGroup(g)
   call GroupEnumUnitsInRange(g, GetUnitX(u), GetUnitY(u), race_ziggurat_keep_distance, null)
   set g = SelectByPlayer(g, ai_player, true)
   set g = SelectUnittype(g, UNIT_TYPE_STRUCTURE, true)
-  call GroupRemoveUnit(g, FirstOfGroup(g))
+  call GroupRemoveUnit(g, tempu)
   if FirstOfGroup(g) == null then
     call Unsummon(u)
   endif
+  call GroupAddUnit(g, tempu)
   call DestroyGroup(g)
   set g = null
+  set tempu = null
 endfunction
 
 function SellZigguratJob takes nothing returns nothing

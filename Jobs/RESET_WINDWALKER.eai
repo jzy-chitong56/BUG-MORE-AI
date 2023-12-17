@@ -1,8 +1,8 @@
 #IFDEF GLOBAL
 #ELSE
 function ResetWindWalkerGuardPosition takes unit u returns nothing
-  call DisplayToAllJobDebug("RESET_GUARD_POSITION JOB START")
-  	if not IsStandardUnit(u) then
+	call DisplayToAllJobDebug("RESET_GUARD_POSITION JOB START")
+	if not IsStandardUnit(u) then
 		call GroupRemoveUnit(windwalk_group, u)
 		return
 	endif

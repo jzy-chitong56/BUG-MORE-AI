@@ -272,7 +272,7 @@ function ArmyTrackJob takes nothing returns nothing
   if mode == 2 then
     call UpdateTownThreat()
   endif
-  if (mode == 3) then
+  if mode == 3 then
     set mode = 0
     call TQAddJob(14 + 1 * sleep_multiplier, TOWN_TRACK, 0)
   endif
