@@ -99,9 +99,8 @@ function BuyItemJob takes integer id returns nothing
       set shop_buy_time_small = -1
       return
     endif
-    call GroupAddUnit(unit_buying_item, shop_sent)
   endif
-
+  call GroupAddUnit(unit_buying_item, shop_sent)
   //call CreateDebugTag("In BUT ITEM JOB, 10, shop_sent, 3.00, 1.50)
 
   // Town threatened so dont get item
