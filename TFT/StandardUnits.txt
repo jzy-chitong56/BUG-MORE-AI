@@ -1,4 +1,4 @@
-Name in AI	4-letter-code	race	type	buy type	built in/by, needed1	needed2	needed3	add for counting 1	add for counting 2	attack group	available time	restock time	gold_price (items only)	wood_price (items only)	bonus hero strength	air strength	casters strength	towers strength	piercing strength	normal strength	siege strength	magic strength	unarmored strength	lightarmor strength	mediumarmor strength	heavyarmor strength
+Name in AI	4-letter-code	race	type	buy type	built in/by, needed1	needed2	needed3	add for counting 1	add for counting 2	attack group	available time (in seconds)	restock time (in seconds)	gold_price (items only)	wood_price (items only)	bonus hero strength	air strength	casters strength	towers strength	piercing strength	normal strength	siege strength	magic strength	unarmored strength	lightarmor strength	mediumarmor strength	heavyarmor strength
 ARCHMAGE	Hamg	HUMAN	hero	HERO	HUMAN_ALTAR	KEEP	CASTLE	0	0	false	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0
 PALADIN	Hpal	HUMAN	hero	HERO	HUMAN_ALTAR	KEEP	CASTLE	0	0	false	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0
 MTN_KING	Hmkg	HUMAN	hero	HERO	HUMAN_ALTAR	KEEP	CASTLE	0	0	false	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0
