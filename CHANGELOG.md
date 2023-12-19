@@ -7,8 +7,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ## [2.6.2-cn] - 2023-4-24
 ### core
-- 3.2.2 master 96800f0 , include all job code
-   - Note: 2.6.2cn include 2.6.1cn and 3.1.1cn
+- 3.3.1 master , include all job code
+   - Note: 2.6.2cn include 2.6.1cn and 3.3.1cn
 - Note:The installer of the old version of AMAI seems to have failed to work properly. Do not use the old installer
 
 ### Added
@@ -84,6 +84,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - Add new attack mode , on maps with more than 10 players , or big map , or small map and human player only 2 or 1 , AI will first attack human players hall , to avoid china call 【内卷】 , like AI internal conflict , no attack human player
 - Add CheckCreepsByRadius search creep too far ，Test findings , if creep and mine distance exceeds expansion_radius ，all race will build EXPANSION , some map like (4)Avalanche_LV , the creep and gold distance > 650 , neutral build check too
 - Add Ally Shopping , when BuyItem() return false , if item is HealingItem and buy_type is RACIAL_ITEM and AI have 1000 gold , then will go Random Ally's Random Shop Shopping
+- Buy item can check repeat , if can not repeat , will change buy unit
 - New job Item Expansion
    - Now can configuration Item Expansion , like ORC can buy TINY_GREAT_HALL
    - This is not proactive expansion , but rather passive(no call ChooseExpansion())
