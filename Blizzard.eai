@@ -247,84 +247,80 @@ endfunction
 function ColorText takes player CPlayer returns string
   //Required Variables
   local playercolor PColor = GetPlayerColor(CPlayer)  //Gets the Player's color
-    
+
   //Finds the Nicer Text Version of the Player's Color
-  if (PColor == PLAYER_COLOR_RED) then
+  if PColor == PLAYER_COLOR_RED then
     set PColor = null
     return "Red"
-  elseif (PColor == PLAYER_COLOR_BLUE) then
+  elseif PColor == PLAYER_COLOR_BLUE then
     set PColor = null
     return "Blue"
-  elseif (PColor == PLAYER_COLOR_CYAN) then
+  elseif PColor == PLAYER_COLOR_CYAN then
     set PColor = null
     return "Cyan"
-  elseif (PColor == PLAYER_COLOR_PURPLE) then
+  elseif PColor == PLAYER_COLOR_PURPLE then
     set PColor = null
     return "Purple"
-  elseif (PColor == PLAYER_COLOR_YELLOW) then
+  elseif PColor == PLAYER_COLOR_YELLOW then
     set PColor = null
     return "Yellow"
-  elseif (PColor == PLAYER_COLOR_ORANGE) then
+  elseif PColor == PLAYER_COLOR_ORANGE then
     set PColor = null
     return "Orange"
-  elseif (PColor == PLAYER_COLOR_GREEN) then
+  elseif PColor == PLAYER_COLOR_GREEN then
     set PColor = null
     return "Green"
-  elseif (PColor == PLAYER_COLOR_PINK) then
+  elseif PColor == PLAYER_COLOR_PINK then
     set PColor = null
     return "Pink"
-  elseif (PColor == PLAYER_COLOR_LIGHT_GRAY) then
+  elseif PColor == PLAYER_COLOR_LIGHT_GRAY then
     set PColor = null
     return "Light Gray"
-  elseif (PColor == PLAYER_COLOR_LIGHT_BLUE) then
+  elseif PColor == PLAYER_COLOR_LIGHT_BLUE then
     set PColor = null
     return "Light Blue"
-  elseif (PColor == PLAYER_COLOR_AQUA) then
+  elseif PColor == PLAYER_COLOR_AQUA then
     set PColor = null
     return "Aqua"
-  elseif (PColor == PLAYER_COLOR_BROWN) then
+  elseif PColor == PLAYER_COLOR_BROWN then
     set PColor = null
     return "Brown"
-  else
-    if playermax != 12 then
-      if (PColor == PLAYER_COLOR_MAROONX) then
-        set PColor = null
-        return "Maroon"
-      elseif (PColor == PLAYER_COLOR_NAVYX) then
-        set PColor = null
-        return "Navy"
-      elseif (PColor == PLAYER_COLOR_TURQUOISEX) then
-        set PColor = null
-        return "Turquoise"
-      elseif (PColor == PLAYER_COLOR_VIOLETX) then
-        set PColor = null
-        return "Violet"
-      elseif (PColor == PLAYER_COLOR_WHEATX) then
-        set PColor = null
-        return "Wheat"
-      elseif (PColor == PLAYER_COLOR_PEACHX) then
-        set PColor = null
-        return "Peach"
-      elseif (PColor == PLAYER_COLOR_MINTX) then
-        set PColor = null
-        return "Mint"
-      elseif (PColor == PLAYER_COLOR_LAVENDERX) then
-        set PColor = null
-        return "Lavender"
-      elseif (PColor == PLAYER_COLOR_COALX) then
-        set PColor = null
-        return "Coal"
-      elseif (PColor == PLAYER_COLOR_SNOWX) then
-        set PColor = null
-        return "Snow"
-      elseif (PColor == PLAYER_COLOR_EMERALDX) then
-        set PColor = null
-        return "Emerald"
-      elseif (PColor == PLAYER_COLOR_PEANUTX) then
-        set PColor = null
-        return "Peanut"
-      endif
-     endif
+  elseif PColor == PLAYER_COLOR_MAROONX then
+    set PColor = null
+    return "Maroon"
+  elseif PColor == PLAYER_COLOR_NAVYX then
+    set PColor = null
+    return "Navy"
+  elseif PColor == PLAYER_COLOR_TURQUOISEX then
+    set PColor = null
+    return "Turquoise"
+  elseif PColor == PLAYER_COLOR_VIOLETX then
+    set PColor = null
+    return "Violet"
+  elseif PColor == PLAYER_COLOR_WHEATX then
+    set PColor = null
+    return "Wheat"
+  elseif PColor == PLAYER_COLOR_PEACHX then
+    set PColor = null
+    return "Peach"
+  elseif PColor == PLAYER_COLOR_MINTX then
+    set PColor = null
+    return "Mint"
+  elseif PColor == PLAYER_COLOR_LAVENDERX then
+    set PColor = null
+    return "Lavender"
+  elseif PColor == PLAYER_COLOR_COALX then
+    set PColor = null
+    return "Coal"
+  elseif PColor == PLAYER_COLOR_SNOWX then
+    set PColor = null
+    return "Snow"
+  elseif PColor == PLAYER_COLOR_EMERALDX then
+    set PColor = null
+    return "Emerald"
+  elseif PColor == PLAYER_COLOR_PEANUTX then
+    set PColor = null
+    return "Peanut"
   endif
   //Returns text version
   set PColor = null
@@ -337,61 +333,56 @@ endfunction
 function ColorPlayer takes string CompC returns playercolor
 
   //Finds player color of the text color
-  if (CompC == "Red") then
+  if CompC == "Red" then
     return PLAYER_COLOR_RED
-  elseif (CompC == "Blue") then
+  elseif CompC == "Blue" then
     return PLAYER_COLOR_BLUE
-  elseif (CompC == "Cyan") then
+  elseif CompC == "Cyan" then
     return PLAYER_COLOR_CYAN
-  elseif (CompC == "Purple") then
+  elseif CompC == "Purple" then
     return PLAYER_COLOR_PURPLE
-  elseif (CompC == "Yellow") then
+  elseif CompC == "Yellow" then
     return PLAYER_COLOR_YELLOW
-  elseif (CompC == "Orange") then
+  elseif CompC == "Orange" then
     return PLAYER_COLOR_ORANGE
-  elseif (CompC == "Green") then
+  elseif CompC == "Green" then
     return PLAYER_COLOR_GREEN
-  elseif (CompC == "Pink") then
+  elseif CompC == "Pink" then
     return PLAYER_COLOR_PINK
-  elseif (CompC == "Light Gray") then
+  elseif CompC == "Light Gray" then
     return PLAYER_COLOR_LIGHT_GRAY
-  elseif (CompC == "Light Blue") then
+  elseif CompC == "Light Blue" then
     return PLAYER_COLOR_LIGHT_BLUE
-  elseif (CompC == "Aqua") then
+  elseif CompC == "Aqua" then
     return PLAYER_COLOR_AQUA
-  elseif (CompC == "Brown") then
+  elseif CompC == "Brown" then
     return PLAYER_COLOR_BROWN
-  else
-    if playermax != 12 then
-      if (CompC == "MAROON") then
-        return PLAYER_COLOR_MAROONX
-      elseif (CompC == "Navy") then
-        return PLAYER_COLOR_NAVYX
-      elseif (CompC == "Turquoise") then
-        return PLAYER_COLOR_TURQUOISEX
-      elseif (CompC == "Violet") then
-        return PLAYER_COLOR_VIOLETX
-      elseif (CompC == "Wheat") then
-        return PLAYER_COLOR_WHEATX
-      elseif (CompC == "Peach") then
-        return PLAYER_COLOR_PEACHX
-      elseif (CompC == "Mint") then
-        return PLAYER_COLOR_MINTX
-      elseif (CompC == "Lavender") then
-        return PLAYER_COLOR_LAVENDERX
-      elseif (CompC == "Coal") then
-        return PLAYER_COLOR_COALX
-      elseif (CompC == "Snow") then
-        return PLAYER_COLOR_SNOWX
-      elseif (CompC == "Emerald") then
-        return PLAYER_COLOR_EMERALDX
-      elseif (CompC == "Peanut") then
-        return PLAYER_COLOR_PEANUTX
-      endif
-    endif
-    return null
+  elseif CompC == "MAROON" then
+    return PLAYER_COLOR_MAROONX
+  elseif CompC == "Navy" then
+    return PLAYER_COLOR_NAVYX
+  elseif CompC == "Turquoise" then
+    return PLAYER_COLOR_TURQUOISEX
+  elseif CompC == "Violet" then
+    return PLAYER_COLOR_VIOLETX
+  elseif CompC == "Wheat" then
+    return PLAYER_COLOR_WHEATX
+  elseif CompC == "Peach" then
+    return PLAYER_COLOR_PEACHX
+  elseif CompC == "Mint" then
+    return PLAYER_COLOR_MINTX
+  elseif CompC == "Lavender" then
+    return PLAYER_COLOR_LAVENDERX
+  elseif CompC == "Coal" then
+    return PLAYER_COLOR_COALX
+  elseif CompC == "Snow" then
+    return PLAYER_COLOR_SNOWX
+  elseif CompC == "Emerald" then
+    return PLAYER_COLOR_EMERALDX
+  elseif CompC == "Peanut" then
+    return PLAYER_COLOR_PEANUTX
   endif
-
+  return null
 endfunction
 
 function cs2s takes string s, playercolor c returns string
@@ -417,36 +408,32 @@ function cs2s takes string s, playercolor c returns string
     return "|Cff7EBFF1"+s+"|r"
   elseif c == PLAYER_COLOR_AQUA then
     return "|Cff106247"+s+"|r"
-  else
-    if playermax != 12 then
-      if c == PLAYER_COLOR_MAROONX then
-        return "|Cff9C0000"+s+"|r"
-      elseif c == PLAYER_COLOR_NAVYX then
-        return "|Cff0000C3"+s+"|r"
-      elseif c == PLAYER_COLOR_TURQUOISEX then
-        return "|Cff00EBFF"+s+"|r"
-      elseif c == PLAYER_COLOR_VIOLETX then
-        return "|CffBD00FF"+s+"|r"
-      elseif c == PLAYER_COLOR_WHEATX then
-        return "|CffECCD87"+s+"|r"
-      elseif c == PLAYER_COLOR_PEACHX then
-        return "|CffF7A58B"+s+"|r"
-      elseif c == PLAYER_COLOR_MINTX then
-        return "|CffBFFF81"+s+"|r"
-      elseif c == PLAYER_COLOR_LAVENDERX then
-        return "|CffDBB9EB"+s+"|r"
-      elseif c == PLAYER_COLOR_COALX then
-        return "|Cff4F5055"+s+"|r"
-      elseif c == PLAYER_COLOR_SNOWX then
-        return "|CffECF0FF"+s+"|r"
-      elseif c == PLAYER_COLOR_EMERALDX then
-        return "|Cff00781E"+s+"|r"
-      elseif c == PLAYER_COLOR_PEANUTX then
-        return "|CffA57033"+s+"|r"
-      endif
-    endif
-    return "|Cff4F2B05"+s+"|r"  //Brown
+  elseif c == PLAYER_COLOR_MAROONX then
+    return "|Cff9C0000"+s+"|r"
+  elseif c == PLAYER_COLOR_NAVYX then
+    return "|Cff0000C3"+s+"|r"
+  elseif c == PLAYER_COLOR_TURQUOISEX then
+    return "|Cff00EBFF"+s+"|r"
+  elseif c == PLAYER_COLOR_VIOLETX then
+    return "|CffBD00FF"+s+"|r"
+  elseif c == PLAYER_COLOR_WHEATX then
+    return "|CffECCD87"+s+"|r"
+  elseif c == PLAYER_COLOR_PEACHX then
+    return "|CffF7A58B"+s+"|r"
+  elseif c == PLAYER_COLOR_MINTX then
+    return "|CffBFFF81"+s+"|r"
+  elseif c == PLAYER_COLOR_LAVENDERX then
+    return "|CffDBB9EB"+s+"|r"
+  elseif c == PLAYER_COLOR_COALX then
+    return "|Cff4F5055"+s+"|r"
+  elseif c == PLAYER_COLOR_SNOWX then
+    return "|CffECF0FF"+s+"|r"
+  elseif c == PLAYER_COLOR_EMERALDX then
+    return "|Cff00781E"+s+"|r"
+  elseif c == PLAYER_COLOR_PEANUTX then
+    return "|CffA57033"+s+"|r"
   endif
+  return "|Cff4F2B05"+s+"|r"  //Brown
 endfunction
 
 function c2s takes player p returns string

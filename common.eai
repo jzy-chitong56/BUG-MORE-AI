@@ -1185,82 +1185,54 @@ endfunction
 
 //============================================================================
 function c2s takes playercolor c returns string
-if c == PLAYER_COLOR_RED then
-    set c = null
+  if c == PLAYER_COLOR_RED then
     return "|CffFF0000"+ai_name+"|r: "
-elseif c == PLAYER_COLOR_BLUE then
-    set c = null
+  elseif c == PLAYER_COLOR_BLUE then
     return "|Cff0064FF"+ai_name+"|r: "
-elseif c == PLAYER_COLOR_CYAN then
-    set c = null
+  elseif c == PLAYER_COLOR_CYAN then
     return "|Cff1BE7BA"+ai_name+"|r: "
-elseif c == PLAYER_COLOR_PURPLE then
-    set c = null
+  elseif c == PLAYER_COLOR_PURPLE then
     return "|Cff550081"+ai_name+"|r: "
-elseif c == PLAYER_COLOR_YELLOW then
-  set c = null
+  elseif c == PLAYER_COLOR_YELLOW then
     return "|CffFFFC00"+ai_name+"|r: "
-elseif c == PLAYER_COLOR_ORANGE then
-    set c = null
+  elseif c == PLAYER_COLOR_ORANGE then
     return "|CffFF8A0D"+ai_name+"|r: "
-elseif c == PLAYER_COLOR_GREEN then
-    set c = null
+  elseif c == PLAYER_COLOR_GREEN then
     return "|Cff21BF00"+ai_name+"|r: "
-elseif c == PLAYER_COLOR_PINK then
-    set c = null
+  elseif c == PLAYER_COLOR_PINK then
     return "|CffE45CAF"+ai_name+"|r: "
-elseif c == PLAYER_COLOR_LIGHT_GRAY then
-    set c = null
+  elseif c == PLAYER_COLOR_LIGHT_GRAY then
     return "|Cff949696"+ai_name+"|r: "
-elseif c == PLAYER_COLOR_LIGHT_BLUE then
-    set c = null
+  elseif c == PLAYER_COLOR_LIGHT_BLUE then
     return "|Cff7EBFF1"+ai_name+"|r: "
-elseif c == PLAYER_COLOR_AQUA then
-    set c = null
+  elseif c == PLAYER_COLOR_AQUA then
     return "|Cff106247"+ai_name+"|r: "
-else
-    if PLAYERPASSIVE != 15 then
-      if c == PLAYER_COLOR_MAROONX then
-        set c = null
-        return "|Cff9C0000"+ai_name+"|r: "
-      elseif c == PLAYER_COLOR_NAVYX then
-        set c = null
-        return "|Cff0000C3"+ai_name+"|r: "
-      elseif c == PLAYER_COLOR_TURQUOISEX then
-        set c = null
-        return "|Cff00EBFF"+ai_name+"|r: "
-      elseif c == PLAYER_COLOR_VIOLETX then
-        set c = null
-        return "|Cffbd00ff"+ai_name+"|r: "
-      elseif c == PLAYER_COLOR_WHEATX then
-        set c = null
-        return "|CffECCD87"+ai_name+"|r: "
-      elseif c == PLAYER_COLOR_PEACHX then
-        set c = null
-        return "|CffF7A58B"+ai_name+"|r: "
-      elseif c == PLAYER_COLOR_MINTX then
-        set c = null
-        return "|CffBFFF81"+ai_name+"|r: "
-      elseif c == PLAYER_COLOR_LAVENDERX then
-        set c = null
-        return "|CffDBB9EB"+ai_name+"|r: "
-      elseif c == PLAYER_COLOR_COALX then
-        set c = null
-        return "|Cff4F5055"+ai_name+"|r: "
-      elseif c == PLAYER_COLOR_SNOWX then
-        set c = null
-        return "|CffECF0FF"+ai_name+"|r: "
-      elseif c == PLAYER_COLOR_EMERALDX then
-        set c = null
-        return "|Cff00781E"+ai_name+"|r: "
-      elseif c == PLAYER_COLOR_PEANUTX then
-        set c = null
-        return "|CffA57033"+ai_name+"|r: "
-      endif
-    endif
-    set c = null
-    return "|Cff4F2B05"+ai_name+"|r: "//Brown
-endif
+  elseif c == PLAYER_COLOR_MAROONX then
+    return "|Cff9C0000"+ai_name+"|r: "
+  elseif c == PLAYER_COLOR_NAVYX then
+    return "|Cff0000C3"+ai_name+"|r: "
+  elseif c == PLAYER_COLOR_TURQUOISEX then
+    return "|Cff00EBFF"+ai_name+"|r: "
+  elseif c == PLAYER_COLOR_VIOLETX then
+    return "|Cffbd00ff"+ai_name+"|r: "
+  elseif c == PLAYER_COLOR_WHEATX then
+    return "|CffECCD87"+ai_name+"|r: "
+  elseif c == PLAYER_COLOR_PEACHX then
+    return "|CffF7A58B"+ai_name+"|r: "
+  elseif c == PLAYER_COLOR_MINTX then
+    return "|CffBFFF81"+ai_name+"|r: "
+  elseif c == PLAYER_COLOR_LAVENDERX then
+    return "|CffDBB9EB"+ai_name+"|r: "
+  elseif c == PLAYER_COLOR_COALX then
+    return "|Cff4F5055"+ai_name+"|r: "
+  elseif c == PLAYER_COLOR_SNOWX then
+    return "|CffECF0FF"+ai_name+"|r: "
+  elseif c == PLAYER_COLOR_EMERALDX then
+    return "|Cff00781E"+ai_name+"|r: "
+  elseif c == PLAYER_COLOR_PEANUTX then
+    return "|CffA57033"+ai_name+"|r: "
+  endif
+  return "|Cff4F2B05"+ai_name+"|r: "//Brown
 endfunction
 
 //===========================================================================
@@ -1311,34 +1283,30 @@ function SetDebugTagColor takes texttag tt returns nothing
     call SetTextTagColor(tt, 19, 98, 71, AMAIPercentTo255(100-0))
   elseif c == PLAYER_COLOR_BROWN then
     call SetTextTagColor(tt, 79, 43, 5, AMAIPercentTo255(100-0))  //Brown
-  else
-    if PLAYERPASSIVE != 15 then
-      if c == PLAYER_COLOR_MAROONX then
-        call SetTextTagColor(tt, 156, 0, 0, AMAIPercentTo255(100-0))
-      elseif c == PLAYER_COLOR_NAVYX then
-        call SetTextTagColor(tt, 0, 0, 195, AMAIPercentTo255(100-0))
-      elseif c == PLAYER_COLOR_TURQUOISEX then
-        call SetTextTagColor(tt, 0, 235, 255, AMAIPercentTo255(100-0))
-      elseif c == PLAYER_COLOR_VIOLETX then
-        call SetTextTagColor(tt, 189, 0, 255, AMAIPercentTo255(100-0))
-      elseif c == PLAYER_COLOR_WHEATX then
-        call SetTextTagColor(tt, 236, 205, 135, AMAIPercentTo255(100-0))
-      elseif c == PLAYER_COLOR_PEACHX then
-        call SetTextTagColor(tt, 247, 165, 139, AMAIPercentTo255(100-0))
-      elseif c == PLAYER_COLOR_MINTX then
-        call SetTextTagColor(tt, 191, 255, 129, AMAIPercentTo255(100-0))
-      elseif c == PLAYER_COLOR_LAVENDERX then
-        call SetTextTagColor(tt, 219, 185, 235, AMAIPercentTo255(100-0))
-      elseif c == PLAYER_COLOR_COALX then
-        call SetTextTagColor(tt, 79, 80, 85, AMAIPercentTo255(100-0))
-      elseif c == PLAYER_COLOR_SNOWX then
-        call SetTextTagColor(tt, 236, 240, 255, AMAIPercentTo255(100-0))
-      elseif c == PLAYER_COLOR_EMERALDX then
-        call SetTextTagColor(tt, 0, 120, 30, AMAIPercentTo255(100-0))
-      elseif c == PLAYER_COLOR_PEANUTX then
-        call SetTextTagColor(tt, 165, 112, 51, AMAIPercentTo255(100-0))
-      endif
-    endif
+  elseif c == PLAYER_COLOR_MAROONX then
+    call SetTextTagColor(tt, 156, 0, 0, AMAIPercentTo255(100-0))
+  elseif c == PLAYER_COLOR_NAVYX then
+    call SetTextTagColor(tt, 0, 0, 195, AMAIPercentTo255(100-0))
+  elseif c == PLAYER_COLOR_TURQUOISEX then
+    call SetTextTagColor(tt, 0, 235, 255, AMAIPercentTo255(100-0))
+  elseif c == PLAYER_COLOR_VIOLETX then
+    call SetTextTagColor(tt, 189, 0, 255, AMAIPercentTo255(100-0))
+  elseif c == PLAYER_COLOR_WHEATX then
+    call SetTextTagColor(tt, 236, 205, 135, AMAIPercentTo255(100-0))
+  elseif c == PLAYER_COLOR_PEACHX then
+    call SetTextTagColor(tt, 247, 165, 139, AMAIPercentTo255(100-0))
+  elseif c == PLAYER_COLOR_MINTX then
+    call SetTextTagColor(tt, 191, 255, 129, AMAIPercentTo255(100-0))
+  elseif c == PLAYER_COLOR_LAVENDERX then
+    call SetTextTagColor(tt, 219, 185, 235, AMAIPercentTo255(100-0))
+  elseif c == PLAYER_COLOR_COALX then
+    call SetTextTagColor(tt, 79, 80, 85, AMAIPercentTo255(100-0))
+  elseif c == PLAYER_COLOR_SNOWX then
+    call SetTextTagColor(tt, 236, 240, 255, AMAIPercentTo255(100-0))
+  elseif c == PLAYER_COLOR_EMERALDX then
+    call SetTextTagColor(tt, 0, 120, 30, AMAIPercentTo255(100-0))
+  elseif c == PLAYER_COLOR_PEANUTX then
+    call SetTextTagColor(tt, 165, 112, 51, AMAIPercentTo255(100-0))
   endif
   set c = null
 endfunction
@@ -6168,7 +6136,7 @@ function CheckExpansionTaken takes unit expa returns boolean
       set u = FirstOfGroup(g)
       exitwhen u == null
       set p = GetOwningPlayer(u)
-      if p != Player(PLAYERPASSIVE) and IsUnitType(u, UNIT_TYPE_STRUCTURE) and GetUnitState(u, UNIT_STATE_LIFE) > 0 then
+      if p != Player(PLAYERPASSIVE) and GetUnitState(u, UNIT_STATE_LIFE) > 0 then
         if GetUnitTypeId(u) == old_id[racial_expansion] or IsUnitGoldMine(u) or IsUnitType(u,UNIT_TYPE_TOWNHALL) then
           call DestroyGroup(g)
           set g = null
@@ -6178,7 +6146,7 @@ function CheckExpansionTaken takes unit expa returns boolean
             //call GroupRemoveUnit(far_expansion, expa)
           // endif
           return true
-        elseif p != ai_player and p != Player(PLAYERAGGRESSIVE) then  // Creeps dosn't mean expansion is taken
+        elseif p != ai_player and p != Player(PLAYERAGGRESSIVE) and IsUnitType(u, UNIT_TYPE_STRUCTURE) then  // Creeps dosn't mean expansion is taken
           call DestroyGroup(g)
           set g = null
           set u = null
@@ -6236,7 +6204,7 @@ function AddExpansion takes unit u, real d returns nothing
   set expansion_dist[expansion_list_length] = d
   set expansion_creeps[expansion_list_length] = GetExpFoeGroup(expansion_creeps[expansion_list_length],u)  // group of the the creeps that guard this mine
   if first_expansion_chosen == false then
-    set first_expansion_chosen = FirstOfGroup(gexpansion_creeps[expansion_list_length]) == null or CheckExpansionTaken(u) == false
+    set first_expansion_chosen = FirstOfGroup(expansion_creeps[expansion_list_length]) == null or CheckExpansionTaken(u) == false
   endif
   if expansion_dist[expansion_list_length] > 6000/512 then
     call GroupAddUnit(far_expansion, expansion_list[expansion_list_length])
