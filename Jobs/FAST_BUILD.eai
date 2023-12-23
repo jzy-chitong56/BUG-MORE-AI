@@ -78,7 +78,6 @@ function FastBuildBuilding takes nothing returns nothing
   call Trace("Fast Build Town Hall")
   set town_hall_built = true
   call RemoveLocation(unitloc)
-  call DestroyGroup(g)
   set unitloc = null
   set g = null
   set u = null
