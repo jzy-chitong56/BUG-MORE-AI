@@ -208,7 +208,7 @@ function RetreatControlJob takes nothing returns nothing
     //if town_threatened and town_threat[most_threatened_town] >= teleport_high_threat then
 
     // else
-//    	call Trace("REATREAT_CONTROL: Stay")
+    //    	call Trace("REATREAT_CONTROL: Stay")
     call SetGroupsFlee(false)
     set isfleeing = false
     return  // end job
