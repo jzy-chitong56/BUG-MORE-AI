@@ -7791,7 +7791,7 @@ function PathingThread takes nothing returns nothing
       call UpdateStrengthJob()
     endif
     if ModuloInteger(t, 30*w) == 0 then
-      if active_expansion and GetPlayerUnitTypeCount(Player(PLAYER_NEUTRAL_PASSIVE),'ngol') < (c_enemy_total + c_ally_total + 1) * 2 then
+      if active_expansion and GetPlayerUnitTypeCount(Player(PLAYERPASSIVE),'ngol') < (c_enemy_total + c_ally_total + 1) * 2 then
         set active_expansion = false
       endif
       set i = 0
