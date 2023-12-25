@@ -57,6 +57,7 @@ globals
 
     boolean play24 = false
     boolean skillfix = false
+    boolean AatpAbility = false
     integer PLAYERPASSIVE = 15
     integer PLAYERAGGRESSIVE = 12
 
@@ -8437,27 +8438,31 @@ endfunction
 
 //===========================================================================
 function GetPatchVersion takes nothing returns nothing
-  if (JASS_MAX_ARRAY_SIZE > 8192) then  //1.29 ~ 1.32 or higher
+  local unit u = CreateUnit(Player(PLAYERPASSIVE), 'ugar', 0, 0, 270.0)
+  set AatpAbility = GetUnitAbilityLevel(u, 'Aatp') > 0  // prevent old war3 or ROC
+  call RemoveUnit(u)
+  set u = null
+  if (JASS_MAX_ARRAY_SIZE > 8192) then  //1.29 or higher
     set skillfix = true
   endif
 
   if GetPlayerController(Player(12)) != MAP_CONTROL_CREEP then  // old ver WE make map , the Player(12) is MAP_CONTROL_CREEP , Even running in higher war3
     call Trace("Map max player is 24")
-    set play24 = true
-    set PLAYERPASSIVE = 27
-    set PLAYERAGGRESSIVE = 24
-    set PLAYER_COLOR_MAROONX             = ConvertPlayerColor(12)
-    set PLAYER_COLOR_NAVYX               = ConvertPlayerColor(13)
-    set PLAYER_COLOR_TURQUOISEX          = ConvertPlayerColor(14)
-    set PLAYER_COLOR_VIOLETX             = ConvertPlayerColor(15)
-    set PLAYER_COLOR_WHEATX              = ConvertPlayerColor(16)
-    set PLAYER_COLOR_PEACHX              = ConvertPlayerColor(17)
-    set PLAYER_COLOR_MINTX               = ConvertPlayerColor(18)
-    set PLAYER_COLOR_LAVENDERX           = ConvertPlayerColor(19)
-    set PLAYER_COLOR_COALX               = ConvertPlayerColor(20)
-    set PLAYER_COLOR_SNOWX               = ConvertPlayerColor(21)
-    set PLAYER_COLOR_EMERALDX            = ConvertPlayerColor(22)
-    set PLAYER_COLOR_PEANUTX             = ConvertPlayerColor(23)
+    set play24                   = true
+    set PLAYERPASSIVE            = 27
+    set PLAYERAGGRESSIVE         = 24
+    set PLAYER_COLOR_MAROONX     = ConvertPlayerColor(12)
+    set PLAYER_COLOR_NAVYX       = ConvertPlayerColor(13)
+    set PLAYER_COLOR_TURQUOISEX  = ConvertPlayerColor(14)
+    set PLAYER_COLOR_VIOLETX     = ConvertPlayerColor(15)
+    set PLAYER_COLOR_WHEATX      = ConvertPlayerColor(16)
+    set PLAYER_COLOR_PEACHX      = ConvertPlayerColor(17)
+    set PLAYER_COLOR_MINTX       = ConvertPlayerColor(18)
+    set PLAYER_COLOR_LAVENDERX   = ConvertPlayerColor(19)
+    set PLAYER_COLOR_COALX       = ConvertPlayerColor(20)
+    set PLAYER_COLOR_SNOWX       = ConvertPlayerColor(21)
+    set PLAYER_COLOR_EMERALDX    = ConvertPlayerColor(22)
+    set PLAYER_COLOR_PEANUTX     = ConvertPlayerColor(23)
   endif
 endfunction
 
@@ -9787,10 +9792,8 @@ function ExecuteAirDistribute takes group g, boolean anti returns nothing
   local integer c = 0  // Allow random retention strength and accelerate cycle
   local integer id = 0
   local integer order = 852155
-  local unit u = CreateUnit(Player(PLAYERPASSIVE), 'ugar', 0, 0, 270.0)
-  local boolean abi = GetUnitAbilityLevel(u, 'Aatp') > 0  // check Ability Level prevent war3 is old ver or map is ROC
+  local unit u = null
   call Trace("Strength Dynamic Distribute - Air")
-  call RemoveUnit(u)
   if anti == false then
     set order = 852156
   endif
@@ -9801,7 +9804,7 @@ function ExecuteAirDistribute takes group g, boolean anti returns nothing
     if (id == 'edot' or id == 'edtm') and IsStandardUnit(u) then
       call IssueImmediateOrderById( u, order)
       set c = c + 1
-    elseif id == 'ugar' and abi and (GetUnitAbilityLevel(u, 'Batp') == 0) == anti and IsStandardUnit(u) then
+    elseif id == 'ugar' and AatpAbility and (GetUnitAbilityLevel(u, 'Batp') == 0) == anti and IsStandardUnit(u) then
       call IssueImmediateOrderById( u, 852677)
       set c = c + 1
     endif
