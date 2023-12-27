@@ -1183,6 +1183,90 @@ function InitAMAIGameCache takes nothing returns nothing
   //set chat_vars_map = InitHashtable()
 endfunction
 
+//===========================================================================
+// (AMAI)  ColorText (Converts the player color to a text version)
+//===========================================================================
+function ColorText takes player CPlayer returns string
+  //Required Variables
+  local playercolor PColor = GetPlayerColor(CPlayer)  //Gets the Player's color
+  //Finds the Nicer Text Version of the Player's Color
+  if PColor == PLAYER_COLOR_RED then
+    set PColor = null
+    return "Red"
+  elseif PColor == PLAYER_COLOR_BLUE then
+    set PColor = null
+    return "Blue"
+  elseif PColor == PLAYER_COLOR_CYAN then
+    set PColor = null
+    return "Cyan"
+  elseif PColor == PLAYER_COLOR_PURPLE then
+    set PColor = null
+    return "Purple"
+  elseif PColor == PLAYER_COLOR_YELLOW then
+    set PColor = null
+    return "Yellow"
+  elseif PColor == PLAYER_COLOR_ORANGE then
+    set PColor = null
+    return "Orange"
+  elseif PColor == PLAYER_COLOR_GREEN then
+    set PColor = null
+    return "Green"
+  elseif PColor == PLAYER_COLOR_PINK then
+    set PColor = null
+    return "Pink"
+  elseif PColor == PLAYER_COLOR_LIGHT_GRAY then
+    set PColor = null
+    return "Light Gray"
+  elseif PColor == PLAYER_COLOR_LIGHT_BLUE then
+    set PColor = null
+    return "Light Blue"
+  elseif PColor == PLAYER_COLOR_AQUA then
+    set PColor = null
+    return "Aqua"
+  elseif PColor == PLAYER_COLOR_BROWN then
+    set PColor = null
+    return "Brown"
+  elseif PColor == PLAYER_COLOR_MAROONX then
+    set PColor = null
+    return "Maroon"
+  elseif PColor == PLAYER_COLOR_NAVYX then
+    set PColor = null
+    return "Navy"
+  elseif PColor == PLAYER_COLOR_TURQUOISEX then
+    set PColor = null
+    return "Turquoise"
+  elseif PColor == PLAYER_COLOR_VIOLETX then
+    set PColor = null
+    return "Violet"
+  elseif PColor == PLAYER_COLOR_WHEATX then
+    set PColor = null
+    return "Wheat"
+  elseif PColor == PLAYER_COLOR_PEACHX then
+    set PColor = null
+    return "Peach"
+  elseif PColor == PLAYER_COLOR_MINTX then
+    set PColor = null
+    return "Mint"
+  elseif PColor == PLAYER_COLOR_LAVENDERX then
+    set PColor = null
+    return "Lavender"
+  elseif PColor == PLAYER_COLOR_COALX then
+    set PColor = null
+    return "Coal"
+  elseif PColor == PLAYER_COLOR_SNOWX then
+    set PColor = null
+    return "Snow"
+  elseif PColor == PLAYER_COLOR_EMERALDX then
+    set PColor = null
+    return "Emerald"
+  elseif PColor == PLAYER_COLOR_PEANUTX then
+    set PColor = null
+    return "Peanut"
+  endif
+  //Returns text version
+  set PColor = null
+  return ""
+endfunction
 
 //============================================================================
 function c2s takes playercolor c returns string
@@ -1282,8 +1366,6 @@ function SetDebugTagColor takes texttag tt returns nothing
     call SetTextTagColor(tt, 126, 191, 241, AMAIPercentTo255(100-0))
   elseif c == PLAYER_COLOR_AQUA then
     call SetTextTagColor(tt, 19, 98, 71, AMAIPercentTo255(100-0))
-  elseif c == PLAYER_COLOR_BROWN then
-    call SetTextTagColor(tt, 79, 43, 5, AMAIPercentTo255(100-0))  //Brown
   elseif c == PLAYER_COLOR_MAROONX then
     call SetTextTagColor(tt, 156, 0, 0, AMAIPercentTo255(100-0))
   elseif c == PLAYER_COLOR_NAVYX then
@@ -1308,6 +1390,8 @@ function SetDebugTagColor takes texttag tt returns nothing
     call SetTextTagColor(tt, 0, 120, 30, AMAIPercentTo255(100-0))
   elseif c == PLAYER_COLOR_PEANUTX then
     call SetTextTagColor(tt, 165, 112, 51, AMAIPercentTo255(100-0))
+  else // PLAYER_COLOR_BROWN
+    call SetTextTagColor(tt, 79, 43, 5, AMAIPercentTo255(100-0))
   endif
   set c = null
 endfunction
@@ -1349,90 +1433,6 @@ function CreateDebugTag takes string s, real fontsize, unit u, real lifespan, re
 	endif
 endfunction
 
-//===========================================================================
-// (AMAI)  ColorText (Converts the player color to a text version)
-//===========================================================================
-function ColorText takes player CPlayer returns string
-  //Required Variables
-  local playercolor PColor = GetPlayerColor(CPlayer)  //Gets the Player's color
-  //Finds the Nicer Text Version of the Player's Color
-  if PColor == PLAYER_COLOR_RED then
-    set PColor = null
-    return "Red"
-  elseif PColor == PLAYER_COLOR_BLUE then
-    set PColor = null
-    return "Blue"
-  elseif PColor == PLAYER_COLOR_CYAN then
-    set PColor = null
-    return "Cyan"
-  elseif PColor == PLAYER_COLOR_PURPLE then
-    set PColor = null
-    return "Purple"
-  elseif PColor == PLAYER_COLOR_YELLOW then
-    set PColor = null
-    return "Yellow"
-  elseif PColor == PLAYER_COLOR_ORANGE then
-    set PColor = null
-    return "Orange"
-  elseif PColor == PLAYER_COLOR_GREEN then
-    set PColor = null
-    return "Green"
-  elseif PColor == PLAYER_COLOR_PINK then
-    set PColor = null
-    return "Pink"
-  elseif PColor == PLAYER_COLOR_LIGHT_GRAY then
-    set PColor = null
-    return "Light Gray"
-  elseif PColor == PLAYER_COLOR_LIGHT_BLUE then
-    set PColor = null
-    return "Light Blue"
-  elseif PColor == PLAYER_COLOR_AQUA then
-    set PColor = null
-    return "Aqua"
-  elseif PColor == PLAYER_COLOR_BROWN then
-    set PColor = null
-    return "Brown"
-  elseif PColor == PLAYER_COLOR_MAROONX then
-    set PColor = null
-    return "Maroon"
-  elseif PColor == PLAYER_COLOR_NAVYX then
-    set PColor = null
-    return "Navy"
-  elseif PColor == PLAYER_COLOR_TURQUOISEX then
-    set PColor = null
-    return "Turquoise"
-  elseif PColor == PLAYER_COLOR_VIOLETX then
-    set PColor = null
-    return "Violet"
-  elseif PColor == PLAYER_COLOR_WHEATX then
-    set PColor = null
-    return "Wheat"
-  elseif PColor == PLAYER_COLOR_PEACHX then
-    set PColor = null
-    return "Peach"
-  elseif PColor == PLAYER_COLOR_MINTX then
-    set PColor = null
-    return "Mint"
-  elseif PColor == PLAYER_COLOR_LAVENDERX then
-    set PColor = null
-    return "Lavender"
-  elseif PColor == PLAYER_COLOR_COALX then
-    set PColor = null
-    return "Coal"
-  elseif PColor == PLAYER_COLOR_SNOWX then
-    set PColor = null
-    return "Snow"
-  elseif PColor == PLAYER_COLOR_EMERALDX then
-    set PColor = null
-    return "Emerald"
-  elseif PColor == PLAYER_COLOR_PEANUTX then
-    set PColor = null
-    return "Peanut"
-  endif
-  //Returns text version
-  set PColor = null
-  return ""
-endfunction
 
 //============================================================================
 // (AMAI)	Int2Str
@@ -1761,7 +1761,7 @@ function UpdateDebugPlayer takes nothing returns nothing
 			set debug_player = debug_player + 1
 		endif
 		if debug_player > PLAYERAGGRESSIVE then
-			set debug_player = PLAYERAGGRESSIVE // Do not go above PLAYERAGGRESSIVE
+			set debug_player = PLAYERAGGRESSIVE // Do not go above 24
 		endif
 endfunction
 
@@ -4138,17 +4138,17 @@ endfunction
 //==========================================================================
 function GroupRemoveGroupAM takes group sourcegroup, group removegroup returns nothing
   local unit u = null
-  local group ug = null
-  set ug = CopyGroup(sourcegroup,ug)
+  local group ug = sourcegroup
+  set sourcegroup = CreateGroup()
   loop
     set u = FirstOfGroup(ug)
-    exitwhen u == null or FirstOfGroup(removegroup) == null
+    exitwhen u == null
+    call GroupAddUnit(sourcegroup, u)
     call GroupRemoveUnit(removegroup,u)
     call GroupRemoveUnit(ug,u)
   endloop
   call DestroyGroup(ug)
   set ug = null
-  set u = null
 endfunction
 
 //==========================================================================
@@ -6013,28 +6013,26 @@ function BuildBRAtCreep takes nothing returns nothing
     set uc[i] = null
     set i = i + 1
   endloop
-  if s == ru or loc == null then  // fail , not found creep
+  if s >= ru then  // fail , not found creep
     return
   endif
   set loc = GetBuildLocationInDistanceFromLoc_d(old_id[racial_rushcreep], loc, 600, false)
-  if loc != null and DistanceBetweenPoints(loc, home_location) < distance then  //Prevent some islands/shallow water terrain from creating u on the other side of the map
-    if GetLocationEnemyStrength(GetLocationX(loc), GetLocationY(loc), 510, false) <= 0 then  //if have enemy , cannot build
-      set u = GetExpansionPeon2(u)
-      if u == null and own_town_mine[0] != null then
-        set g = CreateGroup()
-        call GroupEnumUnitsOfPlayer(g, ai_player, null)
-        set g = SelectUnittype(g, UNIT_TYPE_PEON, true)
-        set g = SelectByLoaded(g, true)
-        set u = FirstOfGroup(g)
-        call DestroyGroup(g)
-        set g = null
-        call IssueTargetOrder(own_town_mine[0], "unload", u)
-        call Sleep(0.01)
-      endif
-      call RemoveGuardPosition(u)  // no need reset guard , the tree can train
-      call IssuePointOrderByIdLoc(u, old_id[racial_rushcreep], loc)
-      set u = null
+  if loc != null and DistanceBetweenPoints(loc, home_location) < distance and GetLocationEnemyStrength(GetLocationX(loc), GetLocationY(loc), 510, false) <= 0 then  //Prevent some islands/shallow water terrain from creating u on the other side of the map or have enemy
+    set u = GetExpansionPeon2(u)
+    if (u == null or GetUnitCurrentOrder(u) != OrderId("harvest")) and own_town_mine[0] != null then
+      set g = CreateGroup()
+      call GroupEnumUnitsOfPlayer(g, ai_player, null)
+      set g = SelectUnittype(g, UNIT_TYPE_PEON, true)
+      set g = SelectByLoaded(g, true)
+      set u = FirstOfGroup(g)
+      call DestroyGroup(g)
+      set g = null
+      call IssueTargetOrder(own_town_mine[0], "unload", u)
+      call Sleep(0.01)
     endif
+    call RemoveGuardPosition(u)  // no need reset guard , the tree can train
+    call IssuePointOrderByIdLoc(u, old_id[racial_rushcreep], loc)
+    set u = null
   endif
   call RemoveLocation(loc)
   set loc = null
@@ -6106,9 +6104,10 @@ endfunction
 
 function IsUnitGoldMine takes unit u returns boolean
   local integer i = 0
+  local integer id = GetUnitTypeId(u)
   loop
     exitwhen i >= gold_mine_ids_size
-    if GetUnitTypeId(u) == gold_mines_ids[i] then
+    if id == gold_mines_ids[i] then
       return true
     endif
     set i = i + 1
@@ -6695,9 +6694,10 @@ endfunction
 //============================================================================
 function IsRacialHall takes unit u, integer min_tier returns boolean
   local integer i = Max(min_tier, 1)
+  local integer id = GetUnitTypeId(u)
   loop
     exitwhen i > tiernum
-    if GetUnitTypeId(u) == old_id[racial_hall[i]] then
+    if id == old_id[racial_hall[i]] then
       return true
     endif
     set i = i + 1
@@ -7487,9 +7487,6 @@ function CheckNeutral takes integer nn returns nothing
       set neutral_available[nn] = false
       return  // SUMMONED or water path
     endif
-    //call DisplayTextToPlayer(GetLocalPlayer(), 0, 0, "checkneutral")
-    //set nearest_neutral[nn] = GetNearestNeutral(nearest_neutral[nn],neutral_id[nn])
-    //call DisplayTextToPlayer(GetLocalPlayer(), 0, 0, "finished check")
     call DestroyGroup(neutral_guards[nn])
     set neutral_guards[nn] = GetCreepGuardGroup(neutral_guards[nn],nn)
     set neutral_guarded[nn] = GetNeutralGuard(nn)
@@ -7738,7 +7735,7 @@ function PathingThread takes nothing returns nothing
     if ModuloInteger(t, 6) == 0 then
       call ChatVarsJob()
     endif
-    if ModuloInteger(t, 10) == 0 then
+    if ModuloInteger(t, 12) == 0 then
       call RepairControlJob()
       if race_has_power_build then
         call FastBuild()
@@ -7761,7 +7758,7 @@ function PathingThread takes nothing returns nothing
     if ModuloInteger(t, 60) == 0 then
       call CleanupBlocksJob()
     endif
-    if ModuloInteger(t, 120) == 0 then
+    if ModuloInteger(t, 160) == 0 then
       call ItemRepeatCheck()
     endif
     if ModuloInteger(t, 5*w) == 0 then
@@ -8685,7 +8682,7 @@ function AMAI takes code heroes, code peons, code attacks returns nothing
       // Job Thread
     if job_running then  // now some jon running on path system when path done , this switch can unified control
       call StartThread(function TQLoop)
-          //call Trace("TQLoop")
+      //call Trace("TQLoop")
     endif
     call StartThread(peons)
     //call Trace("peons")
