@@ -37,12 +37,16 @@ function BuildMilitiaExpansion takes nothing returns boolean
 endfunction
 
 function MilitiaExpansionReset takes nothing returns nothing
+	if militia_builder != null then
+		call RecycleGuardPosition(militia_builder)
+	endif
 	set gold_buffer = 0
 	set wood_buffer = 0
 	set militia_time_out = 0
 	set militia_state = 0
 	set militia_expanding = false
 	set not_taken_expansion = null
+	set militia_builder = null
 endfunction
 
 function TryMilitiaExpansionFoot takes nothing returns nothing
@@ -154,10 +158,6 @@ local location l = null
 	elseif militia_state == 3 then
 		if militia_builder == null or GetUnitState(militia_builder, UNIT_STATE_LIFE) <= 0 or CheckExpansionTaken(current_expansion) or GetGold() < GetUnitGoldCost2(racial_expansion) or GetWood() < GetUnitWoodCost2(racial_expansion) then
 			call MilitiaExpansionReset()
-			if militia_builder != null then
-				call RecycleGuardPosition(militia_builder)
-				set militia_builder = null
-			endif
 			call Trace("Militia state 3 Ended , lost peon or expansion by other player take or no gold or no wood")
 		else
 			call RemoveGuardPosition(militia_builder)  // has to be here or peasant comes off construction
