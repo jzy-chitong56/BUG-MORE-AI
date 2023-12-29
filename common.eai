@@ -5832,7 +5832,7 @@ function GetLocationInDistanceFromLoc takes location loc, real dist, boolean inj
       call TQSleep(0.2)
     else
       call Sleep(0.2)
-    endif  
+    endif
   endloop
   call RemoveUnit(u)
   set u = null
@@ -10214,7 +10214,7 @@ function GetBuildLocation takes integer bloc returns location
   if front_loc[i] != null then
     return front_loc[i]
   endif
-  return front_loc[0]
+  return home_location
 endfunction
 
 //============================================================================
@@ -10875,15 +10875,15 @@ function BuyAllyShopItem takes integer qty, integer id returns boolean
     set g = null
     set u = null
   endif
-  if shop_unit == null then
-    return false
+  if shop_unit != null then
+    call Trace("Buying item form ally shop")
+    set shop_wanted = qty
+    set shop_distance_limit = raceshop_distance_limit
+    set shop_ordered = true
+    call TQAddJob(0, BUY_ITEM, id)
+    return true
   endif
-  call Trace("Buying item form ally shop")
-  set shop_wanted = qty
-  set shop_distance_limit = raceshop_distance_limit
-  set shop_ordered = true
-  call TQAddJob(0, BUY_ITEM, id)
-  return true
+  return false
 endfunction
 
 //============================================================================
