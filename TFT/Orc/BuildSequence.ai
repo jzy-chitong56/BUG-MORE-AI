@@ -260,14 +260,14 @@ function global_build_sequence takes nothing returns nothing
     call BuildAdvUpgr2(2, UPG_ORC_SHAMAN, 2,TownCountDone(SHAMAN),0.33,15,90)
     call BuildAdvUpgr2(2, UPG_ORC_DOCS, 2,TownCountDone(WITCH_DOCTOR), 0.33,15,90)
     call BuildAdvUpgr2(2, UPG_ORC_SWALKER, 2,TownCountDone(SPIRIT_WALKER), 0.33,15,90)
-    call BuildAdvUpgr2(2, UPG_ORC_BERSERK, 2, TownCountDone(GRUNT), 0.33,15,60)	  
+    call BuildAdvUpgr2(2, UPG_ORC_BERSERK, 2, TownCountDone(GRUNT), 0.33,15,60)
 
     // TIER 3 UPGRADES
     //--------------------------------------------------------
     if tier == 3 then
     endif
     call BuildAdvUpgr2(1, UPG_ORC_NAPTHA, 3,TownCountDone(CATAPULT),0.25,15,60)
-    call BuildAdvUpgr(1, UPG_ORC_BURROWS, 3,1,1,0,50)
+    call BuildAdvUpgr(1, UPG_ORC_BURROWS, 3,1,1,5,50)
     call BuildAdvUpgr2(1, UPG_ORC_BERSERKER, 3,TownCountDone(HEAD_HUNTER), 0.33,15,75)
     call BuildAdvUpgr2(1, UPG_ORC_VENOM, 3,TownCountDone(WYVERN),0.33,15,85)
     call BuildAdvUpgr2(1, UPG_ORC_PULVERIZE, 3,TownCountDone(TAUREN),0.25,15,75)
