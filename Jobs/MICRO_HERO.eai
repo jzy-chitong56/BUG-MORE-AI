@@ -208,7 +208,7 @@ function ItemSingetp takes integer hn, boolean retreat returns boolean
       if retreat == false then  // teleport to battle , hope don't interrupt casting
         set l = GetUnitLoc(major_hero)
       elseif GetUnitState(hero_unit[hn], UNIT_STATE_LIFE) / GetUnitState(hero_unit[hn], UNIT_STATE_MAX_LIFE) >= 0.4 then
-        set l = Location(GetLocationX(home_location]), GetLocationY(home_location))
+        set l = Location(GetLocationX(home_location), GetLocationY(home_location))
       endif
       if l != null then
         set g = CreateGroup()
