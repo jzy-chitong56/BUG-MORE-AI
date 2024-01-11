@@ -2,16 +2,16 @@
 //  global builds
 //============================================================================
 function global_init_strategy takes nothing returns nothing
-    call AddBlock(1, UNDEAD_ALTAR, true, 0, TOMB_OF_RELICS, 10)
-    call AddBlock(1, UNDEAD_ALTAR, false, 0, CRYPT, 2)
-    call AddBlock(1, CRYPT, true, 0, TOMB_OF_RELICS, 10)
-    call AddBlock(1, CRYPT, false, 0, GRAVEYARD, 10)
-    call AddBlock(1, UNDEAD_ALTAR, false, 0, ZIGGURAT_1, 2)
-    call AddBlock(1, UNDEAD_ALTAR, false, 0, ZIGGURAT_2, 2)
-    call AddBlock(1, UNDEAD_ALTAR, false, 0, ZIGGURAT_FROST, 2)
+    call AddBlock(1, UNDEAD_ALTAR, true, 0, TOMB_OF_RELICS, 36)
+    call AddBlock(1, UNDEAD_ALTAR, false, 0, CRYPT, 16)
+    call AddBlock(1, CRYPT, true, 0, TOMB_OF_RELICS, 36)
+    call AddBlock(1, CRYPT, false, 0, GRAVEYARD, 16)
+    call AddBlock(1, UNDEAD_ALTAR, false, 0, ZIGGURAT_1, 8)
+    call AddBlock(1, UNDEAD_ALTAR, false, 0, ZIGGURAT_2, 8)
+    call AddBlock(1, UNDEAD_ALTAR, false, 0, ZIGGURAT_FROST, 8)
     call AddHarass(1, 1, GHOUL)
     call AddHarass(2, 2, GHOUL)
-    call AddHarass(3, 2, GARGOYLE)
+    call AddHarass(5, 2, GARGOYLE)
 
 
 
@@ -65,7 +65,7 @@ function global_build_sequence takes nothing returns nothing
       call BuildUnit(1, ZIGGURAT_2, 40)
     endif
     // home_location tower
-    if tier < 3 and GetGold() > 530 then
+    if GetGold() > 530 then
       call BuildUnit(1, ZIGGURAT_2, 50)
       call BuildAtMine(1, ZIGGURAT_FROST, 52)
     endif
@@ -73,7 +73,7 @@ function global_build_sequence takes nothing returns nothing
     if HasExpanded() then
       call BuildUnit(1, ZIGGURAT_2, 45)
       call BuildUnit(1, ZIGGURAT_FROST, 40)
-      if GetGold() > 2000 then
+      if tier >= 3 and GetGold() > 2000 then
         call DefendTownsDone(1, NECROPOLIS_1, 95)
         call DefendTownsDone(3, ZIGGURAT_2, 90)
         call DefendTownsDone(1, ZIGGURAT_FROST, 50)
@@ -84,13 +84,10 @@ function global_build_sequence takes nothing returns nothing
         endif
       endif
     endif
-    // routine build
+    // updata
     if TownCountDone(ZIGGURAT_1) > 0 then
       call BuildUnit(1, ZIGGURAT_2, 40)
-    elseif GetGold() > 800 then
-      call BuildUnit(2, ZIGGURAT_2, 40)
-      call BuildUnit(1, ZIGGURAT_FROST, 42)
-      call BuildAtMine(1, ZIGGURAT_FROST, 33)
+      call BuildUnit(1, ZIGGURAT_FROST, 33)
     endif
 
     // transition train , sequence should be at the beginning
@@ -127,9 +124,6 @@ function global_build_sequence takes nothing returns nothing
     if GetGold() > 1000 then
       call BuildItem(1, STAFF_OF_TELEPORTATION, 35)
     endif
-
-    call BuildUnit(1, TOMB_OF_RELICS, 45+30*(tier-1))
-
 
     // DYNAMIC and Global Mercenaries
     call ResetDynamicSystem()

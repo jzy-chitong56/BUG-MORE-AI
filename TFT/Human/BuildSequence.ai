@@ -3,16 +3,15 @@
 //============================================================================
 function global_init_strategy takes nothing returns nothing
     call AddBlock(1, HUMAN_ALTAR, false, 0, ARCANE_VAULT, 16)
-    call AddBlock(1, HUMAN_ALTAR, false, 0, HOUSE, 2)
-    call AddBlock(1, HUMAN_ALTAR, false, 0, BARRACKS, 1)
-    call AddBlock(2, HOUSE, true, 0, ARCANE_VAULT, 16)
+    call AddBlock(1, HUMAN_ALTAR, false, 0, HOUSE, 8)
+    call AddBlock(1, HUMAN_ALTAR, false, 0, BARRACKS, 16)
+    call AddBlock(2, HOUSE, true, 0, ARCANE_VAULT, 36)
     call AddBlock(1, BARRACKS, false, 0, LUMBER_MILL, 14)
-    call AddBlock(1, BARRACKS, true, 0, ARCANE_VAULT, 16)
-    call AddBlock(1, BARRACKS, false, 0, BLACKSMITH, 10)
+    call AddBlock(1, BARRACKS, true, 0, ARCANE_VAULT, 36)
+    call AddBlock(1, BARRACKS, false, 0, BLACKSMITH, 16)
     call AddBlock(1, BLACKSMITH, false, 0, WATCH_TOWER, 14)
     call AddHarass(1, 2, FOOTMAN)
     call AddHarass(3, 2, GRYPHON)
-    call AddHarass(4, 1, PALADIN)
 
 
 
@@ -78,7 +77,7 @@ function global_build_sequence takes nothing returns nothing
       call BuildAtMine(1, GUARD_TOWER, 45)
     endif
     // home_location tower
-    if tier < 3 and GetGold() > 550 then
+    if GetGold() > 550 then
       call BuildFront(1, GUARD_TOWER, 50)
       call BuildUnit(1, ARCANE_TOWER, 42)
       call BuildFront(1, ARCANE_TOWER, 45)
@@ -87,7 +86,7 @@ function global_build_sequence takes nothing returns nothing
      if HasExpanded() then
       call DefendTownsFrontDone(1, GUARD_TOWER, 75)
       call DefendTownsFrontDone(1, ARCANE_TOWER, 70)
-      if tier == 3 and GetGold() > 2000 then
+      if tier >= 3 and GetGold() > 2000 then
         call DefendTownsFrontDone(2, GUARD_TOWER, 75)
         call DefendTownsFrontDone(1, ARCANE_TOWER, 70)
         call DefendTownsFrontDone(3, GUARD_TOWER, 35)
@@ -97,17 +96,14 @@ function global_build_sequence takes nothing returns nothing
         endif
       endif
     endif
-    // routine build
+    // updata
     if TownCountDone(WATCH_TOWER) > 0 then
       if TownCount(WORKSHOP) > 0 then
         call BuildUnit(1, CANNON_TOWER, 40)
       else
         call BuildUnit(1, ARCANE_TOWER, 45)
+        call BuildUnit(1, GUARD_TOWER, 32)
       endif
-    elseif GetGold() > 800 then
-      call BuildUnit(1, GUARD_TOWER, 32)
-      call BuildUnit(1, ARCANE_TOWER, 45)
-      call BuildFront(1, ARCANE_TOWER, 30)
     endif
 
     // transition train , sequence should be at the beginning
@@ -128,7 +124,6 @@ function global_build_sequence takes nothing returns nothing
     // Global Items
     call BuildItem(1, SCROLL_OF_REGENERATION, 90)
     call BuildItem(1, M_SCROLL_OF_HEALING, 40)
-    call BuildItem(1, SCROLL_OF_PROTECTION, 40)
     call BuildItem(1, POTION_OF_LESSER_INVULNERBILITY, 50)
     call BuildItem(1, M_TOWN_PORTAL, 100)
     if tier > 1 then
@@ -138,15 +133,12 @@ function global_build_sequence takes nothing returns nothing
         call BuildItem(1, STAFF_OF_PRESERVATION, 30)
       endif
     endif
-    if tier == 3 then
+    if tier >= 3 then
       call BuildItem(1, STAFF_OF_SANCTUARY, 80)
     endif
     if GetGold() > 1000 then
       call BuildItem(1, STAFF_OF_TELEPORTATION, 35)
     endif
-
-    call BuildUnit(1, ARCANE_VAULT, 45+30*(tier-1))
-
 
 	// DYNAMIC and Global Mercenaries
 	call ResetDynamicSystem()

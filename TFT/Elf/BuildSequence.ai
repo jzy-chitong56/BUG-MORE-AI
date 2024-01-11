@@ -2,13 +2,14 @@
 //  global builds
 //============================================================================
 function global_init_strategy takes nothing returns nothing
-    call AddBlock(1, ELF_ALTAR, false, 0, ANCIENT_WAR, 1)
-    call AddBlock(1, ELF_ALTAR, true, 0, DEN_OF_WONDERS, 16)
-    call AddBlock(1, ELF_ALTAR, false, 0, MOON_WELL, 2)
-    call AddBlock(1, ANCIENT_WAR, false, 0, HUNTERS_HALL, 8)
-    call AddBlock(1, ANCIENT_WAR, true, 0, DEN_OF_WONDERS, 16)
+    call AddBlock(1, ELF_ALTAR, false, 0, ANCIENT_WAR, 16)
+    call AddBlock(1, ELF_ALTAR, true, 0, DEN_OF_WONDERS, 36)
+    call AddBlock(1, ELF_ALTAR, false, 0, MOON_WELL, 8)
+    call AddBlock(1, ANCIENT_WAR, false, 0, HUNTERS_HALL, 16)
+    call AddBlock(1, ANCIENT_WAR, true, 0, DEN_OF_WONDERS, 36)
     call AddHarass(1, 2, HUNTRESS)
     call AddHarass(3, 2, FAERIE_DRAGON)
+
 
 
 
@@ -67,13 +68,13 @@ function global_build_sequence takes nothing returns nothing
       call BuildFront(2, ANCIENT_PROTECT, 51)
     endif
     // home_location tower
-    if tier < 3 and GetGold() > 500 then
+    if GetGold() > 500 then
       call BuildFront(2, ANCIENT_PROTECT, 45)
     endif
     // exp tower
     if HasExpanded() then
       call DefendTownsFrontDone(2, ANCIENT_PROTECT, 75)
-      if tier == 3 and GetGold() > 2000 then
+      if tier >= 3 and GetGold() > 2000 then
         call DefendTownsFrontDone(3, ANCIENT_PROTECT, 35)
         if TownCount(DEN_OF_WONDERS) < 2 then
           call DefendTownsDone(1, DEN_OF_WONDERS, 40)
@@ -82,10 +83,6 @@ function global_build_sequence takes nothing returns nothing
           call DefendTownsDone(2, MOON_WELL, 35)
         endif
       endif
-    endif
-    // routine build
-    if GetGold() > 800 then
-      call BuildFront(3, ANCIENT_PROTECT, 36)  // ELF not run BuildUnit 
     endif
 
     // transition train , sequence should be at the beginning
@@ -109,7 +106,9 @@ function global_build_sequence takes nothing returns nothing
     call BuildItem(1, M_SCROLL_OF_HEALING, 40)
     //call BuildItem(1, SCROLL_OF_PROTECTION, 30)
     call BuildItem(1, POTION_OF_LESSER_INVULNERBILITY, 70)
-    call BuildItem(1, M_TOWN_PORTAL, 100)
+    if tier == 1 then
+      call BuildItem(1, M_TOWN_PORTAL, 100)
+    endif
     if tier > 1 then
       call BuildItem(1, HEALING_POTION, 80)
       call BuildItem(1, TOWN_PORTAL, 180)
@@ -129,8 +128,6 @@ function global_build_sequence takes nothing returns nothing
     if GetGold() > 1000 then
       call BuildItem(1, STAFF_OF_TELEPORTATION, 35)
     endif
-
-    call BuildUnit(1, DEN_OF_WONDERS, 45+30*(tier-1))
 
     // DYNAMIC and Global Mercenaries
     call ResetDynamicSystem()
