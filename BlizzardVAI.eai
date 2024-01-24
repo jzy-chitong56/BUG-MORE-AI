@@ -637,6 +637,8 @@ globals
     trigger            ZoomSetx                         = null
     trigger            AdjustZoomUp                     = null
     trigger            AdjustZoomDown                   = null
+    trigger            W3CDeny                          = CreateTrigger()
+    trigger            W3CDenyControl                   = CreateTrigger()
     playercolor        PLAYER_COLOR_MAROONX             = null
     playercolor        PLAYER_COLOR_NAVYX               = null
     playercolor        PLAYER_COLOR_TURQUOISEX          = null
@@ -9781,6 +9783,34 @@ function InitGenericPlayerSlots takes nothing returns nothing
     endif
 endfunction
 
+function SetW3CDenyTip takes nothing returns nothing
+  local string t = "DenyTip |cfffd0000[off]|r"
+  if GetTriggerPlayer() != null then
+    if not IsTriggerEnabled(W3CDeny) then
+      call EnableTrigger(W3CDeny)
+      set t = "DenyTip |cff00ff00[on]|r"
+    else
+      call DisableTrigger(W3CDeny)
+    endif
+    call DisplayTimedTextToForce( GetPlayersAll(), 7.00, t)
+  endif
+  set t = null
+endfunction
+
+function W3CDenyTipControl takes nothing returns nothing
+  local integer i = 0
+  loop
+    exitwhen i >= playermax
+    if (GetPlayerController(Player(i)) != MAP_CONTROL_COMPUTER) then
+      call TriggerRegisterPlayerChatEvent(W3CDenyControl, Player(i), "-deny", false)
+    endif
+    set i = i + 1
+  endloop
+  call TriggerAddAction( W3CDenyControl, function SetW3CDenyTip )
+  call TriggerRegisterAnyUnitEventBJ( W3CDeny, EVENT_PLAYER_UNIT_DEATH )
+  call TriggerAddAction( W3CDeny, function W3CDenyTip )
+endfunction
+
 //===========================================================================
 // Zoom
 //===========================================================================
@@ -9804,32 +9834,38 @@ function ZoomSet takes nothing returns nothing
 endfunction
 
 function ZoomDown takes nothing returns nothing
-  if CameraSetupGetFieldSwap(CAMERA_FIELD_TARGET_DISTANCE, GetCurrentCameraSetup()) > 1650 then
-    call SetCameraFieldForPlayer(GetTriggerPlayer(), CAMERA_FIELD_TARGET_DISTANCE, ( CameraSetupGetFieldSwap(CAMERA_FIELD_TARGET_DISTANCE, GetCurrentCameraSetup()) - 50 ), 0 )
+  if CameraSetupGetFieldSwap(CAMERA_FIELD_TARGET_DISTANCE, GetCurrentCameraSetup()) > 1650 and GetTriggerPlayer() == GetLocalPlayer() then
+    call SetCameraFieldForPlayer(GetTriggerPlayer(), CAMERA_FIELD_TARGET_DISTANCE, Zoom - 50, 0 )
   endif
 endfunction
 
 function ZoomUp takes nothing returns nothing
-  if CameraSetupGetFieldSwap(CAMERA_FIELD_TARGET_DISTANCE, GetCurrentCameraSetup()) < 3000 then
-    call SetCameraFieldForPlayer(GetTriggerPlayer(), CAMERA_FIELD_TARGET_DISTANCE, ( CameraSetupGetFieldSwap(CAMERA_FIELD_TARGET_DISTANCE, GetCurrentCameraSetup()) + 50 ), 0 )
+  if CameraSetupGetFieldSwap(CAMERA_FIELD_TARGET_DISTANCE, GetCurrentCameraSetup()) < 3000 and GetTriggerPlayer() == GetLocalPlayer() then
+    call SetCameraFieldForPlayer(GetTriggerPlayer(), CAMERA_FIELD_TARGET_DISTANCE, Zoom + 50, 0 )
   endif
 endfunction
 
 function InitZoom takes nothing returns nothing
+  local integer i = 0
   set ZoomSetx = CreateTrigger()
   set AdjustZoomUp = CreateTrigger()
   set AdjustZoomDown = CreateTrigger()
   call TriggerAddAction(ZoomSetx, function ZoomSet)
   call TriggerAddAction(AdjustZoomUp , function ZoomUp)
   call TriggerAddAction(AdjustZoomDown , function ZoomDown)
-  if (GetPlayerController(GetLocalPlayer()) != MAP_CONTROL_COMPUTER) and not IsPlayerObserver(GetLocalPlayer()) then
-    call DisplayTimedTextToPlayer(GetLocalPlayer(),0,0,7,"Set Zoom type: |c00d5f038-zoom1850|r")
-    call TriggerRegisterPlayerChatEvent( ZoomSetx, GetLocalPlayer(), "-zoom", false )
-    call TriggerRegisterPlayerKeyEventBJ( AdjustZoomUp, GetLocalPlayer(), bj_KEYEVENTTYPE_DEPRESS, bj_KEYEVENTKEY_UP ) // not required in latest war3
-    call TriggerRegisterPlayerKeyEventBJ( AdjustZoomDown, GetLocalPlayer(), bj_KEYEVENTTYPE_DEPRESS, bj_KEYEVENTKEY_DOWN )
-  elseif IsPlayerObserver(GetLocalPlayer()) then
-    call SetCameraFieldForPlayer(GetTriggerPlayer(), CAMERA_FIELD_TARGET_DISTANCE, 1950, 0)
-  endif
+  loop
+    exitwhen i >= playermax
+    if (GetPlayerController(Player(i)) != MAP_CONTROL_COMPUTER) then
+      call DisplayTimedTextToPlayer(Player(i),0,0,7,"Set Zoom type: |c00d5f038-zoom1850|r")
+      call TriggerRegisterPlayerChatEvent( ZoomSetx, Player(i), "-zoom", false )
+      call TriggerRegisterPlayerKeyEventBJ( AdjustZoomUp, Player(i), bj_KEYEVENTTYPE_DEPRESS, bj_KEYEVENTKEY_UP )
+      call TriggerRegisterPlayerKeyEventBJ( AdjustZoomDown, Player(i), bj_KEYEVENTTYPE_DEPRESS, bj_KEYEVENTKEY_DOWN )
+      if IsPlayerObserver(Player(i)) then
+        call SetCameraFieldForPlayer(Player(i), CAMERA_FIELD_TARGET_DISTANCE, 1950, 0)
+      endif
+    endif
+    set i = i + 1
+  endloop
 endfunction
 
 //***************************************************************************
@@ -10192,6 +10228,7 @@ function InitBlizzard takes nothing returns nothing
     call InitSummonableCaps()
     call InitNeutralBuildings()
     call InitZoom()
+    call W3CDenyTipControl()
     call DetectGameStarted()
 
 endfunction

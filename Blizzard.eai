@@ -102,6 +102,9 @@
     trigger AdjustZoomUp = null
     trigger AdjustZoomDown = null
 
+    trigger W3CDeny = CreateTrigger()
+    trigger W3CDenyControl = CreateTrigger()
+
     dialog game_start_dialog = null
     trigger game_start_trigger = null
     button commander_mode = null
@@ -114,9 +117,6 @@
 #INCLUDETABLE <Languages.txt> #EFR
     button %1_button = null
 #ENDINCLUDE
-
-    trigger W3CDeny = CreateTrigger()
-    trigger W3CDenyControl = CreateTrigger()
 
     string chat_no_ally = ""
     string you_no_gold = ""
@@ -791,15 +791,13 @@ function ZoomSet takes nothing returns nothing
 endfunction
 
 function ZoomDown takes nothing returns nothing
-  local real Zoom = CameraSetupGetFieldSwap(CAMERA_FIELD_TARGET_DISTANCE, GetCurrentCameraSetup())
-  if Zoom > 1650 and GetTriggerPlayer() == GetLocalPlayer() then
+  if CameraSetupGetFieldSwap(CAMERA_FIELD_TARGET_DISTANCE, GetCurrentCameraSetup()) > 1650 and GetTriggerPlayer() == GetLocalPlayer() then
     call SetCameraFieldForPlayer(GetTriggerPlayer(), CAMERA_FIELD_TARGET_DISTANCE, Zoom - 50, 0 )
   endif
 endfunction
 
 function ZoomUp takes nothing returns nothing
-  local real Zoom = CameraSetupGetFieldSwap(CAMERA_FIELD_TARGET_DISTANCE, GetCurrentCameraSetup())
-  if Zoom < 3000 and GetTriggerPlayer() == GetLocalPlayer() then
+  if CameraSetupGetFieldSwap(CAMERA_FIELD_TARGET_DISTANCE, GetCurrentCameraSetup()) < 3000 and GetTriggerPlayer() == GetLocalPlayer() then
     call SetCameraFieldForPlayer(GetTriggerPlayer(), CAMERA_FIELD_TARGET_DISTANCE, Zoom + 50, 0 )
   endif
 endfunction
