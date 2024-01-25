@@ -791,13 +791,15 @@ function ZoomSet takes nothing returns nothing
 endfunction
 
 function ZoomDown takes nothing returns nothing
-  if CameraSetupGetFieldSwap(CAMERA_FIELD_TARGET_DISTANCE, GetCurrentCameraSetup()) > 1650 and GetTriggerPlayer() == GetLocalPlayer() then
+  local real Zoom = CameraSetupGetFieldSwap(CAMERA_FIELD_TARGET_DISTANCE, GetCurrentCameraSetup())
+  if Zoom > 1650 and GetTriggerPlayer() == GetLocalPlayer() then
     call SetCameraFieldForPlayer(GetTriggerPlayer(), CAMERA_FIELD_TARGET_DISTANCE, Zoom - 50, 0 )
   endif
 endfunction
 
 function ZoomUp takes nothing returns nothing
-  if CameraSetupGetFieldSwap(CAMERA_FIELD_TARGET_DISTANCE, GetCurrentCameraSetup()) < 3000 and GetTriggerPlayer() == GetLocalPlayer() then
+  local real Zoom = CameraSetupGetFieldSwap(CAMERA_FIELD_TARGET_DISTANCE, GetCurrentCameraSetup())
+  if Zoom < 3000 and GetTriggerPlayer() == GetLocalPlayer() then
     call SetCameraFieldForPlayer(GetTriggerPlayer(), CAMERA_FIELD_TARGET_DISTANCE, Zoom + 50, 0 )
   endif
 endfunction
