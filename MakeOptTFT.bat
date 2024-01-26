@@ -1,21 +1,9 @@
 @ECHO OFF
-call MakeTFTBase.bat 0
-ECHO Optimizing Scripts
-perl Optimize.pl Scripts\TFT\common.ai -l TFT\Races.txt Scripts\TFT\$2
-perl Optimize.pl -b Scripts\Blizzard.j
-ECHO Optimizing finished
+SET LOG=%~1
+call MakeVERBase.bat 0 TFT
 ECHO _____________________________
-pjass common.j Scripts\TFT\common.ai
-ECHO _____________________________
-pjass common.j Scripts\TFT\common.ai Scripts\TFT\elf.ai
-ECHO _____________________________
-pjass common.j Scripts\TFT\common.ai Scripts\TFT\human.ai
-ECHO _____________________________
-pjass common.j Scripts\TFT\common.ai Scripts\TFT\orc.ai
-ECHO _____________________________
-pjass common.j Scripts\TFT\common.ai Scripts\TFT\undead.ai
-ECHO _____________________________
-pjass common.j Scripts\Blizzard.j
+call MakeOptVER TFT
 ECHO =============================
-ECHO Making AMAI finished
-pause
+if not "%LOG%"=="0" (
+    pause
+)

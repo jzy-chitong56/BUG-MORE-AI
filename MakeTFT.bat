@@ -1,5 +1,8 @@
 @ECHO OFF
-call MakeTFTBase.bat 0
+SET LOG=%~1
+ECHO _____________________________
+call MakeVERBase.bat 0 TFT
 ECHO =============================
-ECHO Making AMAI finished
-pause
+if not "%LOG%"=="0" (
+    pause
+)

@@ -1,5 +1,8 @@
 @ECHO OFF
-call MakeROCBase.bat 0
+SET LOG=%~1
+ECHO _____________________________
+call MakeVERBase.bat 0 ROC
 ECHO =============================
-ECHO Making AMAI finished
-pause
+if not "%LOG%"=="0" (
+    pause
+)
