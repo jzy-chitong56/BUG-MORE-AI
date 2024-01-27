@@ -245,6 +245,64 @@ function Parser takes string ChatMsg returns nothing
 endfunction
 
 //===========================================================================
+// ColorPlayer (Converts from text version of a color to a playercolor)
+//===========================================================================
+function ColorPlayer takes string CompC returns playercolor
+
+  //Finds player color of the text color
+  if CompC == "Red" then
+    return PLAYER_COLOR_RED
+  elseif CompC == "Blue" then
+    return PLAYER_COLOR_BLUE
+  elseif CompC == "Cyan" then
+    return PLAYER_COLOR_CYAN
+  elseif CompC == "Purple" then
+    return PLAYER_COLOR_PURPLE
+  elseif CompC == "Yellow" then
+    return PLAYER_COLOR_YELLOW
+  elseif CompC == "Orange" then
+    return PLAYER_COLOR_ORANGE
+  elseif CompC == "Green" then
+    return PLAYER_COLOR_GREEN
+  elseif CompC == "Pink" then
+    return PLAYER_COLOR_PINK
+  elseif CompC == "Light Gray" then
+    return PLAYER_COLOR_LIGHT_GRAY
+  elseif CompC == "Light Blue" then
+    return PLAYER_COLOR_LIGHT_BLUE
+  elseif CompC == "Aqua" then
+    return PLAYER_COLOR_AQUA
+  elseif CompC == "Brown" then
+    return PLAYER_COLOR_BROWN
+  elseif CompC == "MAROON" then
+    return PLAYER_COLOR_MAROONX
+  elseif CompC == "Navy" then
+    return PLAYER_COLOR_NAVYX
+  elseif CompC == "Turquoise" then
+    return PLAYER_COLOR_TURQUOISEX
+  elseif CompC == "Violet" then
+    return PLAYER_COLOR_VIOLETX
+  elseif CompC == "Wheat" then
+    return PLAYER_COLOR_WHEATX
+  elseif CompC == "Peach" then
+    return PLAYER_COLOR_PEACHX
+  elseif CompC == "Mint" then
+    return PLAYER_COLOR_MINTX
+  elseif CompC == "Lavender" then
+    return PLAYER_COLOR_LAVENDERX
+  elseif CompC == "Coal" then
+    return PLAYER_COLOR_COALX
+  elseif CompC == "Snow" then
+    return PLAYER_COLOR_SNOWX
+  elseif CompC == "Emerald" then
+    return PLAYER_COLOR_EMERALDX
+  elseif CompC == "Peanut" then
+    return PLAYER_COLOR_PEANUTX
+  endif
+  return null
+endfunction
+
+//===========================================================================
 // ColorText (Converts the player color to a text version)
 //===========================================================================
 function ColorText takes player CPlayer returns string
@@ -328,64 +386,6 @@ function ColorText takes player CPlayer returns string
   //Returns text version
   set PColor = null
   return ""
-endfunction
-
-//===========================================================================
-// ColorPlayer (Converts from text version of a color to a playercolor)
-//===========================================================================
-function ColorPlayer takes string CompC returns playercolor
-
-  //Finds player color of the text color
-  if CompC == "Red" then
-    return PLAYER_COLOR_RED
-  elseif CompC == "Blue" then
-    return PLAYER_COLOR_BLUE
-  elseif CompC == "Cyan" then
-    return PLAYER_COLOR_CYAN
-  elseif CompC == "Purple" then
-    return PLAYER_COLOR_PURPLE
-  elseif CompC == "Yellow" then
-    return PLAYER_COLOR_YELLOW
-  elseif CompC == "Orange" then
-    return PLAYER_COLOR_ORANGE
-  elseif CompC == "Green" then
-    return PLAYER_COLOR_GREEN
-  elseif CompC == "Pink" then
-    return PLAYER_COLOR_PINK
-  elseif CompC == "Light Gray" then
-    return PLAYER_COLOR_LIGHT_GRAY
-  elseif CompC == "Light Blue" then
-    return PLAYER_COLOR_LIGHT_BLUE
-  elseif CompC == "Aqua" then
-    return PLAYER_COLOR_AQUA
-  elseif CompC == "Brown" then
-    return PLAYER_COLOR_BROWN
-  elseif CompC == "MAROON" then
-    return PLAYER_COLOR_MAROONX
-  elseif CompC == "Navy" then
-    return PLAYER_COLOR_NAVYX
-  elseif CompC == "Turquoise" then
-    return PLAYER_COLOR_TURQUOISEX
-  elseif CompC == "Violet" then
-    return PLAYER_COLOR_VIOLETX
-  elseif CompC == "Wheat" then
-    return PLAYER_COLOR_WHEATX
-  elseif CompC == "Peach" then
-    return PLAYER_COLOR_PEACHX
-  elseif CompC == "Mint" then
-    return PLAYER_COLOR_MINTX
-  elseif CompC == "Lavender" then
-    return PLAYER_COLOR_LAVENDERX
-  elseif CompC == "Coal" then
-    return PLAYER_COLOR_COALX
-  elseif CompC == "Snow" then
-    return PLAYER_COLOR_SNOWX
-  elseif CompC == "Emerald" then
-    return PLAYER_COLOR_EMERALDX
-  elseif CompC == "Peanut" then
-    return PLAYER_COLOR_PEANUTX
-  endif
-  return null
 endfunction
 
 function cs2s takes string s, playercolor c returns string
