@@ -86,6 +86,9 @@ function BuyItemJob takes integer id returns nothing
   local boolean ItemStacking = healing == true or CanRepeatItem(id) == true  // heal item can repeat
   call DisplayToAllJobDebug("BUY_ITEM JOB START")
 
+  if TownCountDone(racial_shop) > 1 and shop_sent != null and UnitAlive(shop_sent) and  then
+    set shop_unit = GetUnitOfTypeNearUnit(old_id[racial_shop], shop_sent, shop_unit)
+  endif
   if shop_ordered == false or shop_unit == null or not UnitAlive(shop_unit) then
     if shop_sent != null then
       call GroupRemoveUnit(unit_buying_item, shop_sent)
@@ -124,6 +127,13 @@ function BuyItemJob takes integer id returns nothing
       return
     endif
     call GroupAddUnit(unit_buying_item, shop_sent)
+  endif
+  if TownCountDone(racial_shop) > 1 and GetOwningPlayer(shop_unit) == ai_player then
+    set shop_unit = GetUnitOfTypeNearUnit(old_id[racial_shop], shop_sent, shop_unit)
+    if shop_unit == null or shop_distance_limit > DistanceBetweenUnits(shop_sent, shop_unit) then
+      call ResetBuyItemUnit()
+      return
+    endif
   endif
   set dist = DistanceBetweenUnits(shop_sent, shop_unit)
   //call CreateDebugTag("In BUT ITEM JOB, 10, shop_sent, 3.00, 1.50)
@@ -176,7 +186,7 @@ function BuyItemJob takes integer id returns nothing
   endif
 
   if (not ItemStacking and GetItemNumberOnUnit(id, shop_sent) > 0) or (ItemStacking and GetItemNumber(id) >= shop_wanted) or (GetSlotsFreeOnUnit(shop_sent) <= 0 and not healing) then
-    call CreateDebugTag("BUT_ITEM: Items have been brought", 10, shop_sent, 3.00, 1.50)
+    call CreateDebugTag("BUT_ITEM: Items have been brought", 10, shop_sent, 3.00, 1.50) 
     call ResetBuyItemUnit()
     return
   endif
