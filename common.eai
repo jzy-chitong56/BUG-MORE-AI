@@ -7848,8 +7848,10 @@ function PJHandleOnce takes integer t returns boolean
   if TimerGetElapsed(tq_timer) - pj_time[t] >= pj_frequency[t] then
    call TQDoJob(pj_jid[t], pj_par[t], null, null)
    set pj_time[t] = TimerGetElapsed(tq_timer)
+   call CreateDebugTagLoc("path sys runjob : " + Int2Str(pj_jid[t]), 10, GetLocationX(home_location), GetLocationY(home_location), 2.00, 1.00)
    return true
   endif
+  call CreateDebugTagLoc("path sys runjob : not job", 10, GetLocationX(home_location), GetLocationY(home_location), 2.00, 1.00)
   return false
 endfunction
 
@@ -8568,10 +8570,7 @@ endfunction
 
 //===========================================================================
 function GetPatchVersion takes nothing returns nothing
-  local unit u = CreateUnit(Player(PLAYERPASSIVE), 'ugar', 0, 0, 270.0)
-  set AatpAbility = GetUnitAbilityLevel(u, 'Aatp') > 0  // prevent old war3 or ROC
-  call RemoveUnit(u)
-  set u = null
+  local unit u = null
   if (JASS_MAX_ARRAY_SIZE > 8192) then  //1.29 or higher
     set skillfix = true
   endif
@@ -8592,6 +8591,10 @@ function GetPatchVersion takes nothing returns nothing
     set PLAYER_COLOR_SNOWX       = ConvertPlayerColor(21)
     set PLAYER_COLOR_EMERALDX    = ConvertPlayerColor(22)
     set PLAYER_COLOR_PEANUTX     = ConvertPlayerColor(23)
+    set u = CreateUnit(Player(PLAYERPASSIVE), 'ugar', 0, 0, 270.0)
+    set AatpAbility = GetUnitAbilityLevel(u, 'Aatp') > 0  // prevent old war3 or ROC
+    call RemoveUnit(u)
+    set u = null
   endif
 endfunction
 
