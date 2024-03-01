@@ -451,7 +451,7 @@ function TowerRushJob takes nothing returns nothing
 			exitwhen u == null
 			set id = GetUnitCurrentOrder(u)
 			call CreateDebugTag("TRush: harvest lumber peon", 10, u, 4.00, 2.00)
-			if id == OrderId("harvest") or id == OrderId("resumeharvesting") then  // no need do anything
+			if id == OrderId("resumeharvesting") then  // no need do anything , maybe resume gold
 			elseif not IsUnitInGroup(u, tower_rush_power) then
 				call RemoveGuardPosition(u)
 				call GroupAddUnit(tower_rush_power,u)
