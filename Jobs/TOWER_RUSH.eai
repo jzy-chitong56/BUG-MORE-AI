@@ -43,7 +43,7 @@ function TowerRushBuilderControl_k takes unit u, location t returns nothing
 	local location unitloc = null
 	local location loc = null
 	local location l = GetUnitLoc(u)
-	if DistanceBetweenPoints(l, t) >= 300 and (id != OrderId("move") or id == OrderId("stop")) then
+	if DistanceBetweenPoints(l, t) >= 500 and (id == OrderId("stop") or id != OrderId("move")) then
 		call CreateDebugTag("TRush: builder moving", 10, u, 4.00, 2.00)
 		call IssuePointOrderLoc(u, "move", t)
 	elseif DistanceBetweenPoints(l, t) <= 500 and (id == 0 or (id != OrderId("smart") and id != OrderId("repair") and id != old_id[race_tower_id] and id != old_id[racial_shop])) then  //Improve efficiency
@@ -241,7 +241,9 @@ function TowerRushJob takes nothing returns nothing
 		set t = GetProjectedLoc(tower_target_loc, towerrushsubloc, -400)
 		if race_tower_move then
 			call GroupClear(g)
-			call GroupEnumUnitsInRangeOfLoc(g, t, 800, null)
+			call RemoveLocation(t)
+			set t = GetProjectedLoc(tower_target_loc, towerrushsubloc, 200)
+			call GroupEnumUnitsInRangeOfLoc(g, t, 650, null)
 			set g = SelectByEnemy(g, ai_player, true)
 			set g = SelectByPlayer(g, Player(PLAYERAGGRESSIVE), false)
 			set g = SelectUnittype(g, UNIT_TYPE_STRUCTURE, true)
@@ -431,11 +433,10 @@ function TowerRushJob takes nothing returns nothing
 					call CreateDebugTag("TRush: free peon", 10, u, 4.00, 2.00)
 					call RecycleGuardPosition(builder[i])
 				endif
-			endif
-			if i > 42 then
+			elseif i > 42 then
 				set id = GetUnitCurrentOrder(builder[i])
 				call CreateDebugTag("TRush: harvest gold peon", 10, u, 4.00, 2.00)
-				if id == OrderId("harvest") or id == OrderId("resumeharvesting") then  // no need do anything
+				if id == OrderId("resumeharvesting") then  // no need do anything , maybe resume gold
 				else
 					call IssueImmediateOrder(builder[i], "autoharvestgold")
 				endif
