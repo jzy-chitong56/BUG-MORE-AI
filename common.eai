@@ -5614,7 +5614,7 @@ function GetLocationEnemyStrength takes real x, real y, real radius, boolean onl
   endloop
   call DestroyGroup(g)
   set g = null
-  set air_strength = RMin(0, R2I(airsum + 0.5))  // structures no air strength
+  set air_strength = Min(0, R2I(airsum + 0.5))  // structures no air strength
   return sum
 endfunction
 
@@ -12389,7 +12389,7 @@ function AttackMoveTowerRush takes nothing returns nothing
 			if towers_built < 4 then
 				if tower_peon_inplace or builder[1] == null or not UnitAlive(builder[1]) then
 					call AttackMoveXY(R2I(first_tower_point_x), R2I(first_tower_point_y))
-				elseif tower_peon_point_x != 0 and tower_peon_point_y !+ 0 then
+				elseif tower_peon_point_x != 0 and tower_peon_point_y != 0 then
 					if ModuloInteger(attack_length_counter,2) == 0 and not town_threatened then
 						call GroupEnumUnitsInRange(g, tower_peon_point_x, tower_peon_point_y, 1200, null)
 						set g = SelectUnittype(g, UNIT_TYPE_PEON, true)
