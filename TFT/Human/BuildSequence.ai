@@ -1978,7 +1978,11 @@ endfunction
 
 
 function init_strategy_HAntiTower takes nothing returns nothing
-    call AddHarass(2, 3, TANK)
+    if GetUpgradeLevel(UPG_TANK) > 0 then
+      call AddHarass(2, 3, ROCKET_TANK)
+    else
+      call AddHarass(2, 3, TANK)
+    endif
     call AddHarass(2, 3, MORTAR)
     set distraction_group = 2
 
