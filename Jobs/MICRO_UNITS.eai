@@ -57,7 +57,7 @@ endfunction
 
 //============================================================================
 function DenyUnit takes unit u , integer id returns nothing
-  if id != 'ugrm' and id != 'ohwd' and not IsUnitType(u, UNIT_TYPE_ETHEREAL) and not IsUnitInvisible(u, Player(PLAYER_NEUTRAL_AGGRESSIVE)) then
+  if id != 'ugrm' and id != 'ohwd' and not IsUnitType(u, UNIT_TYPE_ETHEREAL) and not IsUnitInvisible(u, Player(PLAYERAGGRESSIVE)) then
     set deny_unit = u
   endif
 endfunction
@@ -113,7 +113,7 @@ function SaveUnit takes unit u , integer id returns nothing
     return
   endif
   if GetUnitAbilityLevel(u, 'AOwk') > 0 or GetUnitAbilityLevel(u, 'ANwk') > 0 then
-    if not IsUnitInvisible(u, Player(PLAYER_NEUTRAL_AGGRESSIVE)) then
+    if not IsUnitInvisible(u, Player(PLAYERAGGRESSIVE)) then
       //call RemoveGuardPosition(u)
       call IssueImmediateOrder(u, "windwalk")
       //call TQAddUnitJob(2, RESET_WINDWALKER, 0, u)
