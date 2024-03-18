@@ -22,6 +22,10 @@ if "%errorlevel%"=="1" SET RESULTOPTVER=1
 ECHO _____________________________
 pjass common.j Scripts\Blizzard_%VER%.j
 if "%errorlevel%"=="1" SET RESULTOPTVER=1
+ECHO _____________________________
+for %%f in (Scripts\Blizzard_%VER%.j) do (
+    copy "%%f" "Scripts\Blizzard.j"
+)
 if "%RESULTOPTVER%"=="1" (
   ECHO Compilation AMAI Optimization %VER% error
   exit /b %RESULTOPTVER%
