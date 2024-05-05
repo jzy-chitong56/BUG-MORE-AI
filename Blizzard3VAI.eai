@@ -30,11 +30,11 @@ function PickMeleeAI takes player num, string s1, string s2, string s3 returns n
     endif
 
     if pick == 1 then
-        call StartMeleeAI(num,s1)
+      call StartMeleeAI(num,s1)
     elseif pick == 2 then
-        call StartMeleeAI(num,s2)
+      call StartMeleeAI(num,s2)
     else
-        call StartMeleeAI(num,s3)
+      call StartMeleeAI(num,s3)
     endif
 endfunction
 
@@ -54,7 +54,7 @@ function MeleeStartingAI takes nothing returns nothing
                 if (indexRace == RACE_HUMAN) then
 				#INCLUDETABLE <$VER$\races.txt> #COND "%1" eq "HUMAN"
                     call PickMeleeAI(indexPlayer, "%2", "%3", null)
-				#ENDINCLUDE						
+				#ENDINCLUDE
                 elseif (indexRace == RACE_ORC) then
 				#INCLUDETABLE <$VER$\races.txt> #COND "%1" eq "ORC"
                     call PickMeleeAI(indexPlayer, "%2", "%3", null)
@@ -67,7 +67,7 @@ function MeleeStartingAI takes nothing returns nothing
                 elseif (indexRace == RACE_NIGHTELF) then
 				#INCLUDETABLE <$VER$\races.txt> #COND "%1" eq "ELF"
                     call PickMeleeAI(indexPlayer, "%2", "%3", null)
-				#ENDINCLUDE		
+				#ENDINCLUDE
                 else
                     // Unrecognized race.
                 endif
