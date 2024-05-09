@@ -8,7 +8,7 @@
 #ELSE
 
 function ItemExpansionReset takes nothing returns nothing
-  if itemhero != null and UnitAlive(itemhero) not IsStandardUnit(itemhero) then
+  if itemhero != null and UnitAlive(itemhero) and not IsStandardUnit(itemhero) then
     call RecycleGuardPosition(itemhero)
   endif
   set item_expanding = false
