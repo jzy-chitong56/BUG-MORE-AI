@@ -12504,7 +12504,7 @@ function AttackMoveTowerRush takes nothing returns nothing
 				loop
 					exitwhen i >= expansion_list_length
 					if GetResourceAmount(expansion_list[i]) > 0 and not CheckExpansionTaken(expansion_list[i]) then
-						set d = DistanceBetweenPoints_dk(GetUnitLoc(expansion_list[i]), l) then
+						set d = DistanceBetweenPoints_dk(GetUnitLoc(expansion_list[i]), l)
 						if d < md then
 							set md = d
 							set mine = expansion_list[i]
