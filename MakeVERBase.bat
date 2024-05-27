@@ -68,9 +68,7 @@ if "%errorlevel%"=="1" SET RESULTMAKEVER=1
 jassparser common.j Scripts\Blizzard_%VER%.j
 if "%errorlevel%"=="1" SET RESULTMAKEVER=1
 ECHO _____________________________
-for %%f in (Scripts\Blizzard_%VER%.j) do (
-    copy "%%f" "Scripts\Blizzard.j"
-)
+copy /b/v/y "Scripts\Blizzard_%VER%.j" "Scripts\Blizzard.j"
 ECHO copy \Scripts\Blizzard.j
 rmdir /s /q "%VER%/tmp"
 if "%RESULTMAKEVER%"=="1" (
