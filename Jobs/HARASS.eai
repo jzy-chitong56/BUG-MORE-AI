@@ -123,7 +123,7 @@ function HarassJob takes integer ht, unit targ, group harasser returns nothing
   local boolean state_attacking = false
   local real flee_percent = 0
   local boolean avoiding_towers = false
-  local boolean state_retreat = 0
+  local boolean state_retreat = false
   local real start_strength = 0
   local group g = null
   local unit u = null
