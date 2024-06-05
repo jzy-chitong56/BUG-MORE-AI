@@ -12620,8 +12620,8 @@ function AttackMoveTowerRush takes nothing returns nothing
 	set l = null
 	set u = null
 	set attack_running = false
-  call ClearAllianceTarget(null)
-  call ClearCaptainTargets()
+	call ClearAllianceTarget(null)
+	call ClearCaptainTargets()
 endfunction
 
 //============================================================================
@@ -13555,7 +13555,7 @@ if not creeping_only then	// Do the normal attack sequence
         //set alli_target = null
         call FormGroupAM(3)
         call AttackMoveKillAAM(hall)
-        call ClearAllianceTarget(alli_target)
+        call ClearAllianceTarget(null)
         set hall = null
         return
       endif
