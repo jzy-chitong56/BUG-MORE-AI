@@ -106,6 +106,11 @@
     trigger W3CDeny = CreateTrigger()
     trigger W3CDenyControl = CreateTrigger()
 
+    boolean W3CClock = true
+    real GameTimeSec = 0
+    timer ClockTimer = null
+    timerdialog W3CTimerDialog = null
+
     dialog game_start_dialog = null
     trigger game_start_trigger = null
     button commander_mode = null
@@ -768,6 +773,51 @@ function W3CDenyTipControl takes nothing returns nothing
   call TriggerAddAction( W3CDenyControl, function SetW3CDenyTip )
   call TriggerRegisterAnyUnitEventBJ( W3CDeny, EVENT_PLAYER_UNIT_DEATH )
   call TriggerAddAction( W3CDeny, function W3CDenyTip )
+endfunction
+
+//===========================================================================
+// W3CClock
+//===========================================================================
+
+function UpdateW3CClock takes nothing returns nothing
+  if W3CTimerDialog == null then
+    set W3CTimerDialog = CreateTimerDialogBJ( null, "Time: " )
+    call TimerDialogDisplayBJ(W3CClock, W3CTimerDialog)
+  endif
+  set GameTimeSec = GameTimeSec + 0.5
+  call TimerDialogSetRealTimeRemaining(W3CTimerDialog,I2R(R2I(GameTimeSec)))
+endfunction
+
+function SetW3CClock takes nothing returns nothing
+  if GetTriggerPlayer() != null then
+    if W3CClock == false then
+      set W3CClock = true
+      call DisplayTimedTextToForce(GetPlayersAll(), 7.00, "Game time clock |cff00ff00[on]|r")
+    else
+      set W3CClock = false
+      call DisplayTimedTextToForce(GetPlayersAll(), 7.00, "Game time clock |cfffd0000[off]|r")
+    endif
+    if W3CTimerDialog != null then
+      call TimerDialogDisplayForPlayerBJ(W3CClock, W3CTimerDialog, GetTriggerPlayer())
+    endif
+  endif
+endfunction
+
+function CreateW3CClock takes nothing returns nothing
+  local trigger t = CreateTrigger()
+  local integer i = 0
+  if ClockTimer == null then
+    set ClockTimer = CreateTimer()
+    call TimerStart(ClockTimer, 0.5, true, function UpdateW3CClock)
+  endif
+  loop
+    exitwhen i >= playermax
+    if GetPlayerController(Player(i)) != MAP_CONTROL_COMPUTER then
+      call TriggerRegisterPlayerChatEvent(t, Player(i), "-clock", true)
+    endif
+    set i = i + 1
+  endloop
+  call TriggerAddAction(t, function SetW3CClock)
 endfunction
 
 //===========================================================================
