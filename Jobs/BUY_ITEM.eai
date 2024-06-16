@@ -85,9 +85,11 @@ function SellItem takes unit u, unit shop returns nothing
 endfunction
 
 function ResetBuyItem takes nothing returns nothing
-  call GroupRemoveUnit(unit_buying_item, shop_sent)
-  call RecycleGuardPosition(shop_sent)
-  call AddAssault(1, GetUnitTypeId(shop_sent))
+  if shop_sent != null then
+    call GroupRemoveUnit(unit_buying_item, shop_sent)
+    call RecycleGuardPosition(shop_sent)
+    call AddAssault(1, GetUnitTypeId(shop_sent))
+  endif
   set shop_sent = null
   set shop_ordered = false
   set shop_buy_time_large = -1
