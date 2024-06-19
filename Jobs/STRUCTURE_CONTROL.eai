@@ -16,18 +16,6 @@ function CheckBurrow takes nothing returns nothing
   set g = null
 endfunction
 
-function StatisticsUnitNum takes group g returns integer
-  local integer i = 0
-  local unit u = null
-  loop
-    set u = FirstOfGroup(g)
-    exitwhen u == null
-    set i = i + 1
-    call GroupRemoveUnit(g,u)
-  endloop
-  return i
-endfunction
-
 function CheckBuildLoc takes location l, real range returns integer
   local group g = CreateGroup()
   local integer i = 0
@@ -36,14 +24,14 @@ function CheckBuildLoc takes location l, real range returns integer
   set g = SelectUnittype(g, UNIT_TYPE_STRUCTURE, true)
   set g = SelectByAlive(g, true)
   set g = SelectByHidden(g, false)
-  set i = StatisticsUnitNum(g)
+  set i = BlzGroupGetSizeAMAI(g)
   call DestroyGroup(g)
   set g = null
   return i
 endfunction
 
 function CheckShredderLoc takes nothing returns nothing
-  local real d = 0
+  local integer d = 0
   local location l = null
   local unit u = null
   local group g = CreateGroup()
@@ -55,7 +43,7 @@ function CheckShredderLoc takes nothing returns nothing
     set d = GetUnitCurrentOrder(u)
     if d == OrderId("harvest") or d == OrderId("resumeharvesting") then
       set l = GetUnitLoc(u)
-      set d = DistanceBetweenPoints(home_location, l)
+      set d = R2I(DistanceBetweenPoints(home_location, l))
       if d >= 1000 and d <= 2000 then  //Ensure to be near home_location
         call GroupClear(g)
         call GroupEnumUnitsInRangeOfLoc(g, l, 800, null)
@@ -63,7 +51,7 @@ function CheckShredderLoc takes nothing returns nothing
         set g = SelectUnittype(g, UNIT_TYPE_STRUCTURE, true)
         set g = SelectByAlive(g, true)
         set g = SelectByHidden(g, false)
-        set shredderbuild = StatisticsUnitNum(g) < 5
+        set shredderbuild = BlzGroupGetSizeAMAI(g) < 5
       endif
       call RemoveLocation(l)
       set l = null
