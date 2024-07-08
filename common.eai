@@ -5140,6 +5140,7 @@ function GetUnusedZeppelinNearUnit takes unit ru, unit nu returns unit
   set g = SelectByPlayer(g, ai_player, true)
   set g = SelectByAlive(g, true)
   set g = SelectByOrderOr(g, 0, order_cancel, true)
+  set g = SelectByUnitFree(g, true)
   set g = SelectByUnitStandard(g, true)
   set ru = GetNearestOfGroup(ru, g, unitloc)
   call DestroyGroup(g)
@@ -8766,9 +8767,6 @@ endfunction
 //===========================================================================
 function GetPatchVersion takes nothing returns nothing
   local unit u = null
-  if (JASS_MAX_ARRAY_SIZE > 8192) then  //1.29 or higher
-    set skillfix = true
-  endif
 
   if GetPlayerController(Player(12)) != MAP_CONTROL_CREEP then  // old ver WE make map , the Player(12) is MAP_CONTROL_CREEP , Even running in higher war3
     call Trace("Map max player is 24")
@@ -8790,6 +8788,9 @@ function GetPatchVersion takes nothing returns nothing
     set AatpAbility = GetUnitAbilityLevel(u, 'Aatp') > 0  // prevent old war3 or ROC
     call RemoveUnit(u)
     set u = null
+  endif
+  if JASS_MAX_ARRAY_SIZE > 8192 and not AatpAbility then  //1.29 ~ 1.32.9
+    set skillfix = true
   endif
 endfunction
 
