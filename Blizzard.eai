@@ -99,8 +99,10 @@
     integer playerpassive = 15
 
     trigger ZoomSetx = null
+    trigger ZoomHotKeySet = null
     trigger AdjustZoomUp = null
     trigger AdjustZoomDown = null
+    boolean ZoomHotKey = true
     real array current_zoom
 
     trigger W3CDeny = CreateTrigger()
@@ -1077,7 +1079,7 @@ function TPEffect takes nothing returns nothing
     if u != null then
       set i = 0
       loop
-        exitwhen i >= GetBJMaxPlayers()
+        exitwhen i >= playermax
         set p2 = Player(i)
         if GetPlayerSlotState(p2) == PLAYER_SLOT_STATE_PLAYING and (IsPlayerObserver(p2) or (GetPlayerController(p2) == MAP_CONTROL_USER) and IsPlayerAlly(p1, p2)) then
           set KK_TP_num = KK_TP_num + 1
@@ -1132,8 +1134,18 @@ function ZoomSet takes nothing returns nothing
   endif
 endfunction
 
+function ZoomHotKeySwitch takes nothing returns nothing
+  if ZoomHotKey then
+    set ZoomHotKey = false
+    call DisplayTimedTextToPlayer(GetTriggerPlayer(), 0, 0, 7, "zoom hot key switch: |cfffd0000[off]|r" )
+  else
+    call DisplayTimedTextToPlayer(GetTriggerPlayer(), 0, 0, 7, "zoom hot key switch: |cff00ff00[on]|r" )
+    set ZoomHotKey = true
+  endif
+endfunction
+
 function ZoomDown takes nothing returns nothing
-  if current_zoom[GetPlayerId(GetTriggerPlayer())] > 1650 then
+  if ZoomHotKey and current_zoom[GetPlayerId(GetTriggerPlayer())] > 1650 then
     if GetTriggerPlayer() == GetLocalPlayer() then
       call SetCameraFieldForPlayer(GetTriggerPlayer(), CAMERA_FIELD_TARGET_DISTANCE, ( current_zoom[GetPlayerId(GetTriggerPlayer())] - 50 ), 0 )
       set current_zoom[GetPlayerId(GetTriggerPlayer())] = current_zoom[GetPlayerId(GetTriggerPlayer())] - 50
@@ -1142,7 +1154,7 @@ function ZoomDown takes nothing returns nothing
 endfunction
 
 function ZoomUp takes nothing returns nothing
-  if current_zoom[GetPlayerId(GetTriggerPlayer())] < 3000 then
+  if ZoomHotKey and current_zoom[GetPlayerId(GetTriggerPlayer())] < 3000 then
     if GetTriggerPlayer() == GetLocalPlayer() then
       call SetCameraFieldForPlayer(GetTriggerPlayer(), CAMERA_FIELD_TARGET_DISTANCE, ( current_zoom[GetPlayerId(GetTriggerPlayer())] + 50 ), 0 )
       set current_zoom[GetPlayerId(GetTriggerPlayer())] = current_zoom[GetPlayerId(GetTriggerPlayer())] + 50
@@ -1153,9 +1165,11 @@ endfunction
 function InitZoom takes nothing returns nothing
   local integer i = 0
   set ZoomSetx = CreateTrigger()
+  set ZoomHotKeySet = CreateTrigger()
   set AdjustZoomUp = CreateTrigger()
   set AdjustZoomDown = CreateTrigger()
   call TriggerAddAction(ZoomSetx, function ZoomSet)
+  call TriggerAddAction(ZoomHotKeySet , function ZoomHotKeySwitch)
   call TriggerAddAction(AdjustZoomUp , function ZoomUp)
   call TriggerAddAction(AdjustZoomDown , function ZoomDown)
   loop
@@ -1165,6 +1179,7 @@ function InitZoom takes nothing returns nothing
       call TriggerRegisterPlayerChatEvent( ZoomSetx, Player(i), "-zoom", false )
       call TriggerRegisterPlayerKeyEventBJ( AdjustZoomUp, Player(i), bj_KEYEVENTTYPE_DEPRESS, bj_KEYEVENTKEY_UP )
       call TriggerRegisterPlayerKeyEventBJ( AdjustZoomDown, Player(i), bj_KEYEVENTTYPE_DEPRESS, bj_KEYEVENTKEY_DOWN )
+      call TriggerRegisterPlayerChatEvent( ZoomHotKeySet, Player(i), "-zoomkey", true )
       set current_zoom[i] = 1650 // Default expected in legacy systems
       if IsPlayerObserver(Player(i)) then
         call SetCameraFieldForPlayer(Player(i), CAMERA_FIELD_TARGET_DISTANCE, 1950, 0)
