@@ -1,4 +1,3 @@
-SET LOG=0
-@call MakeRoC %LOG%
-SET LOG=1
-@call MakeTFT %LOG%
+@ECHO OFF
+@call MakeRoC 1
+@call MakeTFT 0

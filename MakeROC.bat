@@ -1,8 +1,11 @@
 @ECHO OFF
-SET LOG=%~1
+SET MAKEALL=%~1
+if not "%MAKEALL%"=="1" (
+  SET MAKEALL=0
+)
 ECHO _____________________________
-call MakeVERBase.bat 0 ROC
+call MakeVERBase.bat 0 ROC %MAKEALL%
 ECHO =============================
-if not "%LOG%"=="0" (
-    pause
+if "%RESULTMAKEVER%"=="1" (
+  pause
 )

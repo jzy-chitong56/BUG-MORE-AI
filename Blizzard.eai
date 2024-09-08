@@ -101,6 +101,7 @@
     trigger ZoomSetx = null
     trigger AdjustZoomUp = null
     trigger AdjustZoomDown = null
+    boolean array ZoomKey
     real array current_zoom
 
     trigger W3CDeny = CreateTrigger()

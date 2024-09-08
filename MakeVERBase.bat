@@ -1,6 +1,7 @@
 @ECHO OFF
 SET VSAI=%~1
 SET VER=%~2
+SET MAKEALL=%~3
 SET RESULTMAKEVER=0
 if %VSAI% == 1 (
 ECHO Making AMAI %VER% VS AI
@@ -52,7 +53,7 @@ if "%errorlevel%"=="1" SET RESULTMAKEVER=1
 jassparser common.j Scripts\%VER%\common.ai Scripts\%VER%\undead.ai
 if "%errorlevel%"=="1" SET RESULTMAKEVER=1
 ECHO _____________________________
-perl SplitBlizzardJ.pl %VER%
+perl SplitBlizzardJ.pl %VER% %VSAI%
 if %VSAI% == 1 (
 ECHO creating \Scripts\Blizzard_%VER%.j  AMAI VS AI Flag set to: ON
 perl ejass.pl Blizzard3VAI.eai %VER% VER:%VER% > %VER%\tmp\Blizzard3Gen.j
@@ -67,7 +68,6 @@ pjass common.j Scripts\Blizzard_%VER%.j
 if "%errorlevel%"=="1" SET RESULTMAKEVER=1
 jassparser common.j Scripts\Blizzard_%VER%.j
 if "%errorlevel%"=="1" SET RESULTMAKEVER=1
-ECHO _____________________________
 copy /b/v/y "Scripts\Blizzard_%VER%.j" "Scripts\Blizzard.j"
 ECHO copy \Scripts\Blizzard.j
 rmdir /s /q "%VER%/tmp"
@@ -77,6 +77,9 @@ if "%RESULTMAKEVER%"=="1" (
   )
   if %VSAI% == 0 (
     ECHO Compilation AMAI %VER% error
+  )
+  if %MAKEALL% == 1 (
+    SET RESULTMAKEVER=0
   )
   exit /b %RESULTOPTVER%
 ) else (
