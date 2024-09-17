@@ -15,7 +15,7 @@ sub process_dir {
   my $dirname = $_[1];
   my $commander = $_[2];
   my $filename;
-  
+
   opendir my $DIR, $dirname or die "Could not open $dirname\n";
 
   while ($filename = readdir($DIR)) {
@@ -29,7 +29,7 @@ sub process_dir {
       } else {
         print "Installing $ver AMAI without Commander to $dirname/$filename\n";
       }
-      system "MPQEditor htsize \"$dirname/$filename\" 64";
+      system "MPQEditor htsize \"$dirname/$filename\" 128";
       if ($? == -1 || $? >> 8 == 5) {
         printf "ERROR: Failed to run htsize, you may not have valid permissions or are blocked by windows UAC. Ensure map files are not in a UAC protected location %d\n", $? >> 8;
       } else {
@@ -47,6 +47,30 @@ sub process_dir {
           printf "ERROR: Failed to add commander, you may not have valid permissions or are blocked by windows UAC. Ensure map files are not in a UAC protected location %d\n", $? >> 8;
         } else {
           printf "add commander:%d\n", $? >> 8;
+        }
+        system "MPQEditor a \"$dirname/$filename\" Icons\\CommandButtons\\*.blp ReplaceableTextures\\CommandButtons";
+        if ($? == -1 || $? >> 8 == 5) {
+          printf "ERROR: Failed to add item icons, you may not have valid permissions or are blocked by windows UAC. Ensure map files are not in a UAC protected location %d\n", $? >> 8;
+        } else {
+          printf "add item icons:%d\n", $? >> 8;
+        }
+        system "MPQEditor a \"$dirname/$filename\" Icons\\CommandButtonsDisabled\\*.blp ReplaceableTextures\\CommandButtonsDisabled";
+        if ($? == -1 || $? >> 8 == 5) {
+          printf "ERROR: Failed to add item icons, you may not have valid permissions or are blocked by windows UAC. Ensure map files are not in a UAC protected location %d\n", $? >> 8;
+        } else {
+          printf "add item icons:%d\n", $? >> 8;
+        }
+        system "MPQEditor a \"$dirname/$filename\" Icons\\war3map.imp war3map.imp";
+        if ($? == -1 || $? >> 8 == 5) {
+          printf "ERROR: Failed to add input files, you may not have valid permissions or are blocked by windows UAC. Ensure map files are not in a UAC protected location %d\n", $? >> 8;
+        } else {
+          printf "add input files:%d\n", $? >> 8;
+        }
+        system "MPQEditor a \"$dirname/$filename\" Icons\\war3map.w3t war3map.w3t";
+        if ($? == -1 || $? >> 8 == 5) {
+          printf "ERROR: Failed to add icon files, you may not have valid permissions or are blocked by windows UAC. Ensure map files are not in a UAC protected location %d\n", $? >> 8;
+        } else {
+          printf "add icon files:%d\n", $? >> 8;
         }
       }
       system "MPQEditor f \"$dirname/$filename\"";
