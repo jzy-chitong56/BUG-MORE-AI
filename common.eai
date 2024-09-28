@@ -1236,85 +1236,60 @@ endfunction
 //===========================================================================
 // (AMAI)  ColorText (Converts the player color to a text version)
 //===========================================================================
-function ColorText takes player CPlayer returns string
+function ColorText takes playercolor c returns string
   //Required Variables
-  local playercolor PColor = GetPlayerColor(CPlayer)  //Gets the Player's color
+
   //Finds the Nicer Text Version of the Player's Color
-  if PColor == PLAYER_COLOR_RED then
-    set PColor = null
+  if c == PLAYER_COLOR_RED then
     return "Red"
-  elseif PColor == PLAYER_COLOR_BLUE then
-    set PColor = null
+  elseif c == PLAYER_COLOR_BLUE then
     return "Blue"
-  elseif PColor == PLAYER_COLOR_CYAN then
-    set PColor = null
+  elseif c == PLAYER_COLOR_CYAN then
     return "Cyan"
-  elseif PColor == PLAYER_COLOR_PURPLE then
-    set PColor = null
+  elseif c == PLAYER_COLOR_PURPLE then
     return "Purple"
-  elseif PColor == PLAYER_COLOR_YELLOW then
-    set PColor = null
+  elseif c == PLAYER_COLOR_YELLOW then
     return "Yellow"
-  elseif PColor == PLAYER_COLOR_ORANGE then
-    set PColor = null
+  elseif c == PLAYER_COLOR_ORANGE then
     return "Orange"
-  elseif PColor == PLAYER_COLOR_GREEN then
-    set PColor = null
+  elseif c == PLAYER_COLOR_GREEN then
     return "Green"
-  elseif PColor == PLAYER_COLOR_PINK then
-    set PColor = null
+  elseif c == PLAYER_COLOR_PINK then
     return "Pink"
-  elseif PColor == PLAYER_COLOR_LIGHT_GRAY then
-    set PColor = null
+  elseif c == PLAYER_COLOR_LIGHT_GRAY then
     return "Light Gray"
-  elseif PColor == PLAYER_COLOR_LIGHT_BLUE then
-    set PColor = null
+  elseif c == PLAYER_COLOR_LIGHT_BLUE then
     return "Light Blue"
-  elseif PColor == PLAYER_COLOR_AQUA then
-    set PColor = null
+  elseif c == PLAYER_COLOR_AQUA then
     return "Aqua"
-  elseif PColor == PLAYER_COLOR_BROWN then
-    set PColor = null
+  elseif c == PLAYER_COLOR_BROWN then
     return "Brown"
-  elseif PColor == PLAYER_COLOR_MAROONX then
-    set PColor = null
+  elseif c == PLAYER_COLOR_MAROONX then
     return "Maroon"
-  elseif PColor == PLAYER_COLOR_NAVYX then
-    set PColor = null
+  elseif c == PLAYER_COLOR_NAVYX then
     return "Navy"
-  elseif PColor == PLAYER_COLOR_TURQUOISEX then
-    set PColor = null
+  elseif c == PLAYER_COLOR_TURQUOISEX then
     return "Turquoise"
-  elseif PColor == PLAYER_COLOR_VIOLETX then
-    set PColor = null
+  elseif c == PLAYER_COLOR_VIOLETX then
     return "Violet"
-  elseif PColor == PLAYER_COLOR_WHEATX then
-    set PColor = null
+  elseif c == PLAYER_COLOR_WHEATX then
     return "Wheat"
-  elseif PColor == PLAYER_COLOR_PEACHX then
-    set PColor = null
+  elseif c == PLAYER_COLOR_PEACHX then
     return "Peach"
-  elseif PColor == PLAYER_COLOR_MINTX then
-    set PColor = null
+  elseif c == PLAYER_COLOR_MINTX then
     return "Mint"
-  elseif PColor == PLAYER_COLOR_LAVENDERX then
-    set PColor = null
+  elseif c == PLAYER_COLOR_LAVENDERX then
     return "Lavender"
-  elseif PColor == PLAYER_COLOR_COALX then
-    set PColor = null
+  elseif c == PLAYER_COLOR_COALX then
     return "Coal"
-  elseif PColor == PLAYER_COLOR_SNOWX then
-    set PColor = null
+  elseif c == PLAYER_COLOR_SNOWX then
     return "Snow"
-  elseif PColor == PLAYER_COLOR_EMERALDX then
-    set PColor = null
+  elseif c == PLAYER_COLOR_EMERALDX then
     return "Emerald"
-  elseif PColor == PLAYER_COLOR_PEANUTX then
-    set PColor = null
+  elseif c == PLAYER_COLOR_PEANUTX then
     return "Peanut"
   endif
   //Returns text version
-  set PColor = null
   return ""
 endfunction
 
@@ -2786,7 +2761,7 @@ endfunction
 //============================================================================
 function InitChatVars takes nothing returns nothing
   call SetChatVar("Race", race_name[own_race])
-  call SetChatVar("Color", ColorText(ai_player))
+  call SetChatVar("Color", ColorText(GetPlayerColor(ai_player)))
   call SetChatVarR("PlayerNum", c_ally_total + c_enemy_total + 1)
   call SetChatVar("PlayerNum", Int2Str(c_ally_total + c_enemy_total + 1))
   call SetChatVarB("1vs1", game_is_1on1)
@@ -2801,7 +2776,7 @@ endfunction
 //============================================================================
 function SetChatVarsPlayer takes player p returns nothing
   call SetChatVar("PlayerRace", race_name[player_race[GetPlayerId(p)]])
-  call SetChatVar("PlayerColor", ColorText(p))
+  call SetChatVar("PlayerColor", ColorText(GetPlayerColor(p)))
 endfunction
 
 
@@ -12516,7 +12491,7 @@ endfunction
 function SetChatVarsAttack takes unit u returns nothing
   local player p = GetOwningPlayer(u)
   call SetChatVar("TargetRace", race_name[player_race[GetPlayerId(p)]])
-  call SetChatVar("TargetColor", ColorText(p))
+  call SetChatVar("TargetColor", ColorText(GetPlayerColor(p)))
   call SetChatVarR("TargetStrength", GetPlayerStrength(p))
   set p = null
 endfunction
