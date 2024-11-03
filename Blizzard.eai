@@ -6,7 +6,9 @@
     // default values
     string language = "Chinese"  // Possible values: "" (dialog), "English", "Deutsch", "Swedish", "French", "Spanish", "Romanian", "Russian", "Portuguese", "Norwegian", "Chinese"
     string game_mode = "" // Possible values: "" (dialog), "commander", "no_human", "ai_only", "shared"
-    string backlanguage = "Chinese"
+    #INCLUDETABLE <backlanguage.txt>
+    string backlanguage = "%1"
+    #ENDINCLUDE
 
     integer array command_number
     integer array command_par1
@@ -2191,8 +2193,8 @@ function Commander takes nothing returns nothing
     return
   elseif Comp != Player(playermax) then
     if GetPlayerController(Comp) != MAP_CONTROL_COMPUTER then
-       call DisplayToTP(not_specified_computer)
-       set Comp = null
+      call DisplayToTP(not_specified_computer)
+      set Comp = null
       return
     elseif not IsPlayerAlly(GetTriggerPlayer(), Comp) then
       call DisplayFromPlayer(Comp, chat_no_ally)
