@@ -3219,8 +3219,8 @@ function InitChatArrays%1 takes nothing returns nothing
     if %1 == null or %1 == "" then
       set %1 = "%2"
     endif
-      #ENDINCLUDE
     #ENDINCLUDE
+  #ENDINCLUDE
 endfunction
 
 #ENDINCLUDE
@@ -4463,9 +4463,9 @@ function GetMineNearLoc takes unit u, location l, real dist returns unit
       call GroupRemoveUnit(g,mine)
     endloop
     set mine = null
-  endif
-  if u != null then
-    call Trace("GetMineNearLOC: A Mine match found")
+    if u != null then
+      call Trace("GetMineNearLOC: A Mine match found")
+    endif
   endif
   call DestroyGroup(g)
   set g = null
@@ -5425,7 +5425,7 @@ function GetPlayerHeroStrengthMod takes player p returns integer
     set u = FirstOfGroup(g)
     exitwhen u == null
     if IsUnitType(u, UNIT_TYPE_HERO) and UnitAlive(u) then
-      set sum = sum + R2I(GetHeroStrength(u) * handicap * (GetUnitState(u, UNIT_STATE_LIFE) / Max(GetUnitState(u, UNIT_STATE_MAX_LIFE), 1)))
+      set sum = sum + R2I(GetHeroStrength(u) * handicap * (GetUnitState(u, UNIT_STATE_LIFE) / RMax(GetUnitState(u, UNIT_STATE_MAX_LIFE), 1)))
     endif
     call GroupRemoveUnit(g,u)
   endloop
