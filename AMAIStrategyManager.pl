@@ -9,7 +9,7 @@ use Tk::NoteBook;
 BEGIN{
   if($^O eq 'MSWin32'){
       require Win32::Console;
-      Win32::Console::Free();
+      #Win32::Console::Free();
   }
 }
 
@@ -19,7 +19,7 @@ if($] >= 5.008004) {
   $fdialogbug = 1;
 }
 
-my $main = MainWindow->new(-title => 'AMAI Strategy Manager V2.54');
+my $main = MainWindow->new(-title => 'AMAI Strategy Manager');
 my $lframe = $main->Frame->pack(-side => 'left');
 my $race;
 my $ver;
@@ -167,16 +167,12 @@ $lframe->Button(
                 -width => 15)->pack;
 $lframe->Button(
                 -text => 'Compile',
-                -command => sub { system "Make$ver.bat" },
+                -command => sub { system("Make$ver.bat", "1") },
                 -width => 15)->pack;
 $lframe->Button(
                 -text => 'Compile, Optimize',
-                -command => sub { system "MakeOpt$ver.bat" },
+                -command => sub { system("MakeOpt$ver.bat", "1") },
                 -width => 15)->pack;
-$lframe->Button(
-		-text => 'Compile AMAIvsAI',
-		-command => sub { system "MakeVAI$ver.bat" },
-		-width => 15)->pack;
 MainLoop;
 
 sub GetRaces {

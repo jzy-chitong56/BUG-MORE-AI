@@ -1,11 +1,4 @@
 @ECHO OFF
-SET MAKEALL=%~1
-if not "%MAKEALL%"=="1" (
-  SET MAKEALL=0
-)
-ECHO _____________________________
-call MakeVERBase.bat 0 TFT %MAKEALL%
-ECHO =============================
-if "%RESULTMAKEVER%"=="1" (
-  pause
-)
+@REM call TFT/Inherit.bat Manually call this when need to refresh TFT state.
+SET SILENT=%~1
+call MakeVERBase.bat TFT %SILENT%
