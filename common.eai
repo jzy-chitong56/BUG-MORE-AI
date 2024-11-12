@@ -1500,7 +1500,7 @@ function Int2Str takes integer ic returns string
   endif
   if i < 0 then
     set neg = true
-    set i = 0 - i
+    set i = i * -1
   endif
   loop
     exitwhen i == 0
@@ -1657,7 +1657,7 @@ function DisplayToAll takes string s returns nothing
   local integer i = 0
   local string m = message_add+s
   loop
-    if GetPlayerSlotState(Player(i)) == PLAYER_SLOT_STATE_PLAYING then
+    if GetPlayerSlotState(Player(i)) == PLAYER_SLOT_STATE_PLAYING or IsPlayerObserver(Player(i)) then
       call DisplayTimedTextToPlayer(Player(i),0,0,15,m)
     endif
     set i = i + 1
@@ -1672,7 +1672,7 @@ function DisplayToAllImportant takes string s returns nothing
   local integer i = 0
   local string m = message_add+s
   loop
-    if GetPlayerSlotState(Player(i)) == PLAYER_SLOT_STATE_PLAYING then
+    if GetPlayerSlotState(Player(i)) == PLAYER_SLOT_STATE_PLAYING or IsPlayerObserver(Player(i)) then
       call DisplayTimedTextToPlayer(Player(i),0,0,15,m)
     endif
     set i = i + 1
@@ -1748,7 +1748,7 @@ function DisplayToObservers takes string s returns nothing
   local string m = message_add+s
   loop
     exitwhen i >= PLAYERAGGRESSIVE
-    if IsPlayerObserver(Player(i)) then
+    if IsPlayerObserver(Player(i)) and not IsPlayerAlly(ai_player,Player(i)) then
       call DisplayTimedTextToPlayer(Player(i),0,0,15,m)
       call StartSound(chatSound)
     endif
@@ -1763,7 +1763,7 @@ function DisplayToObserversImportant takes string s returns nothing
   local string m = message_add+s
   loop
     exitwhen i >= PLAYERAGGRESSIVE
-    if IsPlayerObserver(Player(i)) then
+    if IsPlayerObserver(Player(i)) and not IsPlayerAlly(ai_player,Player(i)) then
       call DisplayTimedTextToPlayer(Player(i),0,0,15,m)
       call StartSound(importantSound)
     endif
@@ -1815,9 +1815,9 @@ endfunction
 function DisplayToAllFromPlayer takes string s, integer playernum, boolean important returns nothing
 	local integer i = 0
 	local string m = message_add+s
-	if Player(GetAiPlayer()) == Player(playernum) then
+	if GetAiPlayer() == playernum then
 		loop
-			if GetPlayerSlotState(Player(i)) == PLAYER_SLOT_STATE_PLAYING then
+			if GetPlayerSlotState(Player(i)) == PLAYER_SLOT_STATE_PLAYING or IsPlayerObserver(Player(i)) then
 				call DisplayTimedTextToPlayer(Player(i),0,0,15,m)
 			endif
 			set i = i + 1
@@ -1833,34 +1833,34 @@ function DisplayToAllFromPlayer takes string s, integer playernum, boolean impor
 endfunction
 
 function UpdateDebugPlayer takes nothing returns nothing
-		if IsPlayerObserver(Player(debug_player)) == true then
-			if debug_player >= PLAYERAGGRESSIVE then
-				set debug_player = PLAYERAGGRESSIVE // Do not go above MaxPlayers
-			else
-				set debug_player = debug_player + 1
-			endif
-		endif
-		if GetPlayerUnitCount(Player(debug_player), true) == 0 then
-			if debug_player >= PLAYERAGGRESSIVE then
-				set debug_player = PLAYERAGGRESSIVE
-			else
-				set debug_player = debug_player + 1
-			endif
-		endif
-		//if GetChar(GetPlayerName(Player(debug_player)), 1) != "A" then
-			//if debug_player >= PLAYERAGGRESSIVE then
-			//	set debug_player = PLAYERAGGRESSIVE
-			//else
-			//	set debug_player = debug_player + 1
-			//endif
-		//endif
-		if GetPlayerSlotState(Player(debug_player)) != PLAYER_SLOT_STATE_PLAYING then
-			if debug_player >= PLAYERAGGRESSIVE then
-				set debug_player = PLAYERAGGRESSIVE
-			else
-				set debug_player = debug_player + 1
-			endif
-		endif
+  if IsPlayerObserver(Player(debug_player)) == true then
+    if debug_player >= PLAYERAGGRESSIVE then
+      set debug_player = PLAYERAGGRESSIVE // Do not go above MaxPlayers
+    else
+      set debug_player = debug_player + 1
+    endif
+  endif
+  if GetPlayerUnitCount(Player(debug_player), true) == 0 then
+    if debug_player >= PLAYERAGGRESSIVE then
+      set debug_player = PLAYERAGGRESSIVE
+    else
+      set debug_player = debug_player + 1
+    endif
+  endif
+  //if GetChar(GetPlayerName(Player(debug_player)), 1) != "A" then
+    //if debug_player >= PLAYERAGGRESSIVE then
+    //	set debug_player = PLAYERAGGRESSIVE
+    //else
+    //	set debug_player = debug_player + 1
+    //endif
+  //endif
+  if GetPlayerSlotState(Player(debug_player)) != PLAYER_SLOT_STATE_PLAYING then
+    if debug_player >= PLAYERAGGRESSIVE then
+      set debug_player = PLAYERAGGRESSIVE
+    else
+      set debug_player = debug_player + 1
+    endif
+  endif
 endfunction
 
 function TracePlayer takes string s, integer playernum returns nothing
@@ -1999,7 +1999,7 @@ function Abs takes integer a returns integer
   if a >= 0 then
     return a
   else
-    return 0 - a
+    return a * -1
   endif
 endfunction
 
@@ -2007,7 +2007,7 @@ function RAbs takes real a returns real
   if a >= 0 then
     return a
   else
-    return 0 - a
+    return a * -1
   endif
 endfunction
 
@@ -2084,7 +2084,7 @@ function GetRandomDiff takes integer maxdiff returns integer
   if GetRandomInt(0,1) == 1 then
     return GetRandomInt(0,maxdiff)
   else
-    return GetRandomInt(0 - maxdiff, 0)
+    return GetRandomInt(0,maxdiff) * -1
   endif
 endfunction
 
@@ -2687,7 +2687,7 @@ endfunction
 // If units upgrade requirement unit is the same as passed in upgrade unit id for three levels of upgrades.
 // TODO Won't currently work with 4 or more tiers.
 function isSameUpgradeLine takes integer unitid, integer upgradeid returns boolean
-  if upgradeid == 0 then
+  if upgradeid == 0 or unitid < 1 then
     return false
   endif
   if needed3[unitid] == UPGRADED and needed1[unitid] == upgradeid then
@@ -3302,7 +3302,7 @@ function InitChatArrays%1 takes nothing returns nothing
   set %1 = "%2"
   #ENDINCLUDE
   #INCLUDETABLE <backlanguage.txt>
-  #DEFINE $back$ %1
+    #DEFINE $back$ %1
     #INCLUDETABLE <Languages\$back$\ChatMisc.txt> #ENC:$enc$
     if %1 == null or %1 == "" then
       set %1 = "%2"
