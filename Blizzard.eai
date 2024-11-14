@@ -746,9 +746,6 @@ function CreateW3CClock takes nothing returns nothing
   local trigger t = CreateTrigger()
   local integer i = 0
   if ClockTimer == null then
-    if GetPlayerController(Player(12)) != MAP_CONTROL_CREEP then
-      set W3CClock = false  // use war3 2.0
-    endif
     set ClockTimer = CreateTimer()
     call TimerStart(ClockTimer, 0.5, true, function UpdateW3CClock)
     set ClockTimerTemp = CreateTimer()
@@ -785,7 +782,7 @@ function updateMineText takes integer i returns nothing
       loop
         exitwhen c >= playermax
         set sp = Player(c)
-        call SetTextTagVisibility(W3CWorkTextTag[i], W3CWorkerCount and (IsPlayerObserver(sp) or (GetPlayerSlotState(sp) == PLAYER_SLOT_STATE_PLAYING and IsPlayerAlly(p, sp))))
+        call SetTextTagVisibility(W3CWorkTextTag[i], IsPlayerObserver(sp) or (W3CWorkerCount and (GetPlayerSlotState(sp) == PLAYER_SLOT_STATE_PLAYING and IsPlayerAlly(p, sp))))
         set c = c + 1
       endloop
       set sp = null
@@ -938,7 +935,7 @@ function W3CWorker_chat takes nothing returns nothing
         loop
           exitwhen c >= playermax
           set sp = Player(c)
-          call SetTextTagVisibility(W3CWorkTextTag[i], W3CWorkerCount and (IsPlayerObserver(sp) or (GetPlayerSlotState(sp) == PLAYER_SLOT_STATE_PLAYING and IsPlayerAlly(p, sp))))
+          call SetTextTagVisibility(W3CWorkTextTag[i], IsPlayerObserver(sp) or (W3CWorkerCount and (GetPlayerSlotState(sp) == PLAYER_SLOT_STATE_PLAYING and IsPlayerAlly(p, sp))))
           set c = c + 1
         endloop
         set sp = null
@@ -958,9 +955,6 @@ function InitW3CWorkerCount takes nothing returns nothing
   local trigger issuedPointOrder = CreateTrigger()
   local trigger lossOfUnitTrigger = CreateTrigger()
   local trigger lossOfMineTrigger = CreateTrigger()
-  if GetPlayerController(Player(12)) != MAP_CONTROL_CREEP then
-    set W3CWorkerCount = false  // use war3 2.0
-  endif
   loop
     exitwhen i >= playermax
     set p = Player(i)
