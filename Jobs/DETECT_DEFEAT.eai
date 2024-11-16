@@ -106,7 +106,7 @@ function KillYourself takes boolean end_ai returns nothing
           if destroy_buildings_on_defeat or IsUnitHidden(u) then
             call KillUnit(u)
           else
-            call SetUnitOwner(u, Player(PLAYER_AMAI_NEUTRAL_VICTIM), true)
+            call SetUnitOwner(u, Player(PLAYERVICTIM), true)
           endif
           call GroupRemoveUnit(g, u )
         endloop
