@@ -1,6 +1,6 @@
 @ECHO off
 chcp 65001
-SET VER=REFORGED
+SET VER=TFT
 SET COMMAND=1
 SET COMMAND_STATE=安装常规控制台
 
@@ -9,19 +9,15 @@ cls
 ECHO.
 ECHO (1/4) 请选择魔兽3版本:
 ECHO.
-ECHO 1. 重制版 REFORGED (1.33+) (默认)
-ECHO 2. 经典版-冰封王座 TFT (1.24e+)
-ECHO 3. 经典版-混乱之治 ROC (1.24e ~ 1.31)
+ECHO 1. 经典版-冰封王座 TFT (1.24e+)
+ECHO 2. 经典版-混乱之治 ROC (1.24e ~ 1.31)
 ECHO.
-set /p choice=请输入(1 ~ 3):
+set /p choice=请输入(1 ~ 2):
 
 if "%choice%"=="1" (
-  set VER=REFORGED
-)
-if "%choice%"=="2" (
   set VER=TFT
 )
-if "%choice%"=="3" (
+if "%choice%"=="2" (
   set VER=ROC
 )
 
@@ -40,15 +36,15 @@ ECHO.
 set /p choice=请输入(1 ~ 3):
 
 if "%choice%"=="1" (
-  SET COMMAND=0
+  SET COMMAND=1
   SET COMMAND_STATE =安装常规控制台
 )
 if "%choice%"=="2" (
-  SET COMMAND=1
+  SET COMMAND=2
   SET COMMAND_STATE =安装 VS AI 控制台
 )
 if "%choice%"=="3" (
-  SET COMMAND=2
+  SET COMMAND=0
   SET COMMAND_STATE =不安装控制台
 )
 
@@ -86,7 +82,7 @@ set /p searchPath=请输入:
 
 setlocal enabledelayedexpansion
 for %%F in ("%searchPath%\*.w3x" "%searchPath%\*.w3m") do (
-  call InstallVERToMap !VER! "!%%~fF!" "!COMMAND!"
+  call InstallVERToMap !VER! "!%%~fF!" "%COMMAND%"
 )
 endlocal
 goto EndScript
