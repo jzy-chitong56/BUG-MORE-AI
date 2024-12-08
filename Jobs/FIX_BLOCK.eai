@@ -37,6 +37,7 @@ function MoveAncient takes unit u returns nothing
   endif
   call CreateDebugTagLoc("fix block : root here", 10, GetLocationX(ancientrootloc), GetLocationY(ancientrootloc), 3.00, 1.50)
   call IssuePointOrderLoc(u, "root", ancientrootloc)  // build no n need RESET GUARD POSITION
+  call TQAddUnitJob(10, RESET_ANCIENT, 0, u)
   set movetotal = movetotal + 1
 endfunction
 
