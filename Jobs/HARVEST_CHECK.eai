@@ -25,7 +25,7 @@ function PeonMineCheck takes unit mine returns boolean
         if IsUnitInTransport(u, mine) then
           set savewisp = u
           set i = i + 1
-        elseif not IsUnitHidden(u) then
+        elseif not IsUnitHidden(u) and GetUnitCurrentOrder(u) <= 852678 then
           call GroupAddUnit(tempg, u)
         endif
       endif
@@ -40,7 +40,7 @@ function PeonMineCheck takes unit mine returns boolean
     endif
     if i < delaywisps then
       set tempg = SelectByLoaded(tempg, false)
-      set tempg = SelectUnittype(tempg, UNIT_TYPE_STRUCTURE, false)  //  Preventing Tree Transformation
+      //set tempg = SelectUnittype(tempg, UNIT_TYPE_STRUCTURE, false)  //  Preventing Tree Transformation
       set tempg = GetNearestSubGroupOfGroup(tempg, unitloc, delaywisps - i)
       //call GroupRemoveGuardPositionInstant(g) // this gets wisps to come off the trees.
       //call GroupTargetOrder(g, "harvest", mine)
