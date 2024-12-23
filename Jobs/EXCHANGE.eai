@@ -50,7 +50,7 @@ endfunction
 
 function ExchangeOnce takes nothing returns nothing
   local integer amount = 0
-  if force_number <= 0 then
+  if force_number <= 0 or GetGoldOwned() < 1000 then
     return
   endif
   set amount = GetPlayerGold(ai_player) - gold_exchange_level
