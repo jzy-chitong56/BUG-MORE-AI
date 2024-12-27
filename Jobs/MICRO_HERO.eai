@@ -429,7 +429,7 @@ function MicroHeroJob takes integer hn returns nothing
     //  call DisplayToAll(Int2Str(R2I(hero_enemy_density[hn] * 10)))
     //  call DisplayToAll(Int2Str(R2I(DistanceBetweenPoints(hero_enemy_loc[hn],GetUnitLoc(hero_unit[hn])))))
 
-    if not teleporting and GetUnitState(hero_unit[hn], UNIT_STATE_LIFE) < RMax(flee_health_percentage * GetUnitState(hero_unit[hn], UNIT_STATE_MAX_LIFE), flee_minimum_health) and healing == false then
+    if not teleporting and GetUnitState(hero_unit[hn], UNIT_STATE_LIFE) < RMax(flee_health_percentage * GetUnitState(hero_unit[hn], UNIT_STATE_MAX_LIFE), flee_minimum_health) then
       call SaveHero(hn,armyOfHero)
       set healing = IsUnitInGroup(hero_unit[hn], unit_healing)
     endif
