@@ -2803,6 +2803,7 @@ function StaggerSleep takes real base, real spread returns nothing
   local real sleep = base + spread * I2R(GetAiPlayer()) / I2R(GetPlayers()) + GetRandomReal(-0.1, 0.1)
   if sleep <= 0 then
     return
+  endif
   set sleep = RMax(0.1, sleep)
   call Sleep(sleep)
 endfunction
@@ -6511,7 +6512,7 @@ function MultipleMinefix takes nothing returns boolean
       endif
       if expansion_peon != null and UnitAlive(expansion_peon) then
         call IssueTargetOrderById(expansion_peon, old_id[racial_expansion], fixmine)  // this API only return false , cannot set b
-        call CreateDebugTag("Multiple Mine fix - expansion", 10, uexpansion_peon, 10.00, 8.00)
+        call CreateDebugTag("Multiple Mine fix - expansion", 10, expansion_peon, 10.00, 8.00)
         set b = true
       endif
     endif
