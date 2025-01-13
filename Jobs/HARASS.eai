@@ -204,7 +204,7 @@ function HarassJob takes integer key, unit target returns nothing
     set hu = FirstOfGroup(harasser)
   endif
   if state_retreat == 1 then
-    set d = DistanceBetweenPoints_dk(GetUnitLoc(hu), home_location) > 1000
+    set b = DistanceBetweenPoints_dk(GetUnitLoc(hu), home_location) > 1000
     if hu != null and b then
       set g = CreateGroup()
       call GroupEnumUnitsInRange(g,GetUnitX(hu),GetUnitY(hu),harass_radius_flee_ranged,null)
