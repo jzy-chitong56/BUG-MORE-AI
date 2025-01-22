@@ -1250,7 +1250,7 @@ function InitRandomHero takes nothing returns nothing
         endif
         call SetStartHero_d(p, GetPlayerRace(p), GetStartLocationLoc(GetPlayerStartLocation(p)))  // include AI
       endif
-      set i= i + 1
+      set i = i + 1
     endloop
     call TriggerRegisterPlayerUnitEvent(Random_Hero, Player(playerpassive), EVENT_PLAYER_UNIT_SELL, filterMeleeTrainedUnitIsHeroBJ)
     set Random_Hero_Action = TriggerAddAction(Random_Hero, function SetOtherHero)
