@@ -10,7 +10,7 @@ function GetMilitiaHall takes unit u returns unit
   loop
     set u = FirstOfGroup(g)
     exitwhen u == null
-    if GetUnitAbilityLevel(u, race_militia_hall_ability) > 0 and and GetUnitState(u, UNIT_STATE_LIFE) >= 1 and not IsUnitHidden(u) then
+    if GetUnitAbilityLevel(u, race_militia_hall_ability) > 0 and GetUnitState(u, UNIT_STATE_LIFE) >= 1 and not IsUnitHidden(u) then
       call DestroyGroup(g)
       set g = null
       return u
