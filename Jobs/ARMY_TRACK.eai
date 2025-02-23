@@ -199,7 +199,7 @@ function SeedNewArmies takes nothing returns nothing
     exitwhen p >= PLAYERAGGRESSIVE
     exitwhen p != lastFreeNum and ModuloInteger(p, 10) == 0 // Sleep every 10 players
     set sp = Player(p)
-    if sp != null and andGetPlayerSlotState(sp) == PLAYER_SLOT_STATE_PLAYING and not IsPlayerObserver(sp) and GetPlayerUnitCount(sp, false) > 0 then
+    if sp != null and GetPlayerSlotState(sp) == PLAYER_SLOT_STATE_PLAYING and not IsPlayerObserver(sp) and GetPlayerUnitCount(sp, false) > 0 then
       call SeedNewArmiesForPlayer(p)
     endif
     set p = p + 1
