@@ -5,7 +5,7 @@
     boolean tower_attack_run = false  // tower rush attack team has left home?
     boolean tower_peon_run = false  // tower rush peon team has left home? just first left
     boolean tower_peon_inplace = false  // tower rush peon in place? use to attack
-	boolean Console_TR_Commands = false  // tower rush Order by Player from Console?
+    boolean Console_TR_Commands = false  // tower rush Order by Player from Console?
     unit array builder  // hero and peon go to enemy home
     location tower_target_loc = null
     real first_tower_point_x = 0
@@ -23,6 +23,7 @@
     group tower_rush_power = null
     location toweringplayerloc = null
     location towerrushsubloc = null
+    location towerrecoveryloc = null
 #ELSE
 
 // ######################## Tower Rush Check ##############################
@@ -98,9 +99,6 @@ function TowerRushCheck takes integer delay returns nothing
 		if tower_target_loc != null then
 			set racial_rushcreep = 0  // TowerRush BR , waste time
 			set towerrushsubloc = GetSubtractionLoc(tower_target_loc, toweringplayerloc)
-			if race_sell_ziggurats then
-				set TRrecovery = Location(GetLocationX(towerrushsubloc), GetLocationY(towerrushsubloc))
-			endif
 			call StartTowerRush(delay)
 			return
 		endif
