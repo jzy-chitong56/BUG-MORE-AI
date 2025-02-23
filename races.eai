@@ -682,7 +682,7 @@ endfunction
 //  harvest_gold
 //============================================================================
 function harvest_gold takes integer townid returns nothing
-  if TownHasMine(townid) or (own_town_mine[townid] != null and GetResourceAmount(own_town_mine[townid]) > 0) then
+  if TownHasMine(townid) or (own_town_mine[townid] != null and UnitAlive(own_town_mine[townid]) and GetResourceAmount(own_town_mine[townid]) > 0) then
     call HarvestGold(townid,ver_optimal_gold)
   endif
 endfunction
@@ -700,10 +700,10 @@ function peon_assignment takes nothing returns nothing
   if race_manual_loading then
     if FoodSpace() <= 0 and TownCount(racial_peon) == TownCountDone(racial_peon) and TownCount(racial_peon) <= 4 then  // Scenario A
       call HarvestGold(0, 2)  // no foodspace , no peon , need one harvest mine peon build Farms
-      //call HarvestWood(0, Max(TownCountDone(racial_peon) - 1, 0))  //seize a seat
+      //call HarvestWood(0, 2)  //seize a seat
     elseif ((FoodSpace() <= 0 and FoodCap() < ver_food_limit) or not hero_built[1]) and TownCount(racial_peon) < 8 then  // Scenario B , game just started , but maybe use random hero
       call HarvestGold(0, 3)  // need more wisp HarvestWood , avoidance no wood cannot build and AI stop construction
-      //call HarvestWood(0, Max(TownCountDone(racial_peon) - 3, 0))  //seize a seat
+      //call HarvestWood(0, 2)  //seize a seat
     else  //Scenario C
       call HarvestGold(0, ver_optimal_gold)
     endif
@@ -841,7 +841,9 @@ function build_sequence_all takes nothing returns nothing
       endif
     endif
     //if debugging then
-      call UpdateDebugTextTag(debugcountertag, "Counter: " + strengthtext[chosen_counter], 18, GetLocationX(home_location) - 600, GetLocationY(home_location) - 600)
+      if chosen_counter >= 0 then
+        call UpdateDebugTextTag(debugcountertag, "Counter: " + strengthtext[chosen_counter], 18, GetLocationX(home_location) - 600, GetLocationY(home_location) - 600)
+      endif
       //call SetTextTagPermanent(debugcountertag, true)
     //endif
 
@@ -952,7 +954,7 @@ function main takes nothing returns nothing
   call removeNonBeginningStrats()
   call display_rp_strat()
   set chosen_counter = DetermineCounterForce()
-  if debugging then
+  if debugging and chosen_counter >= 0 then
     //set debugcountertag = CreateTextTag()
     call UpdateDebugTextTag(debugcountertag, "Counter: " + strengthtext[chosen_counter], 18, GetLocationX(home_location) - 600, GetLocationY(home_location) - 600)
     call SetTextTagPermanent(debugcountertag, true)
