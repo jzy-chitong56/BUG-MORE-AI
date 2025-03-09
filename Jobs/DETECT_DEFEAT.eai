@@ -362,7 +362,7 @@ function TakeOverOfflineAlly takes player p returns nothing
     call SetPlayerState(ai_player,PLAYER_STATE_RESOURCE_LUMBER,GetPlayerState(ai_player,PLAYER_STATE_RESOURCE_LUMBER) + GetPlayerState(p,PLAYER_STATE_RESOURCE_LUMBER))
     call SetPlayerState(p,PLAYER_STATE_RESOURCE_GOLD,0)
     call SetPlayerState(p,PLAYER_STATE_RESOURCE_LUMBER,0)
-    call DisplayToAlliesChat(cs2s(GetPlayerName(p), GetPlayerColor(p)) + " " + chat_over_control_ally)
+    call DisplayToAlliesChat(c2s(GetPlayerColor(p)) + " " + chat_over_control_ally)
   else
     set over_control_state[GetPlayerId(p)] = true
   endif
