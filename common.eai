@@ -1234,6 +1234,11 @@ function BlzGroupGetSizeAMAI takes group whichGroup returns integer
   return i
 endfunction
 
+function RemoveUnitAM takes unit u returns nothing
+  call KillUnit(u)  // Prevent the unit from continuing to exist
+  call RemoveUnit(u)
+endfunction
+
 //============================================================================
 function DoNothing takes nothing returns nothing
 endfunction
@@ -4761,14 +4766,14 @@ endfunction
         // if distance <= buy_distance then
 		// //	call DisplayTextToPlayer(GetLocalPlayer(), 0, 0, "Tavern is pathable")
 			// call CreateDebugTag("Target Destination is pathable", 10, u, 3.00, 1.50)
-			// call RemoveUnit(u)
+			// call RemoveUnitAM(u)
 			// set u = null
 			// set exitloop = true
       // //return totaltime
 		// //elseif GetUnitCurrentOrder(u) == OrderId("stop") then
           // //return (totaltime * -1)
         // elseif GetUnitState(u, UNIT_STATE_LIFE) < 1 then
-			// call RemoveUnit(u)
+			// call RemoveUnitAM(u)
 			// set u = null
 			// set exitloop = true
 			// set totaltime = totaltime * -1
@@ -4778,7 +4783,7 @@ endfunction
 			// call CreateDebugTag("Invisible Path unit has stopped", 10, u, 3.00, 1.50)
 			// if checks > 1 then
 				// call CreateDebugTag("Target Destination was not reached", 10, u, 3.00, 1.50)
-				// call RemoveUnit(u)
+				// call RemoveUnitAM(u)
 				// set u = null
 				// set exitloop = true
 				// set totaltime = totaltime * -1
@@ -4874,13 +4879,13 @@ function CanPathToLoc takes location locA, location target, pathingtype path ret
     if distance <= buy_distance then
   //	call DisplayTextToPlayer(GetLocalPlayer(), 0, 0, "Tavern is pathable")
       call CreateDebugTag("Target Destination is pathable", 10, u, 3.00, 1.50)
-      call RemoveUnit(u)
+      call RemoveUnitAM(u)
       set u = null
       return totaltime
   //elseif GetUnitCurrentOrder(u) == OrderId("stop") then
       //return (totaltime * -1)
     elseif GetUnitState(u, UNIT_STATE_LIFE) < 1 then
-      call RemoveUnit(u)
+      call RemoveUnitAM(u)
       set u = null
       return (totaltime * -1)
     elseif GetUnitCurrentOrder(u) == OrderId("stop") or GetUnitCurrentOrder(u) != OrderId("move") then
@@ -4888,7 +4893,7 @@ function CanPathToLoc takes location locA, location target, pathingtype path ret
       call CreateDebugTag("Invisible Path unit has stopped", 10, u, 3.00, 1.50)
       if checks > 1 then
         call CreateDebugTag("Target Destination was not reached", 10, u, 3.00, 1.50)
-        call RemoveUnit(u)
+        call RemoveUnitAM(u)
         set u = null
         return (totaltime * -1)
       endif
@@ -5000,23 +5005,23 @@ function CalcNearestNeutrals takes nothing returns nothing
           exitwhen pather[i] == null
           if GetUnitTypeId(u) == neutral_id[neutral_i] then
             if nearest_neutral[neutral_i] != null then
-              call RemoveUnit(pather[i])
+              call RemoveUnitAM(pather[i])
               set pather[i] = null
             elseif distance <= buy_distance then
               call CreateDebugTag("Target Destination is pathable", 10, pather[i], 10.00, 8.00)
-              call RemoveUnit(pather[i])
+              call RemoveUnitAM(pather[i])
               set pather[i] = null
               if nearest_neutral[neutral_i] == null then
                 set nearest_neutral[neutral_i] = u
               endif
             elseif GetUnitState(pather[i], UNIT_STATE_LIFE) < 1 then
-              call RemoveUnit(pather[i])
+              call RemoveUnitAM(pather[i])
               set pather[i] = null
             elseif GetUnitCurrentOrder(pather[i]) == OrderId("stop") or GetUnitCurrentOrder(pather[i]) != OrderId("move") then
               set checks[i] = checks[i] + 1
               if checks[i] > 2 then
                 call CreateDebugTag("Target Destination was not reached", 10, pather[i], 10.00, 8.00)
-                call RemoveUnit(pather[i])
+                call RemoveUnitAM(pather[i])
                 set pather[i] = null
               else
                 call CreateDebugTag("Invisible Path unit has stopped", 10, pather[i], 10.00, 8.00)
@@ -5114,12 +5119,12 @@ function GetNearestNeutral takes unit ru, integer id returns unit
       if pather[i] != null then
         set distance = DistanceBetweenUnits(pather[i],u)
         if ru != null then
-          call RemoveUnit(pather[i])
+          call RemoveUnitAM(pather[i])
           set pather[i] = null
         elseif distance <= buy_distance then
         //call DisplayTextToPlayer(GetLocalPlayer(), 0, 0, "Tavern is pathable")
           call CreateDebugTag("Target Destination is pathable", 10, pather[i], 3.00, 3.00)
-          call RemoveUnit(pather[i])
+          call RemoveUnitAM(pather[i])
           set pather[i] = null
           if ru == null then
             set ru = u
@@ -5127,14 +5132,14 @@ function GetNearestNeutral takes unit ru, integer id returns unit
         //elseif GetUnitCurrentOrder(u) == OrderId("stop") then
           //return (totaltime * -1)
         elseif GetUnitState(pather[i], UNIT_STATE_LIFE) < 1 then
-          call RemoveUnit(pather[i])
+          call RemoveUnitAM(pather[i])
           set pather[i] = null
         elseif GetUnitCurrentOrder(pather[i]) == OrderId("stop") or GetUnitCurrentOrder(pather[i]) != OrderId("move") then
           set checks[i] = checks[i] + 1
           call CreateDebugTag("Invisible Path unit has stopped", 10, pather[i], 3.00, 3.00)
           if checks[i] > 2 then
             call CreateDebugTag("Target Destination was not reached", 10, pather[i], 3.00, 3.00)
-            call RemoveUnit(pather[i])
+            call RemoveUnitAM(pather[i])
             set pather[i] = null
           else
             call IssuePointOrder(pather[i], "move", GetUnitX(u), GetUnitY(u))
@@ -5425,7 +5430,7 @@ function RemoveUnitsOfType takes string ut returns nothing
     set u = FirstOfGroup(g)
     exitwhen u == null
     call GroupRemoveUnit(g, u)
-    call RemoveUnit(u)
+    call RemoveUnitAM(u)
   endloop
   call DestroyGroup(g)
   set g = null
@@ -6255,7 +6260,7 @@ function GetLocationInDistanceFromLoc takes location loc, real dist, boolean inj
     set distance = DistanceBetweenPoints_dk(Location(x,y), loc)
     if distance >= dist then
       //call DisplayToAll("loc found")
-      call RemoveUnit(u)
+      call RemoveUnitAM(u)
       set u = null
       return Location(x,y)
     elseif GetUnitState(u, UNIT_STATE_LIFE) < 1 or GetUnitCurrentOrder(u) == OrderId("stop") or GetUnitCurrentOrder(u) != OrderId("move") then
@@ -6268,7 +6273,7 @@ function GetLocationInDistanceFromLoc takes location loc, real dist, boolean inj
       call Sleep(0.2)
     endif
   endloop
-  call RemoveUnit(u)
+  call RemoveUnitAM(u)
   set u = null
   return null
 endfunction
@@ -6294,18 +6299,18 @@ function GetLocationInDistanceFromBaseToLoc takes location loc, real d returns l
     if distance >= d then
 //        call DisplayToAll("loc found")
 //        call PingMinimap(GetLocationX(l), GetLocationY(l), 20)
-      call RemoveUnit(u)
+      call RemoveUnitAM(u)
       set u = null
       return Location(x,y)
     elseif GetUnitState(u, UNIT_STATE_LIFE) < 1 or GetUnitCurrentOrder(u) == OrderId("stop") or GetUnitCurrentOrder(u) != OrderId("move") then
-      call RemoveUnit(u)
+      call RemoveUnitAM(u)
       set u = null
 //        call DisplayToAll("loc not found")
       return null
     endif
     call Sleep(0.2)
   endloop
-  call RemoveUnit(u)
+  call RemoveUnitAM(u)
   set u = null
   return null
 endfunction
@@ -6324,7 +6329,7 @@ function GetBuildLocationInDistanceFromLoc_d takes integer id, location loc, rea
     set buildloc = null
     set x = GetUnitX(u)
     set y = GetUnitY(u)
-    call RemoveUnit(u)
+    call RemoveUnitAM(u)
     set u = null
     return Location(x,y)
   endif
@@ -6352,14 +6357,14 @@ function GetLumberLocationAtBase takes nothing returns location
     call Sleep(1.00)
   endif
   if GetUnitCurrentOrder(u) == 0 then  // home no tree , fix build
-    call RemoveUnit(u)
+    call RemoveUnitAM(u)
     set u = CreatePathingUnitFull(u, Player(PLAYERPASSIVE), old_id[racial_lumber], GetLocationX(home_location) + GetRandomInt(700,1200)*ISign(), GetLocationY(home_location) + GetRandomInt(700,1200)*ISign())
   else
     call Sleep(4.00)
   endif
   set x = GetUnitX(u)
   set y = GetUnitY(u)
-  call RemoveUnit(u)
+  call RemoveUnitAM(u)
   set u = null
   return Location(x,y)
 endfunction
@@ -6377,7 +6382,7 @@ function BuildLumberMillAtBase takes nothing returns boolean
       set u = CreateUnitAtLoc(Player(PLAYERPASSIVE), old_id[racial_lumber], buildloc, 270.0)
       call RemoveLocation(buildloc)
       set buildloc = GetUnitLoc(u)
-      call RemoveUnit(u)
+      call RemoveUnitAM(u)
       set u = null
       call IssuePointOrderByIdLoc(peon, old_id[racial_lumber], buildloc)
       call CreateDebugTag("Build Lumber", 10, peon, 4.00, 2.00)
@@ -6448,9 +6453,9 @@ function BuildBRAtCreep takes nothing returns boolean
   set i = 0
   loop
     exitwhen i >= r
-    call RemoveUnit(ua[i])
+    call RemoveUnitAM(ua[i])
     set ua[i] = null
-    call RemoveUnit(ub[i])
+    call RemoveUnitAM(ub[i])
     set ub[i] = null
     set uc[i] = null
     set i = i + 1
@@ -6558,7 +6563,7 @@ function MultipleMinefix takes nothing returns boolean
       elseif TownCount(racial_expansion) < 2 and c > 1 and gold > 3 * GetUnitGoldCost(old_id[racial_expansion]) then  //  build one tree
         set u = CreateUnit(Player(PLAYERPASSIVE), old_id[racial_expansion], GetUnitX(fixmine), GetUnitY(fixmine), 270.0)
         set l = GetUnitLoc(u)
-        call RemoveUnit(u)
+        call RemoveUnitAM(u)
         set u = null
         if expansion_peon == null or not UnitAlive(expansion_peon) then
           set expansion_peon = GetExpansionPeon()
@@ -6834,14 +6839,14 @@ function MakeExpansionList takes nothing returns nothing
         if DistanceBetweenUnits(pather[i],u) <= buy_distance then
           //call DisplayTextToPlayer(GetLocalPlayer(), 0, 0, "Tavern is pathable")
           call CreateDebugTag("Target Destination is pathable", 10, pather[i], 5.00, 3.00)
-          call RemoveUnit(pather[i])
+          call RemoveUnitAM(pather[i])
           set pather[i] = null
           set patherdone[i] = true
           call AddExpansion(u, totaltime * 512)
         //elseif GetUnitCurrentOrder(u) == OrderId("stop") then
           //return (totaltime * -1)
         elseif GetUnitState(pather[i], UNIT_STATE_LIFE) < 1 then
-          call RemoveUnit(pather[i])
+          call RemoveUnitAM(pather[i])
           set pather[i] = null
           set patherdone[i] = true
         elseif GetUnitCurrentOrder(pather[i]) == OrderId("stop") or GetUnitCurrentOrder(pather[i]) != OrderId("move") then
@@ -6849,7 +6854,7 @@ function MakeExpansionList takes nothing returns nothing
           call CreateDebugTag("Invisible Path unit has stopped", 10, pather[i], 5.00, 3.00)
           if checks[i] > 3 then
             call CreateDebugTag("Target Destination was not reached", 10, pather[i], 5.00, 3.00)
-            call RemoveUnit(pather[i])
+            call RemoveUnitAM(pather[i])
             set pather[i] = null
             set patherdone[i] = true
             call AddWaterExpansion(u, DistanceBetweenPoints_kd(home_location, GetUnitLoc(u)))
@@ -7430,7 +7435,7 @@ function AddFrontPoint takes location l returns nothing
   //else
     //call CreateDebugTagLoc("Front Point : Not Buildable", 10, x, y, 60.00, 55.00)
   endif
-  call RemoveUnit(pathable)
+  call RemoveUnitAM(pathable)
   set pathable = null
 endfunction
 
@@ -7486,7 +7491,7 @@ function ComputeFrontPoints takes nothing returns nothing
           set distance = DistanceBetweenPoints(l, home_location)
           if distance >= front_base_distance then
             call CreateDebugTag("Front Point Found", 10, u[i], 10.00, 8.00)
-            call RemoveUnit(u[i])
+            call RemoveUnitAM(u[i])
             set u[i] = null
             set patherdone[i] = true
             if enemyplayers[i] then
@@ -7501,7 +7506,7 @@ function ComputeFrontPoints takes nothing returns nothing
             endif
           elseif GetUnitState(u[i], UNIT_STATE_LIFE) < 1 or GetUnitCurrentOrder(u[i]) == OrderId("stop") or GetUnitCurrentOrder(u[i]) != OrderId("move") then
             set patherdone[i] = true
-            call RemoveUnit(u[i])
+            call RemoveUnitAM(u[i])
             set u[i] = null
           endif
           call RemoveLocation(l)
@@ -9123,7 +9128,7 @@ function GetPatchVersion takes nothing returns nothing
     set u = CreateUnit(Player(PLAYERPASSIVE), 'ugar', 0, 0, 270.0)
     call UnitAddAbility(u, 'Aatp')  //Prevent customization
     set AatpAbility = GetUnitAbilityLevel(u, 'Aatp') > 0  // prevent old war3 or ROC
-    call RemoveUnit(u)
+    call RemoveUnitAM(u)
     set u = null
   endif
   if JASS_MAX_ARRAY_SIZE > 8192 and not AatpAbility then  //1.29 ~ 1.32.9
@@ -11212,15 +11217,15 @@ function BuildAtSpecialLoc takes integer unitid, integer town, integer bloc retu
   if bloc != BLOC_MINE then
     set spaceunit2 = CreateUnitAtLoc(Player(PLAYERPASSIVE), old_id[unitid], loc, 270.0)
     set u = CreateUnitAtLoc(Player(PLAYERPASSIVE), old_id[unitid], loc, 270.0)
-    call RemoveUnit(spaceunit2)
+    call RemoveUnitAM(spaceunit2)
     set spaceunit2 = null
   else
     set u = CreateUnitAtLoc(Player(PLAYERPASSIVE), old_id[unitid], loc, 270.0)
   endif
-  call RemoveUnit(spaceunit)
+  call RemoveUnitAM(spaceunit)
   set spaceunit = null
   set l = GetUnitLoc(u)
-  call RemoveUnit(u)
+  call RemoveUnitAM(u)
   set u = null
   set loc = null
   if l == null then
@@ -11523,7 +11528,7 @@ function ConstructExpansion takes unit peon, integer unitid returns boolean
     set u = CreateUnit(Player(PLAYERPASSIVE), unitid, GetUnitX(current_expansion), GetUnitY(current_expansion), 270.0)
     set x = GetUnitX(u)
     set y = GetUnitY(u)
-    call RemoveUnit(u)
+    call RemoveUnitAM(u)
     set u = null
     if DistanceBetweenPoints_dd(Location(x, y), GetUnitLoc(current_expansion)) <= race_max_expa_mine_distance then
       call IssuePointOrderById(peon, unitid, x, y)
@@ -13250,7 +13255,7 @@ function BRRush takes nothing returns boolean
     call Trace("===BR Finished===")
     set u = CreateUnit(Player(PLAYERPASSIVE), 'eaom', GetLocationX(l), GetLocationY(l), 270.0)
     set loc = GetUnitLoc(u)
-    call RemoveUnit(u)
+    call RemoveUnitAM(u)
     set u = null
     call IssuePointOrderLoc(utemp, "root", loc)
     call TQAddUnitJob(10, RESET_ANCIENT, -1, utemp)
@@ -13542,7 +13547,7 @@ function GetFittingCreep takes unit u, integer str returns unit
 
   set u = GetCreepCamp(1, lvl, true)
   if u != null and UnitAlive(u) then
-    set allow_air = anti_air_strength > 0 and GetLocationCreepAirStrength(GetUnitX(u), GetUnitY(u), creep_camp_radius) <= anti_air_strength
+    set allow_air = GetLocationCreepAirStrength(GetUnitX(u), GetUnitY(u), creep_camp_radius) <= anti_air_strength
   endif
 
   if not allow_air then
