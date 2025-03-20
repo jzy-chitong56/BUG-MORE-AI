@@ -54,10 +54,10 @@ function AncientExpansionReset takes nothing returns nothing
   endif
   if ancient_exp_unit != null and UnitAlive(ancient_exp_unit) then
     call IssuePointOrder(ancient_exp_unit, "root", GetUnitX(ancient_exp_unit), GetUnitY(ancient_exp_unit))
-    call TreeGoSitu()
     call TQAddUnitJob(10, RESET_ANCIENT, -1, ancient_exp_unit)
     //call RecycleGuardPosition(ancient_exp_unit)
   endif
+  call TreeGoSitu()
   call RemoveLocation(ancient_exp_loc)
   set ancient_exp_loc = null
   set ancient_exp_unit = null
@@ -257,9 +257,10 @@ elseif ancient_exp_state == 3 then
   call CreateDebugTag("Expansion State 3: take expansion", 10, ancient_exp_unit, 3.00, 1.50)
   if GetAncientCampStrength() > 0 then  // wait creep
     call IssuePointOrder(ancient_exp_unit, "attack", GetUnitX(ancient_exp_mine), GetUnitY(ancient_exp_mine))
-  elseif DistanceBetweenPoints_dd(GetUnitLoc(ancient_exp_unit), GetUnitLoc(ancient_exp_mine)) < 1200 then
+  elseif DistanceBetweenPoints_dd(GetUnitLoc(ancient_exp_unit), GetUnitLoc(ancient_exp_mine)) < 1000 then
     call IssueTargetOrder(ancient_exp_unit, "entangle", ancient_exp_mine)
     //call TQAddUnitJob(R2I(GetTimeToReachUnit(ancient_exp_unit, ancient_exp_mine)*2 + 5), RESET_GUARD_POSITION, 0, ancient_exp_unit)
+    set ancient_exp_unit = null // no need reset
     call AncientExpansionReset()
     call Trace("Expansion State 3 : exp done")
     return
