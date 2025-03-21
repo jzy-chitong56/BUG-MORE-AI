@@ -73,7 +73,7 @@ function SellZigguratJob takes nothing returns nothing
   local unit u = null
   local integer c = GetUnitCount(old_id[racial_hall[tier]])
   call DisplayToAllJobDebug("SELL_ZIGGURATS JOB START")
-  if not towerrush then
+  if not towerrush and GetGold() < 2000 then
     if GetGoldOwned() + GetGold() < 800 then  // if insufficient resources, buy more buildings , else ensure there is sufficient food available
       call GroupEnumUnitsOfPlayer(g, ai_player, null)
       call CheckSellStructure(g)

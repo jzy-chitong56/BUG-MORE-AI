@@ -126,10 +126,10 @@ function TeleportHome takes integer hn returns nothing
   call GoHomeIfMainHero(hero_unit[hn], dx, dy)
   call UnitUseItemPoint(hero_unit[hn], GetItemOfTypeOnUnit(tp_item, hero_unit[hn]), dx + GetRandomInt(300,500) * ISign(), dy + GetRandomInt(300,500) * ISign())
   set teleporting = true
-  if teleportloc != null then
-    call RemoveLocation(teleportloc)
-  endif
-  set teleportloc = Location(dx,dy)  //  set new teleport job move loc
+  // if teleportloc != null then
+  //   call RemoveLocation(teleportloc)
+  // endif
+  // set teleportloc = Location(dx,dy)  //  set new teleport job move loc
   call TQAddUnitJob(0.5, TELEPORT, 0, hero_unit[hn])
 endfunction
 
@@ -138,12 +138,13 @@ function GetTeleportLandPoint takes location l returns location
   local unit u = null
   local player p = null
   local location loc = null
+  local location tploc = null
   local real x = GetLocationX(l)
   local real y = GetLocationY(l)
   call GroupEnumUnitsInRangeOfLoc(g, l, 1800, null)
-  if teleportloc != null then
-    call RemoveLocation(teleportloc)  // set new loc , cannot return teleportloc
-  endif
+  // if teleportloc != null then
+  //   call RemoveLocation(teleportloc)  // set new loc , cannot return teleportloc
+  // endif
   loop
     set u = FirstOfGroup(g)
     exitwhen u == null  //Find a enemy unit , land to unit loc , prevent army land to hall , cannot expand
@@ -151,21 +152,26 @@ function GetTeleportLandPoint takes location l returns location
     if IsPlayerEnemy(ai_player,p) and p != Player(PLAYER_NEUTRAL_AGGRESSIVE) and not IsUnitType(u, UNIT_TYPE_FLYING) and not IsUnitInvisible(u, ai_player) and UnitAlive(u) and not IsUnitHidden(u) then
       set loc = GetUnitLoc(u)
       if DistanceBetweenPoints(loc, l) > 850 then
-        set teleportloc = AIGetProjectedLoc(l, loc, GetRandomReal(420, 840), 0)
-        call RemoveLocation(loc)
+        set tploc = AIGetProjectedLoc(l, loc, GetRandomReal(420, 840), 0)
+        set x = GetLocationX(tploc)
+        set y = GetLocationY(tploc)
+        call RemoveLocation(tploc)
+        set tploc = null
       else
-        set teleportloc = loc
+        set x = GetLocationX(loc)
+        set y = GetLocationY(loc)
       endif
+      call RemoveLocation(loc)
       call DestroyGroup(g)
       set g = null
       set u = null
       set p = null
       set loc = null
-      return Location(GetLocationX(teleportloc),GetLocationY(teleportloc))
+      return Location(x,y)
     endif
     call GroupRemoveUnit(g, u)
   endloop
-  set teleportloc = Location(x,y)
+  // set teleportloc = Location(x,y)
   call DestroyGroup(g)
   set g = null
   set p = null
@@ -415,10 +421,10 @@ function MicroHeroJob takes integer hn returns nothing
         if current_order != OrderId("massteleport") then  // can not konw teleport to where
           call GoHomeIfMainHero(hero_unit[hn], GetLocationX(home_location), GetLocationY(home_location))
         endif
-        if not teleporting and teleportloc != null then // unknown destination as was triggered by hardcoded logic
-          call RemoveLocation(teleportloc)
-          set teleportloc = null
-        endif
+        // if not teleporting and teleportloc != null then // unknown destination as was triggered by hardcoded logic
+        //   call RemoveLocation(teleportloc)
+        //   set teleportloc = null
+        // endif
         set teleporting = true
         call TQAddUnitJob(0.5, TELEPORT, 0, hero_unit[hn])
         call TQAddJob(4, MICRO_HERO, hn)
@@ -450,7 +456,7 @@ function MicroHeroJob takes integer hn returns nothing
       if most_threatened_town >= 0 and town_loc[most_threatened_town] != null then
         set teleportdistance = DistanceBetweenPoints(hero_loc[hn], town_loc[most_threatened_town])
       endif
-      if town_threatened and most_threatened_town >= 0 and town_threat[most_threatened_town] >= teleport_min_threat and teleportdistance > LinearInterpolation(teleport_low_threat, teleport_high_threat, teleport_low_threat_distance, teleport_high_threat_distance, town_threat[most_threatened_town]) and town_can_tp[most_threatened_town] and army_strength[armyOfHero] >= teleport_army_min_strength then
+      if town_threatened and most_threatened_town >= 0 and town_loc[most_threatened_town] != null and town_threat[most_threatened_town] >= teleport_min_threat and teleportdistance > LinearInterpolation(teleport_low_threat, teleport_high_threat, teleport_low_threat_distance, teleport_high_threat_distance, town_threat[most_threatened_town]) and town_can_tp[most_threatened_town] and army_strength[armyOfHero] >= teleport_army_min_strength then
         call CreateDebugTag("HERO: Teleporting to threatened town", 10, hero_unit[hn], 4.00, 2.00)
         call TeleportToLoc(hero_unit[hn], town_loc[most_threatened_town])
         call TQAddJob(2, MICRO_HERO, hn)

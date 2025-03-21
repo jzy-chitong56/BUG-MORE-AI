@@ -1,30 +1,38 @@
 #IFDEF GLOBAL
     boolean teleporting = false
-    location teleportloc = Location(0,0)
+    //location teleportloc = Location(0,0)
 #ELSE
 function TeleportJob takes unit hu returns nothing
   local group g = null
   local unit u = null
-  local integer current_order = GetUnitCurrentOrder(hu)
-
+  local integer current_order = 0
+  local location l = null
   call DisplayToAllJobDebug("TELEPORT JOB Start")
-  if hu == null or not UnitAlive(hu) or ((current_order < 852008 or current_order > 852013) and current_order != OrderId("massteleport")) then // No longer teleporting
+  if hu == null or not UnitAlive(hu) then
+    set teleporting = false
+    return
+  endif
+  set current_order = GetUnitCurrentOrder(hu)
+  if (current_order < 852008 or current_order > 852013) and current_order != OrderId("massteleport") then // No longer teleporting
     set teleporting = false
     return
   endif
   set g = CreateGroup()
   call GroupEnumUnitsInRange(g, GetUnitX(hu), GetUnitY(hu), 2 * teleport_radius, null)
   call GroupRemoveUnit(g, hu)
+  set l = GetUnitLoc(hu)
   loop
     set u = FirstOfGroup(g)
     exitwhen u == null
-    if GetOwningPlayer(u) == ai_player and not IsUnitType(u, UNIT_TYPE_PEON) and not IsUnitType(u, UNIT_TYPE_STRUCTURE) and UnitAlive(u) and not IsUnitHidden(u) and DistanceBetweenUnits(hu, u) > teleport_radius then
-      call IssuePointOrder(u, "move", GetUnitX(hu), GetUnitY(hu))
+    if GetOwningPlayer(u) == ai_player and not IsUnitType(u, UNIT_TYPE_PEON) and not IsUnitType(u, UNIT_TYPE_STRUCTURE) and UnitAlive(u) and not IsUnitHidden(u) and DistanceBetweenPoints_kd(l, GetUnitLoc(u)) > teleport_radius then
+      call IssuePointOrderLoc(u, "move", l)
     endif
     call GroupRemoveUnit(g, u)
   endloop
   call DestroyGroup(g)
   set g = null
+  call RemoveLocation(l)
+  set l = null
   call TQAddUnitJob(1, TELEPORT, 0, hu)
 endfunction
 #ENDIF
