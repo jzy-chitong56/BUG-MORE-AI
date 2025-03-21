@@ -25,6 +25,7 @@ function BuildMilitiaExpansion takes nothing returns boolean
     call CreateDebugTag("Militia Expansion - build", 10, militia_builder, 3.00, 1.50)
     call IssuePointOrderById(militia_builder, old_id[racial_expansion], x, y)
     call TQAddUnitJob(200, RESET_GUARD_POSITION_ONLY, 80, militia_builder)
+    set militia_builder = null  // no need reset
     if race_has_power_build then
       call FastBuildCheck()
     endif

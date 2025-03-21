@@ -123,6 +123,7 @@ function BuildAncient takes nothing returns nothing
   endif
   if DistanceBetweenPoints_dd(GetUnitLoc(ancient_exp_mine), Location(x, y)) <= race_max_expa_mine_distance then
     call IssuePointOrderById(ancient_exp_wisp, old_id[racial_expansion], x, y)
+    set ancient_exp_wisp = null  // no need reset
     call CreateDebugTag("Expansion State 4 - Ancient build", 10, ancient_exp_wisp, 3.00, 1.50)
   endif
 endfunction
