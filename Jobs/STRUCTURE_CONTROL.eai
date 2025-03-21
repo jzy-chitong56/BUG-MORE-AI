@@ -14,7 +14,7 @@ function CheckBurrow takes nothing returns nothing
     set u = FirstOfGroup(g)
     exitwhen u == null
     if GetOwningPlayer(u) == ai_player and GetUnitTypeId(u) == id and UnitAlive(u) and not IsUnitHidden(u) then
-      call IssueImmediateOrder(u, "burrow")  //fix orc peon go battlestations , but can not standdown
+      call IssueImmediateOrder(u, "standdown")  //fix orc peon go battlestations , but can not standdown
     endif
     call GroupRemoveUnit(g,u)
   endloop
