@@ -357,8 +357,10 @@ endfunction
 //===========================================================================
 function AMAI_PickMeleeHero takes nothing returns nothing
   local integer i = 0
+  if hero_built[1] and hero_built[2] and hero_built[3] then
+    return
+  endif
   //local location l = GetUnitLoc(nearest_neutral[NEUTRAL_TAVERN])
-
   set hero_number = race_hero_number + ver_neutral_hero_number
   // recalculate_heros occurs only if hero is a tavern hero but tavern is not pathable
   if not recalculate_heros and ver_neutral_heroes_available and neutral_available[NEUTRAL_TAVERN] then //and CanPathToLoc(home_location, l, PATHING_TYPE_WALKABILITY) > 0 then
