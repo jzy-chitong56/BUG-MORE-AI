@@ -2828,9 +2828,6 @@ endfunction
 //============================================================================
 function StaggerSleep takes real base, real spread returns nothing
   local real sleep = base + spread * I2R(GetAiPlayer()) / I2R(GetPlayers()) + GetRandomReal(-0.1, 0.1)
-  if sleep <= 0 then
-    return
-  endif
   set sleep = RMax(0.1, sleep)
   call Sleep(sleep)
 endfunction
@@ -3823,7 +3820,7 @@ function GetNearestEnemyToLoc_k takes location l returns player
   local integer i = 0
   local integer min_p = 30
   local real nr = 0
-  local real min_nr = 1000000
+  local real min_nr = 10000000
 
   loop
     exitwhen i >= c_enemy_total
@@ -3846,7 +3843,7 @@ function GetNearestEnemyToLoc_d takes location l returns player
   local integer i = 0
   local integer min_p = 30
   local real nr = 0
-  local real min_nr = 1000000
+  local real min_nr = 10000000
 
   loop
     exitwhen i >= c_enemy_total
@@ -5641,7 +5638,7 @@ endfunction
 function ActionListEval takes nothing returns integer
   local integer i = 0
   local integer max_i = -1
-  local real max_val = -1000000.0
+  local real max_val = -500000.0
   loop
     exitwhen i >= action_numbers
     if action_points[i] > max_val then
@@ -13628,13 +13625,13 @@ endfunction
 // (AMAI)  ChooseAttackTarget
 //============================================================================
 function GetRangePenalty takes unit target, player p returns real
-  if target == null then
-    if p == null then
-      return 0.0
+  if major_hero == null or not UnitAlive(major_hero) or target == null or not UnitAlive(target) or IsUnitHidden(target) then
+    if p != null then
+      return DistanceBetweenPoints_kd(home_location, GetPlayerStartLocationLoc(p))
+    elseif target != null then
+      return DistanceBetweenPoints_kd(home_location, GetPlayerStartLocationLoc(GetOwningPlayer(target)))
     endif
-    return DistanceBetweenPoints_kd(home_location, GetPlayerStartLocationLoc(p))
-  elseif major_hero == null or not UnitAlive(major_hero) or not UnitAlive(target) or IsUnitHidden(target) then
-    return DistanceBetweenPoints_kd(home_location, GetPlayerStartLocationLoc(GetOwningPlayer(target)))
+    return 0.0
   endif
   return DistanceBetweenUnits(major_hero, target) / 1400
 endfunction
@@ -13694,7 +13691,7 @@ endfunction
 function GetWeakAndNearEnemy takes nothing returns player
   local integer i = 0
   local integer pmin = -1
-  local real minstr = 1000000
+  local real minstr = 10000000
   local real cstr = 0
   local unit cbuilding = null
   loop
@@ -13722,7 +13719,7 @@ function GetNearestEnemy takes nothing returns player
 local integer i = 0
 local integer nearplayer = 30
 local real dist = 0
-local real mindistance = 1000000
+local real mindistance = 10000000
 
 loop
   exitwhen i >= c_enemy_total
@@ -13746,8 +13743,8 @@ function GetSecondNearestEnemy takes nothing returns player
   local integer i = 0
   local integer pmin = -1
   local integer spmin = -1
-  local real minstr = 1000000
-  local real sminstr = 1000000
+  local real minstr = 10000000
+  local real sminstr = 10000000
   local real cstr = 0
   local unit cbuilding = null
   loop
@@ -13873,6 +13870,7 @@ function ChooseEnemyExpansionTarget takes unit u returns unit
   set u = GetEnemyExpansion()
   if IsTargetGood(u, expansion_target_bonus) then
     call Trace("Hardcoded enemy expansion target chosen")
+    return u
   endif
   return null
 endfunction
@@ -14085,12 +14083,6 @@ function SleepUntilTownDefended takes integer ai_strength returns nothing
       set defense_length_counter = 0
       //call FormGroupAM(0)
     endif
-    // if not b then
-    //   set b = CaptainIsHome()
-    //   if not b then
-    //     call CaptainGoHome()
-    //   endif
-    // endif
     //if CaptainAtGoal() or CaptainInCombat(true) or CaptainInCombat(false) then
       // Attack move to actually defend
     //   if town_threatened and most_threatened_town >= 0 then
