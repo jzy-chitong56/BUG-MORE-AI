@@ -1,7 +1,6 @@
 #IFDEF GLOBAL
   integer blockstate = 0
   integer movetotal = 0
-  location ancientrootloc = Location(0, 0)
   unit blockpathunit = null
   unit blockancient = null
   unit blockunit = null
@@ -19,26 +18,25 @@ function TryAttackTree takes unit u, integer id, location l returns nothing
     call CreateDebugTag("fix block : attack tree", 10, u, 3.00, 1.50)
     call TQAddUnitJob(6, RESET_GUARD_POSITION_ONLY, 0, u)
   elseif GetUnitAbilityLevel(u, 'AEfn') > 0 or GetUnitAbilityLevel(u, 'ACfr') > 0 then
-    call IssuePointOrderLoc(u, "forceofnature", l)
     call CreateDebugTag("fix block : use skill to tree", 10, u, 3.00, 1.50)
+    call IssuePointOrderLoc(u, "forceofnature", l)
   endif
 endfunction
 
 function MoveAncient takes unit u returns nothing
-  local unit utemp = null
+  local unit utemp = CreateUnitAtLoc(ai_player, GetUnitTypeId(u), front_loc[0], 270)
+  local real x = GetUnitX(utemp)
+  local real y = GetUnitY(utemp)
+  call RemoveUnitAM(utemp)
   if GetUnitCurrentOrder(u) != OrderId("root") then
-    call RemoveLocation(ancientrootloc)
-    set utemp = CreateUnitAtLoc(ai_player, GetUnitTypeId(u), front_loc[0], 270)
-    set ancientrootloc = GetUnitLoc(utemp)
-    call RemoveUnitAM(utemp)
-    set utemp = null
     call IssueImmediateOrder(u, "cancel")
     call IssueImmediateOrder(u, "unroot")
   endif
-  call CreateDebugTagLoc("fix block : root here", 10, GetLocationX(ancientrootloc), GetLocationY(ancientrootloc), 3.00, 1.50)
-  call IssuePointOrderLoc(u, "root", ancientrootloc)  // build no n need RESET GUARD POSITION
+  call CreateDebugTagLoc("fix block : root here", 10, x, y, 3.00, 1.50)
+  call IssuePointOrderById(u, "root", x, y)  // build no n need RESET GUARD POSITION
   call TQAddUnitJob(10, RESET_ANCIENT, 0, u)
   set movetotal = movetotal + 1
+  set utemp = null
 endfunction
 
 function RootAncient takes nothing returns nothing
@@ -157,9 +155,9 @@ function TryFixBlock takes integer fixmode, location l, real range, boolean acti
       loop
         set u = FirstOfGroup(g)
         exitwhen u == null
-        if GetOwningPlayer(u) == ai_player and not IsUnitType(u, UNIT_TYPE_PEON) and not IsUnitType(u, UNIT_TYPE_STRUCTURE) and not IsUnitType(u, UNIT_TYPE_FLYING) and GetUnitTypeId(u) != 'ngir' and UnitAlive(u) and not IsUnitHidden(u) and GetUnitCurrentOrder(u) != OrderId("cannibalize") and not IsUnitBuying(u) and not IsUnitLoaded(u) and not IsUnitInvisible(u, Player(PLAYER_NEUTRAL_AGGRESSIVE)) then
-          call IssuePointOrderLoc(u, "move", front_loc[0])
+        if GetOwningPlayer(u) == ai_player and not IsUnitType(u, UNIT_TYPE_PEON) and not IsUnitType(u, UNIT_TYPE_STRUCTURE) and not IsUnitType(u, UNIT_TYPE_FLYING) and GetUnitTypeId(u) != 'ngir' and UnitAlive(u) and not IsUnitHidden(u) and GetUnitCurrentOrder(u) != OrderId("cannibalize") and not IsUnitLoaded(u) and not IsUnitInvisible(u, Player(PLAYER_NEUTRAL_AGGRESSIVE)) and not IsUnitBuying(u) then
           call CreateDebugTagLoc("fix block : move aside", 10, GetUnitX(u), GetUnitY(u), 3.00, 1.50)
+          call IssuePointOrderLoc(u, "move", front_loc[0])
         endif
         call GroupRemoveUnit(g,u)
       endloop
@@ -196,7 +194,7 @@ function FixBlockJob takes nothing returns nothing
     endif
     call RemoveBlockPathUnit()
     set blockunit = null
-    call TQAddJob(240, FIX_BLOCK, 0)
+    call TQAddJob(360, FIX_BLOCK, 0)
     return
   endif
   if blockancient != null and UnitAlive(blockancient) then
@@ -216,12 +214,14 @@ function FixBlockJob takes nothing returns nothing
   elseif blockpathunit != null and DistanceBetweenPoints_kd(home_location, GetUnitLoc(blockpathunit)) < front_base_distance then
     if GetUnitTypeId(blockpathunit) == 'ewsp' then
       set l = GetUnitLoc(blockpathunit)
-      if GetUnitCurrentOrder(blockpathunit) == OrderId("harvest") then
+      set i = GetUnitCurrentOrder(blockpathunit)
+      call RemoveBlockPathUnit()
+      if i == OrderId("harvest") then
         call TryFixBlock(1, l, 1200, race_no_wood_harvest or GetPlayerRace(ai_player) == RACE_NIGHTELF)
       else
+        set blockancient = null
         call TryFixBlock(0, l, 550, true)
       endif
-      call RemoveBlockPathUnit()
       call RemoveLocation(l)
       set l = null
     else
@@ -277,6 +277,6 @@ function FixBlockJob takes nothing returns nothing
   if blockstate > 3 then
     set blockstate = 0
   endif
-  call TQAddJob(240 - Min(blockstate, 1) * 235, FIX_BLOCK, 0)
+  call TQAddJob(360 - Min(blockstate, 1) * 355, FIX_BLOCK, 0)
 endfunction
 #ENDIF

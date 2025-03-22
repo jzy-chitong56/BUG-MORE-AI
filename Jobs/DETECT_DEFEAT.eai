@@ -104,7 +104,9 @@ function KillYourself takes boolean end_ai returns nothing
           set u = FirstOfGroup(g)
           exitwhen u == null
           if UnitAlive(u) then
-            if destroy_buildings_on_defeat or IsUnitHidden(u) then
+            if IsUnitHidden(u) then
+              call RemoveUnitAM(u)
+            elseif destroy_buildings_on_defeat or IsUnitType(u, UNIT_TYPE_HERO) then
               call KillUnit(u)
             else
               call SetUnitOwner(u, Player(PLAYER_AMAI_NEUTRAL_VICTIM), true)
@@ -114,7 +116,6 @@ function KillYourself takes boolean end_ai returns nothing
         endloop
         if not destroy_buildings_on_defeat then
           set u = CreateUnit(ai_player, structid, GetLocationX(home_location), GetLocationY(home_location), 270.00)  // Trigger Melee defeat conditions
-          call KillUnit(u)
           call RemoveUnitAM(u)  // remove CORPSES
           set u = null
         endif
@@ -345,7 +346,9 @@ function TakeOverOfflineAlly takes player p returns nothing
     set u = FirstOfGroup(g)
     exitwhen u == null
     if UnitAlive(u) then
-      if IsUnitType(u, UNIT_TYPE_HERO) or IsUnitHidden(u) then
+      if IsUnitHidden(u) then
+        call RemoveUnitAM(u)
+      elseif IsUnitType(u, UNIT_TYPE_HERO) then
         call KillUnit(u)
       else
         call SetUnitOwner(u, ai_player, true)
@@ -354,8 +357,6 @@ function TakeOverOfflineAlly takes player p returns nothing
     endif
     call GroupRemoveUnit(g, u)
   endloop
-  call DestroyGroup(g)
-  set g = null
   if i > 0 then
     call StoreBoolean(amaiCache, Int2Str(OVER_CONTROL), Int2Str(GetPlayerId(p)), true)
     call SetPlayerState(ai_player,PLAYER_STATE_RESOURCE_GOLD,GetPlayerState(ai_player,PLAYER_STATE_RESOURCE_GOLD) + GetPlayerState(p,PLAYER_STATE_RESOURCE_GOLD))
@@ -363,9 +364,9 @@ function TakeOverOfflineAlly takes player p returns nothing
     call SetPlayerState(p,PLAYER_STATE_RESOURCE_GOLD,0)
     call SetPlayerState(p,PLAYER_STATE_RESOURCE_LUMBER,0)
     call DisplayToAlliesChat(cs2s(GetPlayerName(p), GetPlayerColor(p)) + " " + chat_over_control_ally)
-  else
-    set over_control_state[GetPlayerId(p)] = true
   endif
+  call DestroyGroup(g)
+  set g = null
 endfunction
 
 function DetectDefeatJob takes nothing returns nothing
