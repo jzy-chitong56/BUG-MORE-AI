@@ -70,8 +70,8 @@ function TrackTown takes integer num returns boolean
   endloop
   call DestroyGroup(g)
   set g = null
-  call RemoveLocation(town_loc[num])
   set tp = null
+  call RemoveLocation(town_loc[num])
   if town_count[num] == 0 then
     set town_loc[num] = null
     return false
@@ -183,10 +183,10 @@ endfunction
 function TownTrackJob takes nothing returns nothing
   call DisplayToAllJobDebug("TOWN_TRACK Job Start")
   if not town_threatened and not TownThreatened() then
-    call GroupClear(in_town_group)
     set home_town = -1
     call TrackExistingTowns()
     call SeedNewTowns()
+    call GroupClear(in_town_group)
   endif
   //call TQAddJob(15, TOWN_TRACK, 0)
   call TQAddJob(1, ARMY_TRACK, 0) // Always runs army track after updating towns as otherwise most threatened town will not be correct

@@ -40,6 +40,7 @@ endfunction
 function TrackArmy takes integer num returns boolean
   local group g = CreateGroup()
   local unit u = FirstOfGroup(army_group[num])
+  local unit tu = null
   local location l = null
   local real x = 0
   local real y = 0
@@ -66,6 +67,7 @@ function TrackArmy takes integer num returns boolean
       set y = y + GetUnitY(u)
       //set l = GetSumLoc_dd(l, GetUnitLoc(u))
       set army_count[num] = army_count[num] + 1
+      set tu = u
       if up != ai_player and IsUnitInvisibleAM(u, ai_player) then
         // Fix using invisible units to exploit amai to force defend its town
       else
@@ -76,18 +78,21 @@ function TrackArmy takes integer num returns boolean
   endloop
   call DestroyGroup(g)
   set g = null
-
-  call RemoveLocation(army_dir[num])
-  call RemoveLocation(army_future[num])
   set ap = null
   set up = null
+  call RemoveLocation(army_dir[num])
+  call RemoveLocation(army_future[num])
   if army_count[num] <= 1 or army_strength[num] == 0 then
+    set army_dir[num] = null
+    set army_future[num] = null
     call DestroyGroup(army_group[num])
     set army_group[num] = null
     call RemoveLocation(army_loc[num])
     set army_loc[num] = null
-    set army_dir[num] = null
-    set army_future[num] = null
+    if tu != null then
+      call GroupRemoveUnit(in_army_group, tu)  // count is 1
+      set tu = null
+    endif
     //call RemoveLocation(l)
     //set l = null
     return false
@@ -110,6 +115,7 @@ function TrackArmy takes integer num returns boolean
   // endif
   call RemoveLocation(l)
   set l = null
+  set tu = null
   return true
 endfunction
 
@@ -176,11 +182,11 @@ function SeedNewArmiesForPlayer takes integer p returns nothing
     endif
     call GroupRemoveUnit(g, u)
   endloop
-  if Player(p) == ai_player and main_army >= 0 then
+  if Player(p) == ai_player then
     // Calculate main_army to be the largest group of units
     loop
       exitwhen i >= army_num
-      if Player(army_owner[i]) == ai_player and army_strength[main_army] < army_strength[i] then
+      if Player(army_owner[i]) == ai_player and (main_army < 0 or army_strength[main_army] < army_strength[i]) then
         set main_army = i
       endif
       set i = i + 1
@@ -223,51 +229,51 @@ function UpdateSpecificTownThreat takes integer num returns nothing
   local real t = GetLocationTowerStrength(GetLocationX(town_loc[num]), GetLocationY(town_loc[num]), ver_tower_check_radius) * 2 // Detect any tower rush events
   local real disttemp = 0
   local location loc = null
-  local player p = Player(town_owner[num])
-  if Player(army_owner[i]) != ai_player then
-    loop
-      exitwhen i >= army_num
-      if army_owner[i] != town_owner[i] then
-        set dist = RMax(DistanceBetweenPoints(army_future[i], town_loc[num]), full_threat_distance) // Future loc
-        set loc = GetSubtractionLoc(town_loc[num], army_loc[i])
-        set disttemp = DistanceBetweenPoints(army_loc[i], town_loc[num])
-        if disttemp < GetLengthOfLoc(army_dir[i]) and RAbs(GetAngleBetweenLocs(army_dir[i], loc)) <= 0.4 then // Current loc
-          set dist = full_threat_distance
-        else
-          set dist = RMin(dist, disttemp)
+  local player pt = Player(town_owner[num])
+  local player pa = null
+  loop
+    exitwhen i >= army_num
+    set pa = Player(army_owner[i])
+    if pa != ai_player and pt != pa then
+      set dist = RMax(DistanceBetweenPoints(army_future[i], town_loc[num]), full_threat_distance) // Future loc
+      set loc = GetSubtractionLoc(army_loc[i], town_loc[num])
+      set disttemp = DistanceBetweenPoints(army_loc[i], town_loc[num])
+      if disttemp < GetLengthOfLoc(army_dir[i]) and RAbs(GetAngleBetweenLocs(army_dir[i], loc)) <= 0.4 then // Current loc
+        set dist = full_threat_distance
+      else
+        set dist = RMin(dist, disttemp)
+      endif
+      call RemoveLocation(loc)
+      if dist <= no_threat_distance then
+        //call DisplayToAll("Threat Dist:" + Real2Str(dist))
+        //call DisplayToAll("Threat strength:" + Real2Str(army_strength[i]))
+        //call DisplayToAll("Threat divisor:" + Real2Str(Pow(dist, distance_threat_exponent)))
+        set dist = Pow(dist, distance_threat_exponent)
+        if dist == 0 then
+          set dist = 1
         endif
-        call RemoveLocation(loc)
-        if dist <= no_threat_distance then
-          //call DisplayToAll("Threat Dist:" + Real2Str(dist))
-          //call DisplayToAll("Threat strength:" + Real2Str(army_strength[i]))
-          //call DisplayToAll("Threat divisor:" + Real2Str(Pow(dist, distance_threat_exponent)))
-          set dist = Pow(dist, distance_threat_exponent)
-          if dist == 0 then
-            set dist = 1
-          endif
-          set threat = distance_threat_mult * army_strength[i] / dist
-          //call DisplayToAll("Threat:" + Real2Str(Pow(dist, distance_threat_exponent)))
-          if IsPlayerAlly(Player(town_owner[num]), Player(army_owner[i])) then
-            set t = t - (threat*0.3) // Only ally units reduce threat so should protect own towns over allies, but in some situations ally units enough to protect town
-          else
-            set t = t + threat
-            if threat > max_threat then
-              set max_threat = threat
-              set town_threat_army[num] = i
-            endif
+        set threat = distance_threat_mult * army_strength[i] / dist
+        //call DisplayToAll("Threat:" + Real2Str(Pow(dist, distance_threat_exponent)))
+        if IsPlayerAlly(pt, pa) then
+          set t = t - (threat*0.3) // Only ally units reduce threat so should protect own towns over allies, but in some situations ally units enough to protect town
+        else
+          set t = t + threat
+          if threat > max_threat then
+            set max_threat = threat
+            set town_threat_army[num] = i
           endif
         endif
       endif
-      set i = i + 1
-    endloop
-  endif
+    endif
+    set i = i + 1
+  endloop
   set town_threat[num] = t
   if town_count[num] > 0 then
-    if Player(town_owner[num]) == ai_player then
+    if pt == ai_player then
       if most_threatened_player_town == -1 or town_threat[most_threatened_player_town] < town_threat[num] then
         set most_threatened_player_town = num
       endif
-    elseif IsPlayerAlly(Player(town_owner[num]), ai_player) then
+    elseif IsPlayerAlly(pt, ai_player) then
       if most_threatened_town == -1 or town_threat[most_threatened_town] < town_threat[num] then
         if town_can_tp[num] == true then
           set most_threatened_town = num
@@ -282,7 +288,8 @@ function UpdateSpecificTownThreat takes integer num returns nothing
     endif
   endif
   set loc = null
-  set p = null
+  set pt = null
+  set pa = null
 endfunction
 
 function UpdateTownThreat takes nothing returns nothing
@@ -292,22 +299,22 @@ function UpdateTownThreat takes nothing returns nothing
   local integer enemy_army = -1
   loop
     exitwhen i >= town_num
-    if i > 0 and ModuloInteger(i, 10) == 0 then 
+    if i > 0 and ModuloInteger(i, 10) == 0 then
       call Sleep(0.01)  // This can take along time, but this could cause most threatened town to be wrong in other processes, so sleep so at least no other jobs can use this yet
     endif
     call UpdateSpecificTownThreat(i)
     set i = i + 1
   endloop
-  if main_army >= 0 then
-    set playerthreat = Pow(full_threat_distance, distance_threat_exponent)
-    if playerthreat == 0 then
-      set playerthreat = 1
-    endif
-    set playerthreat = ApplyFleeStrengthModifier(distance_threat_mult * army_strength[main_army] / playerthreat, false) // Converts the players total strength into threat
-  endif
   if i >= town_num then
     set mode = 3
     set lastFreeNum = 0
+    if main_army >= 0 then
+      set playerthreat = Pow(full_threat_distance, distance_threat_exponent)
+      if playerthreat == 0 then
+        set playerthreat = 1
+      endif
+      set playerthreat = ApplyFleeStrengthModifier(distance_threat_mult * army_strength[main_army] / playerthreat, false) // Converts the players total strength into threat
+    endif
     if most_threatened_town >= 0 and town_threat[most_threatened_town] > 0 then
       call Trace("ThreatenedTownThreat: " + Real2Str(town_threat[most_threatened_town]) + " AcceptedThreatLevel: " + Real2Str(accepted_threat_level))
     endif
@@ -378,7 +385,12 @@ function ArmyTrackJob takes nothing returns nothing
     call SeedNewArmies()
   endif
   if mode == 2 then
-    call UpdateTownThreat()
+    if town_num > 0 then
+      call UpdateTownThreat()
+    else
+      set mode = 3
+      set lastFreeNum = 0
+    endif
   endif
   if mode == 3 then
     set mode = 0
