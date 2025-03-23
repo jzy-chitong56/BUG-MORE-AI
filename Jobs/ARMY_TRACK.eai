@@ -122,7 +122,6 @@ endfunction
 function TrackExistingArmies takes nothing returns nothing
   local integer i = lastArmyNum
   local integer first_free = lastFreeNum
-  set tmpmainarmy = -1
   loop
     exitwhen i >= army_num
     exitwhen i != lastArmyNum and ModuloInteger(i,30) == 0 // Sleep every 30 armies to avoid infinite loops
@@ -394,6 +393,7 @@ function ArmyTrackJob takes nothing returns nothing
   endif
   if mode == 3 then
     set mode = 0
+    set tmpmainarmy = -1
     call GroupClear(in_army_group)
     call TQAddJob(4 + 1 * sleep_multiplier, TOWN_TRACK, 0)
   endif
