@@ -1,6 +1,6 @@
 #IFDEF GLOBAL
   integer blockstate = 0
-  integer movetotal = 0
+  //integer movetotal = 0
   unit blockpathunit = null
   unit blockancient = null
   unit blockunit = null
@@ -35,16 +35,16 @@ function MoveAncient takes unit u returns nothing
   call CreateDebugTagLoc("fix block : root here", 10, x, y, 3.00, 1.50)
   call IssuePointOrder(u, "root", x, y)  // build no n need RESET GUARD POSITION
   call TQAddUnitJob(10, RESET_ANCIENT, 0, u)
-  set movetotal = movetotal + 1
+  //set movetotal = movetotal + 1
   set utemp = null
 endfunction
 
-function RootAncient takes nothing returns nothing
-  call IssuePointOrder(blockancient, "root", GetUnitX(blockancient), GetUnitY(blockancient))
-  call TQAddUnitJob(10, RESET_ANCIENT, -1, blockancient)
-  set blockancient = null
-  set movetotal = 0
-endfunction
+// function RootAncient takes nothing returns nothing
+//   call IssuePointOrder(blockancient, "root", GetUnitX(blockancient), GetUnitY(blockancient))
+//   call TQAddUnitJob(10, RESET_ANCIENT, -1, blockancient)
+//   set blockancient = null
+  //set movetotal = 0
+// endfunction
 
 function TeleportFixBlock takes unit u, player p returns nothing
   local group g = null
@@ -77,6 +77,7 @@ function TryFixBlock takes integer fixmode, location l, real range, boolean acti
   local group g = CreateGroup()
   local unit u = null
   local unit utemp = null
+  local unit utree = null
   local player p = null
   local integer i = 0
   local boolean array allyhero
@@ -86,20 +87,20 @@ function TryFixBlock takes integer fixmode, location l, real range, boolean acti
   if fixmode == 0 then
     loop
       set u = FirstOfGroup(g)
-      exitwhen u == null or blockancient != null or (GetPlayerRace(ai_player) != RACE_NIGHTELF and utemp != null)  // first move ancient
+      exitwhen u == null or utree != null or (GetPlayerRace(ai_player) != RACE_NIGHTELF and utemp != null)  // first move ancient
       if GetOwningPlayer(u) == ai_player and IsUnitType(u, UNIT_TYPE_STRUCTURE) and not IsUnitGoldMine(u) and not IsUnitType(u, UNIT_TYPE_TOWNHALL) and UnitAlive(u) and not IsUnitHidden(u) then
         if IsUnitType(u, UNIT_TYPE_ANCIENT) then
           call MoveAncient(u)
-          set blockancient = u
+          set utree = u
         endif
         set i = GetUnitTypeId(u)  // Prevent kill mine , altar , lumber , but include shop
-        if blockancient == null and UnitAlive(u) and utemp == null and GetUnitCount(i) > 1 and i != old_id[racial_expansion] and i != old_id[racial_altar] and i != old_id[racial_lumber] then
+        if utree == null and UnitAlive(u) and utemp == null and GetUnitCount(i) > 1 and i != old_id[racial_expansion] and i != old_id[racial_altar] and i != old_id[racial_lumber] then
           set utemp = u
         endif
       endif
       call GroupRemoveUnit(g,u)
     endloop
-    if blockancient == null and utemp != null then
+    if utree == null and utemp != null then
       call CreateDebugTag("fix block : kill build", 10, utemp, 3.00, 1.50)
       set i = GetUnitTypeId(utemp)
       call SetPlayerGold(ai_player, GetPlayerState(ai_player,PLAYER_STATE_RESOURCE_GOLD) + GetUnitGoldCost(i) * 2)  // Prevent training unit or research technology
@@ -189,23 +190,24 @@ function FixBlockJob takes nothing returns nothing
   local unit u = null
   local integer i = 1
   if TownThreatened() or town_threatened or towerrush or teleporting or not pathing_done or water_map or GetPlayerStructureCount(ai_player, true) < 8 then  // town_threatened include ally so not check
-    if blockancient != null and UnitAlive(blockancient) then
-      call RootAncient()  // case townthreatened
-    endif
+    // if blockancient != null and UnitAlive(blockancient) then
+    //   call RootAncient()  // case townthreatened
+    // endif
     call RemoveBlockPathUnit()
     set blockunit = null
     call TQAddJob(360, FIX_BLOCK, 0)
+    set blockstate = 0
     return
   endif
-  if blockancient != null and UnitAlive(blockancient) then
-    if movetotal > 3 then
-      call RootAncient()
-    else
-      call MoveAncient(blockancient)
-      call TQAddJob(4, FIX_BLOCK, 0)
-      return
-    endif
-  elseif blockunit != null and DistanceBetweenPoints_kd(home_location, GetUnitLoc(blockunit)) < front_base_distance then
+  //if blockancient != null and UnitAlive(blockancient) then
+    // if movetotal > 3 then
+    //   call RootAncient()
+    // else
+    //call MoveAncient(blockancient)
+    //call TQAddJob(4, FIX_BLOCK, 0)
+    //return
+    // endif
+  if blockunit != null and DistanceBetweenPoints_kd(home_location, GetUnitLoc(blockunit)) < front_base_distance then
     call CreateDebugTag("fix block : unit block at here", 10, blockunit, 3.00, 1.50)
     call FindTree(GetUnitX(blockunit), GetUnitY(blockunit))
     set blockunit = null
@@ -219,7 +221,7 @@ function FixBlockJob takes nothing returns nothing
       if i == OrderId("harvest") then
         call TryFixBlock(1, l, 1200, race_no_wood_harvest or GetPlayerRace(ai_player) == RACE_NIGHTELF)
       else
-        set blockancient = null
+        //set blockancient = null
         call TryFixBlock(0, l, 550, true)
       endif
       call RemoveLocation(l)
@@ -232,9 +234,9 @@ function FixBlockJob takes nothing returns nothing
     return
   endif
   call RemoveBlockPathUnit()
-  set blockancient = null
+  //set blockancient = null
   set blockunit = null
-  set movetotal = 0
+  //set movetotal = 0
   call DisplayToAllJobDebug("Fix_Block Job Start, state : " + Int2Str(blockstate))
   call TryFixBlock(2, home_location, 1000, blockstate == 3)  // 3 check other block , maybe pathing sys will always led unit go one loc , but loc blind alley , this block unable to handle , like map lastmanstanding - when hero no block , but maybe new train unit wiil go tavern
   if blockstate == 0 then
