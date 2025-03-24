@@ -13626,10 +13626,18 @@ endfunction
 //============================================================================
 function GetRangePenalty takes unit target, player p returns real
   if major_hero == null or not UnitAlive(major_hero) or target == null or not UnitAlive(target) or IsUnitHidden(target) then
-    if p != null then
-      return DistanceBetweenPoints_kd(home_location, GetPlayerStartLocationLoc(p))
-    elseif target != null then
-      return DistanceBetweenPoints_kd(home_location, GetPlayerStartLocationLoc(GetOwningPlayer(target)))
+    if major_hero != null and UnitAlive(major_hero) then
+      if p != null then
+        return DistanceBetweenPoints_dd(GetUnitLoc(major_hero), GetPlayerStartLocationLoc(p)) / 1400
+      elseif target != null and not IsUnitHidden(target) then
+        return DistanceBetweenPoints_dd(GetUnitLoc(major_hero), GetPlayerStartLocationLoc(GetOwningPlayer(target))) / 1400
+      endif
+    else
+      if p != null then
+        return DistanceBetweenPoints_kd(home_location, GetPlayerStartLocationLoc(p))
+      elseif target != null and not IsUnitHidden(target) then
+        return DistanceBetweenPoints_kd(home_location, GetPlayerStartLocationLoc(GetOwningPlayer(target)))
+      endif
     endif
     return 0.0
   endif
