@@ -894,6 +894,10 @@ globals
     string invalid_strategy_number = ""
     string chat_over_control_ally = ""
 
+    string chat_CurrentGold = "CurrentGold"
+    string chat_Target = "Target"
+    string chat_TargetColor = "TargetColor"
+
     //gamecache translation_map = InitGameCache("AMAI_TM.w3v")
     hashtable translation_map = InitHashtable()
     string array translation
@@ -5220,6 +5224,7 @@ function GetUnusedZeppelinNearUnit takes unit ru, unit nu returns unit
   call GroupEnumUnitsOfType(g, "goblinzeppelin", null)
   set g = SelectByPlayer(g, ai_player, true)
   set g = SelectByAlive(g, true)
+  set g = SelectByHidden(g, false)
   set g = SelectByOrderOr(g, 0, order_cancel, true)
   set g = SelectByUnitFree(g, true)
   set g = SelectByUnitStandard(g, true)
