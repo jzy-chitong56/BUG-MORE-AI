@@ -3430,10 +3430,10 @@ function DisplayChat takes integer chat, boolean ally, boolean enemy, boolean ob
     return
   endif
   set parsed_chat = ApplyChatVars(chat_list[GetRandomInt(0, chat_list_length - 1)])
-  set cgold = ApplyTrans("CurrentGold")
+  set cgold = ApplyTrans(chat_CurrentGold)
   set gold = Int2Str(GetGold())
-  set target = ApplyTrans("Target")
-  set color = ApplyTrans(GetChatVar("TargetColor"))
+  set target = ApplyTrans(chat_Target)
+  set color = ApplyTrans(GetChatVar(chat_TargetColor))
   loop
     exitwhen i >= GetBJMaxPlayers()
     set p = Player(i)
