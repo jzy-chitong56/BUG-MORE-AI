@@ -146,17 +146,14 @@ function TrackExistingArmies takes nothing returns nothing
     set lastArmyNum = 0
     set lastFreeNum = 0
   else
-    set lastArmyNum = i
     set lastFreeNum = first_free
-    if i != first_free then
-      loop
-        exitwhen i >= army_num
-        call CopyArmy(i, first_free)
-        set first_free = first_free + 1
-        set i = i + 1
-      endloop
-      set lastArmyNum = lastFreeNum
-    endif
+    loop
+      exitwhen i >= army_num
+      call CopyArmy(i, first_free)
+      set first_free = first_free + 1
+      set i = i + 1
+    endloop
+    set lastArmyNum = lastFreeNum
     set army_num = first_free
     call TQAddJob(1, ARMY_TRACK, 0)
   endif
