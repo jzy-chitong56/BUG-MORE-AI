@@ -108,7 +108,7 @@ function GoHomeIfMainHero takes unit u, real x, real y returns nothing
 endfunction
 
 function TeleportHome takes integer hn returns nothing
-  local integer i = 0
+  //local integer i = 0
   local real dx = GetLocationX(captain_home)
   local real dy = GetLocationY(captain_home)
   if teleporting then
@@ -205,7 +205,7 @@ function ItemSingetp takes integer hn, integer loc, integer FountainID returns b
         set x = GetUnitX(major_hero)
         set y = GetUnitY(major_hero)
         set g = true
-      elseif enemy_density < 1 or GetUnitState(hero_unit[hn], UNIT_STATE_LIFE) > GetUnitState(hero_unit[hn], UNIT_STATE_MAX_LIFE) * 0.4 then  // life too low cannot use singetp
+      elseif enemy_density == 0 or (enemy_density < 0.08 and GetUnitState(hero_unit[hn], UNIT_STATE_LIFE) > GetUnitState(hero_unit[hn], UNIT_STATE_MAX_LIFE) * 0.4) then  // life too low cannot use singetp
         if loc == 1 then
           set x = GetLocationX(home_location)
           set y = GetLocationY(home_location)
