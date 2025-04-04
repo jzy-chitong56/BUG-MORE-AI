@@ -46,6 +46,8 @@ function TrackTown takes integer num returns boolean
   //local location l = null
   local real x = 0
   local real y = 0
+  local real tx = 0
+  local real ty = 0
   local integer p = town_owner[num]
   local player tp = Player(p)
   set town_value[num] = 0
@@ -64,6 +66,8 @@ function TrackTown takes integer num returns boolean
       set town_value[num] = town_value[num] + 1
       if IsUnitType(u, UNIT_TYPE_TOWNHALL) then
         set town_can_tp[num] = true
+        set tx = GetUnitX(u)
+        set ty = GetUnitY(u)
       endif
     endif
     call GroupRemoveUnit(g, u)
@@ -76,9 +80,11 @@ function TrackTown takes integer num returns boolean
     set town_loc[num] = null
     return false
   endif
-  set x = x / Max(town_count[num], 1)
-  set y = y / Max(town_count[num], 1)
-  set town_loc[num] = Location(x, y)
+  if town_can_tp[num] then
+    set town_loc[num] = Location(tx, ty)
+  else
+    set town_loc[num] = Location(x / Max(town_count[num], 1), y / Max(town_count[num], 1))
+  endif
   if Player(p) == ai_player then
     call CreateDebugTagLoc("Tracked Town: " + Int2Str(num) + " Structures: " + Int2Str(town_count[num]), 16, x, y, 8.00, 3.00)
     if town_value[num] > max_value_town then
@@ -183,7 +189,8 @@ endfunction
 function TownTrackJob takes nothing returns nothing
   call DisplayToAllJobDebug("TOWN_TRACK Job Start")
   if not town_threatened and not TownThreatened() then
-    set home_town = -1
+    // set home_town = -1
+    // set max_value_town = -1
     call TrackExistingTowns()
     call SeedNewTowns()
     call GroupClear(in_town_group)

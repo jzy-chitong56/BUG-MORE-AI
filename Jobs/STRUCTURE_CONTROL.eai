@@ -56,7 +56,7 @@ function CheckShredderLoc takes nothing returns nothing
     set d = GetUnitCurrentOrder(u)
     if d == OrderId("harvest") or d == OrderId("resumeharvesting") then
       set l = GetUnitLoc(u)
-      if DistanceBetweenPoints_kd(home_location, l) >= 1000 then  //Ensure to be near home_location
+      if DistanceBetweenPoints(home_location, l) >= 1000 then  //Ensure to be near home_location
         call GroupClear(g)
         call GroupEnumUnitsInRangeOfLoc(g, l, 800, null)
         set d = 0
@@ -70,6 +70,7 @@ function CheckShredderLoc takes nothing returns nothing
         endloop
         set shredderbuild = d < 5
       endif
+      call RemoveLocation(l)
       set l = null
     endif
     set u = null

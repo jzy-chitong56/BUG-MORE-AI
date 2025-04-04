@@ -44,6 +44,7 @@ function TrackArmy takes integer num returns boolean
   local location l = null
   local real x = 0
   local real y = 0
+  local real s = 0
   local integer p = army_owner[num]
   local player ap = Player(p)
   local player up = null
@@ -71,7 +72,7 @@ function TrackArmy takes integer num returns boolean
       if up != ai_player and IsUnitInvisibleAM(u, ai_player) then
         // Fix using invisible units to exploit amai to force defend its town
       else
-        set army_strength[num] = army_strength[num] + GetUnitStrength(u)
+        set s = s + GetUnitStrength(u)
       endif
     endif
     call GroupRemoveUnit(g, u)
@@ -82,7 +83,7 @@ function TrackArmy takes integer num returns boolean
   set up = null
   call RemoveLocation(army_dir[num])
   call RemoveLocation(army_future[num])
-  if army_count[num] <= 1 or army_strength[num] == 0 then
+  if army_count[num] <= 1 or s == 0 then
     set army_dir[num] = null
     set army_future[num] = null
     call DestroyGroup(army_group[num])
@@ -97,6 +98,7 @@ function TrackArmy takes integer num returns boolean
     //set l = null
     return false
   endif
+  set army_strength[num] = s
   set x = x / Max(army_count[num], 1)
   set y = y / Max(army_count[num], 1)
   //set l = GetDivisionLoc_d(l, Max(army_count[num], 1))
@@ -147,6 +149,8 @@ function TrackExistingArmies takes nothing returns nothing
     set lastFreeNum = 0
   else
     set lastFreeNum = first_free
+    // This ensures list of armies are still partly usuable even though army track isn't quite finished
+    // as the array is kept in sync with the army_num variable
     loop
       exitwhen i >= army_num
       call CopyArmy(i, first_free)
@@ -227,11 +231,14 @@ function UpdateSpecificTownThreat takes integer num returns nothing
   local real dist = 0
   local real threat = 0
   local real max_threat = 0
-  local real t = GetLocationTowerStrength(GetLocationX(town_loc[num]), GetLocationY(town_loc[num]), ver_tower_check_radius) * 2 // Detect any tower rush events
+  local real t = 0
   local real disttemp = 0
   local location loc = null
   local player pt = Player(town_owner[num])
   local player pa = null
+  if IsPlayerAlly(pt, ai_player) then
+    set t = GetLocationTowerStrength(GetLocationX(town_loc[num]), GetLocationY(town_loc[num]), ver_tower_check_radius) * 2 // Detect any tower rush events
+  endif
   loop
     exitwhen i >= army_num
     set pa = Player(army_owner[i])
@@ -282,7 +289,7 @@ function UpdateSpecificTownThreat takes integer num returns nothing
       endif
       // call DisplayToAll("Town threatened "+Int2Str(num)+" Threat: "+Int2Str(R2I(town_threat[num])))
       // call PingMinimapEx(GetLocationX(town_loc[num]), GetLocationY(town_loc[num]), 4, 255, 0, 0, true)
-    else  //Enemy
+    else  //  Enemy
       if most_threatened_enemy_town == -1 or town_threat[most_threatened_enemy_town] < town_threat[num] then
         set most_threatened_enemy_town = num
       endif
