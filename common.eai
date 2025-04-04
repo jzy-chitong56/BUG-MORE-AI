@@ -160,6 +160,10 @@ globals
     constant integer BLOC_STD = 1
     constant integer BLOC_FRONT = 2
     constant integer BLOC_MINE = 3
+    constant integer BLOC_OBSERVATORY = 4
+    constant integer BLOC_MERC_CAMP = 5
+    constant integer BLOC_DRAGON_ROOST = 6
+    integer NEUTRAL_BUILD_LOCK = -300
 
     constant integer NOT_ENOUGH_RES = 1
     constant integer CANNOT_BUILD = 2
@@ -5393,6 +5397,30 @@ function GetUnitToBuy takes unit ru, unit buy_place returns unit
 endfunction
 
 //==========================================================================
+// (AMAI)	GetStructureToBuy
+//==========================================================================
+function GetStructureToBuy takes unit ru, unit buy_place returns unit
+  local group g = CreateGroup()
+  local unit u = null
+  local location l = GetUnitLoc(buy_place)
+  set ru = null
+  call GroupEnumUnitsInRangeOfLoc(g, l, buy_distance, null)
+  loop
+    set u = FirstOfGroup(g)
+    exitwhen u == null
+    if GetOwningPlayer(u) == ai_player and not IsUnitHidden(u) and UnitAlive(u) then
+      set ru = u
+    endif
+    call GroupRemoveUnit(g, u)
+  endloop
+  call DestroyGroup(g)
+  set g = null
+  call RemoveLocation(l)
+  set l = null
+  return ru
+endfunction
+
+//==========================================================================
 // (AMAI)	GetUnitOfTypeNearUnit
 //==========================================================================
 function GetUnitOfTypeNearUnit takes integer ut, unit nu, unit ru returns unit
@@ -10400,6 +10428,24 @@ function BuildAtMine takes integer qty, integer unitid, integer prio returns not
   call SetBuildAllAM(BUILD_UNIT, qty, unitid, -1, BLOC_MINE, prio)
 endfunction
 
+function BuildAtNeutral_O takes integer qty, integer unitid, integer prio returns nothing
+  if neutral_available[NEUTRAL_OBSERVATORY] and not IsVisibleToPlayer(GetUnitX(nearest_neutral[NEUTRAL_OBSERVATORY]), GetUnitY(nearest_neutral[NEUTRAL_OBSERVATORY]), ai_player) and GetGoldOwned() > 600 then
+    call SetBuildAllAM(BUILD_UNIT, qty, unitid, -1, BLOC_OBSERVATORY, prio)
+  endif
+endfunction
+
+function BuildAtNeutral_M takes integer qty, integer unitid, integer prio returns nothing
+  if neutral_available[NEUTRAL_MERC_CAMP] and not IsVisibleToPlayer(GetUnitX(nearest_neutral[NEUTRAL_MERC_CAMP]), GetUnitY(nearest_neutral[NEUTRAL_MERC_CAMP]), ai_player) and GetGoldOwned() > 600 then
+    call SetBuildAllAM(BUILD_UNIT, qty, unitid, -1, BLOC_MERC_CAMP, prio)
+  endif
+endfunction
+
+function BuildAtNeutral_D takes integer qty, integer unitid, integer prio returns nothing
+  if neutral_available[NEUTRAL_DRAGON_ROOST] and not IsVisibleToPlayer(GetUnitX(nearest_neutral[NEUTRAL_DRAGON_ROOST]), GetUnitY(nearest_neutral[NEUTRAL_DRAGON_ROOST]), ai_player) and GetGoldOwned() > 600 then
+    call SetBuildAllAM(BUILD_UNIT, qty, unitid, -1, BLOC_DRAGON_ROOST, prio)
+  endif
+endfunction
+
 //============================================================================
 // Unlike other build commands priority works backwards so it always builds first units at prio specified then works backwards. This is because otherwise its unknown how many units it will build as its first units will build at variable priority based on number of units it actually builds.
 // Min value is in addition to the number built within the food use.
@@ -11215,13 +11261,42 @@ function BuildAtSpecialLoc takes integer unitid, integer town, integer bloc retu
   local unit peon = GetExpansionPeon()
   local location loc = GetBuildLocation(bloc)
   local real d = 0
-  local integer i = 0
+  local integer i = -1
   if peon == null or not UnitAlive(peon) then
     set peon = GetExpansionPeon2(peon)	// In case we can't get the expansion peon
   endif
   if peon == null then
     call Trace("BuildatspecialLoc: No peon available")
     return CANNOT_BUILD
+  endif
+  if bloc == BLOC_OBSERVATORY then
+    set u = nearest_neutral[NEUTRAL_OBSERVATORY]
+    set i = NEUTRAL_OBSERVATORY
+  elseif bloc == BLOC_MERC_CAMP then
+    set u = nearest_neutral[NEUTRAL_MERC_CAMP]
+    set i = NEUTRAL_MERC_CAMP
+  elseif bloc == BLOC_DRAGON_ROOST then
+    set u = nearest_neutral[NEUTRAL_DRAGON_ROOST]
+    set i = NEUTRAL_DRAGON_ROOST
+  endif
+  if i >= 0 then
+    if u != null and UnitAlive(u) and not neutral_guarded[i] then
+      set l = GetUnitLoc(u)
+      set u = CreateUnitAtLoc(Player(PLAYER_NEUTRAL_PASSIVE), old_id[unitid], l, 270.0)
+      set loc = GetUnitLoc(u)
+      call RemoveUnitAM(u)
+      if own_race == R_UNDEAD and not IsPointBlighted(GetLocationX(loc), GetLocationY(loc)) then      // can not build
+      elseif DistanceBetweenPoints(loc, l) < buy_distance then
+        call IssuePointOrderByIdLoc(peon, old_id[unitid], loc)
+        call CreateDebugTag("build to neutral", 10, peon, 4.00, 2.00)
+      endif
+      call RemoveLocation(loc)
+      set loc = null
+      call RemoveLocation(l)
+      set l = null
+    endif
+    set u = null
+    return BUILT_SOME
   endif
   set spaceunit = CreateUnitAtLoc(Player(PLAYERPASSIVE), old_id[unitid], loc, 270.0)
   if bloc != BLOC_MINE then
@@ -11935,6 +12010,19 @@ endfunction
 
 //============================================================================
 function BuildFarms takes integer qty returns nothing
+  if qty < 1 and M4 + NEUTRAL_BUILD_LOCK > ai_time and c_ai_total < 7 then
+    if qty == -1 then
+      call BuildAtNeutral_O(TownCountDone(racial_farm) + 1, racial_farm, farm_prio)
+      set NEUTRAL_BUILD_LOCK = ai_time
+    elseif qty == -2 then
+      call BuildAtNeutral_M(TownCountDone(racial_farm) + 1, racial_farm, farm_prio)
+      set NEUTRAL_BUILD_LOCK = ai_time
+    elseif qty == -3 then
+      call BuildAtNeutral_D(TownCountDone(racial_farm) + 1, racial_farm, farm_prio)
+      set NEUTRAL_BUILD_LOCK = ai_time
+    endif
+    return  // lock olny success
+  endif
   if TownCount(racial_farm) < race_farms_at_mine then
     call BuildAtMine(Min(TownCountDone(racial_farm) + qty, max_farms), racial_farm, farm_prio)
   elseif race_build_farms_front and front_locs_computed and TownCountDone(racial_farm) <= race_farms_front_limit + 1 and TownCountDone(racial_farm) >= 1 then
@@ -11946,7 +12034,11 @@ endfunction
 
 //============================================================================
 function FarmBuilder takes nothing returns nothing
+  if FoodSpace() > farm_food then
+    call BuildFarms(GetRandomInt(-1, -4))
+  endif
   if FoodCap() >= ver_food_limit then
+    call BuildFarms(GetRandomInt(-1, -4))
     return
   endif
   if FoodSpace() <= farm_food2 then
@@ -13644,7 +13736,7 @@ function GetRangePenalty takes unit target, player p returns real
         return DistanceBetweenPoints_kd(home_location, GetPlayerStartLocationLoc(GetOwningPlayer(target)))
       endif
     endif
-    return 0.0
+    return 100.0
   endif
   return DistanceBetweenUnits(major_hero, target) / 1400
 endfunction
@@ -13704,7 +13796,7 @@ endfunction
 function GetWeakAndNearEnemy takes nothing returns player
   local integer i = 0
   local integer pmin = -1
-  local real minstr = 10000000
+  local real minstr = 10000
   local real cstr = 0
   local unit cbuilding = null
   loop
@@ -14732,18 +14824,23 @@ function ApplyHealingItem takes unit u, item heal_item returns nothing
     loop
       exitwhen not UnitAlive(u) or not UnitHasItem(u, heal_item)
       set target = FirstOfGroup(urgent)
-      if target != null and UnitAlive(target) and IsUnitInGroup(target, g) then
-        call UnitUseItemTarget(u, heal_item, target)
+      if target != null then
+        if UnitAlive(target) and IsUnitInGroup(target, g) then
+          call UnitUseItemTarget(u, heal_item, target)
+          call Sleep(2)
+        endif
         call GroupRemoveUnit(urgent, target)
       else
         set target = FirstOfGroup(medium)
-        if target != null and UnitAlive(target) and IsUnitInGroup(target, g) then
-          call UnitUseItemTarget(u, heal_item, target)
+        if target != null then
+          if UnitAlive(target) and IsUnitInGroup(target, g) then
+            call UnitUseItemTarget(u, heal_item, target)
+            call Sleep(2)
+          endif
           call GroupRemoveUnit(medium, target)
         endif
       endif
       exitwhen target == null
-      call Sleep(2)
     endloop
   endif
   call RecycleGuardPosition(u)
