@@ -29,8 +29,8 @@
   //call ActionRule3(true, ACTION_TP, (I2R(GetHeroLevel(hero_unit[hn]))*14)-20, ACTION_ZEPPELIN_HOME, I2R(GetHeroLevel(hero_unit[hn]))*8, ACTION_ZEPPELIN_FOUNTAIN, I2R(GetHeroLevel(hero_unit[hn]))*6)
 
   // Rules of action failure
-  call ActionRule(not race_has_moonwells or TownCountDone(racial_farm) <= 0, ACTION_MOONWELLS,-1000000)
-  if race_has_moonwells then
+  call ActionRule((not race_has_moonwells and GetUnitCountDone('ncmw') == 0) or TownCountDone(racial_farm) <= 0, ACTION_MOONWELLS,-1000000)
+  if race_has_moonwells or GetUnitCountDone('ncmw') > 0 then
     if nearest_neutral[hFountainID] != null then
       call ActionRule(DistanceBetweenPoints_dk(GetUnitLoc(nearest_neutral[hFountainID]),l) > DistanceBetweenPoints(home_location,l), ACTION_MOONWELLS, 18) // Use moonwells if they closer than the fountain
     else
