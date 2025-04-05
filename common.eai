@@ -6664,7 +6664,7 @@ function CheckExpansionTaken takes unit expa returns boolean
   local integer claimedMines = 0
   local integer minecount = 0
   local integer ownedmines = 0
-  local integer id = 0
+  //local integer id = 0
   local boolean mineclaimed = true
   if expa == null or not UnitAlive(expa) then
     return true
@@ -6688,19 +6688,18 @@ function CheckExpansionTaken takes unit expa returns boolean
         return true
       endif
       if u == expa then
-        set mineclaimed = false // Mine not been captured by elf or undead
+        set mineclaimed = false // Mine not been captured by another elf or undead
       endif
       if IsUnitGoldMine(u) then // This is just informative doesnt affect check
         if p == Player(PLAYERPASSIVE) then
           set minecount = minecount + 1
-        else
+        elseif p == ai_player then
           set ownedmines = ownedmines + 1
         endif
       endif
       // A single town hall of humans and orcs can capture close enough mines
       // For now elf will also claim the mines, due to elf mine has to wait for tree of ages to be built so don't want allies to grab mine before its complete.
-      set id = GetUnitTypeId(u)
-      if IsUnitType(u,UNIT_TYPE_TOWNHALL) and id != old_id[NECROPOLIS_1] and id != old_id[NECROPOLIS_2] and id != old_id[NECROPOLIS_3] and DistanceBetweenUnits(u, expa) < race_max_expa_mine_distance then
+      if IsUnitType(u, UNIT_TYPE_TOWNHALL) and (not race_uses_mine_expansion or (p != ai_player and p != Player(PLAYERPASSIVE))) then
         set claimedMines = claimedMines + 1
       endif
     endif
