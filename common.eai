@@ -11281,7 +11281,7 @@ function BuildAtSpecialLoc takes integer unitid, integer town, integer bloc retu
   if i >= 0 then
     if u != null and UnitAlive(u) and not neutral_guarded[i] then
       set l = GetUnitLoc(u)
-      set u = CreateUnitAtLoc(Player(PLAYER_NEUTRAL_PASSIVE), old_id[unitid], l, 270.0)
+      set u = CreateUnitAtLoc(Player(PLAYERPASSIVE), old_id[unitid], l, 270.0)
       set loc = GetUnitLoc(u)
       call RemoveUnitAM(u)
       if own_race == R_UNDEAD and not IsPointBlighted(GetLocationX(loc), GetLocationY(loc)) then      // can not build
