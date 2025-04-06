@@ -6378,7 +6378,7 @@ function MultipleMinefix takes nothing returns boolean
       set i = DistanceBetweenPoints_kd(home_location,GetUnitLoc(u))
       if i <= distance then
         set distance = i
-        if fixmine == null or GetResourceAmount(fixmine) == 0 then
+        if (fixmine == null or GetResourceAmount(fixmine) == 0) and u != own_town_mine[0] then
           set fixmine = u
         endif
       endif
@@ -8660,7 +8660,7 @@ function InitCheckHarvest takes nothing returns nothing
             set distance = check
             if i == GOLD_MINE and own_town_mine[0] == null then
               set own_town_mine[0] = u
-            else
+            elseif u != own_town_mine[0] then
               set fixmine = u
             endif
           endif
@@ -11778,7 +11778,7 @@ endfunction
 
 //============================================================================
 function BuildFarms takes integer qty returns nothing
-  if qty < 1 and M4 + NEUTRAL_BUILD_LOCK > ai_time and c_ai_total < 7 then
+  if qty < 1 and 50 + NEUTRAL_BUILD_LOCK > ai_time and c_ai_total < 7 then
     if qty == -1 then
       call BuildAtNeutral_O(TownCountDone(racial_farm) + 1, racial_farm, farm_prio)
       set NEUTRAL_BUILD_LOCK = ai_time
