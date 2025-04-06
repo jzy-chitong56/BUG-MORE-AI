@@ -18,12 +18,9 @@ function FixBuildJob takes nothing returns nothing
   loop
     set u = FirstOfGroup(g)
     exitwhen u == null
-    if GetOwningPlayer(u) == ai_player and not IsUnitHidden(u) and IsUnitType(u, UNIT_TYPE_PEON) and not IsUnitLoaded(u) and UnitAlive(u) and not IsUnitBuying(u) and (GetUnitState(u, UNIT_STATE_LIFE) < GetUnitState(u, UNIT_STATE_MAX_LIFE) or DistanceBetweenPoints_kd(home_location,GetUnitLoc(u)) > 1000) then
+    if GetOwningPlayer(u) == ai_player and not IsUnitHidden(u) and IsUnitType(u, UNIT_TYPE_PEON) and not IsUnitLoaded(u) and UnitAlive(u) and not IsUnitBuying(u) and (GetUnitState(u, UNIT_STATE_LIFE) < GetUnitState(u, UNIT_STATE_MAX_LIFE) or DistanceBetweenPoints_kd(home_location,GetUnitLoc(u)) > 1360) then
       set id = GetUnitCurrentOrder(u)
-      if id <= 852678 and id != OrderId("smart") then
-        call IssuePointOrder(u, "move", GetLocationX(home_location), GetLocationY(home_location))
-        call CreateDebugTag("Fix Job : peon go home", 10, u, 4.00, 2.00)
-      elseif id > 852678 then
+      if id > 852678 then
         if (id == old_id[racial_rushcreep] and rushcreep_target != null) or id == old_id[racial_expansion] then
         else
           if GetRandomInt(0, 3) < 1 then
@@ -35,7 +32,14 @@ function FixBuildJob takes nothing returns nothing
           set y = GetUnitY(build)
           call RemoveUnitAM(build)
           call IssuePointOrderById(u, id, x, y)
-          call CreateDebugTag("Fix Job : peon build", 10, u, 4.00, 2.00)
+          call CreateDebugTag("Fix Job : fix build", 10, u, 4.00, 2.00)
+        endif
+      elseif id != OrderId("smart") and id != OrderId("repair") and id != OrderId("resumeharvesting") then
+        call CreateDebugTag("Fix Job : fix harvest", 10, u, 4.00, 2.00)
+        if own_town_mine[0] != null then
+          call IssueTargetOrder(u, "harvest", own_town_mine[0])
+        else
+          call IssuePointOrder(u, "move", GetLocationX(home_location), GetLocationY(home_location))
         endif
       endif
     endif
@@ -45,7 +49,7 @@ function FixBuildJob takes nothing returns nothing
   set g = null
   if GetUnitCountDone(old_id[racial_farm]) < 2 then
     call TQAddJob(2, FIX_BUILD, 0)
-  elseif tier < 3 and TownCount(racial_expansion) < 2 then
+  elseif TownCount(racial_expansion) < 2 then
     if build != null then
       call TQAddJob(4, FIX_BUILD, 0)
     else
