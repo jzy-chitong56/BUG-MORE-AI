@@ -59,11 +59,12 @@ function PeonMineCheck takes unit mine returns boolean
     set tempg = CreateGroup()
     call GroupEnumUnitsOfPlayer(g, ai_player, null)
     call GroupRemoveUnit(g, expansion_peon)
+    set peon = old_id[racial_peon]
     loop
       set u = FirstOfGroup(g)
       exitwhen u == null or i >= delaywisps
-      if GetUnitTypeId(u) == old_id[racial_peon] and UnitAlive(u) and not IsUnitHidden(u) then
-        if GetUnitCurrentOrder(u) == OrderId("harvest") and DistanceBetweenUnits(u,mine) < 300 then  // UD harvest gold max standard distance is 221
+      if GetUnitTypeId(u) == peon and UnitAlive(u) and not IsUnitHidden(u) then
+        if GetUnitCurrentOrder(u) == OrderId("harvest") and DistanceBetweenPoints_dk(GetUnitLoc(u),unitloc) < 300 then  // UD harvest gold max standard distance is 221
           set i = i + 1
         elseif GetUnitCurrentOrder(u) == 0 and not IsUnitBuying(u) then
           call GroupAddUnit(tempg,u)  // prevent the mine harvest peon more than 5
@@ -71,7 +72,7 @@ function PeonMineCheck takes unit mine returns boolean
       endif
       call GroupRemoveUnit(g, u)
     endloop
-    if TownCount(racial_peon) > 1 then
+    if TownCount(racial_expansion) > 1 then
       set tempg = GetNearestSubGroupOfGroup(tempg, unitloc, delaywisps - i)
     endif
     loop
