@@ -139,9 +139,6 @@ function TrackExistingArmies takes nothing returns nothing
       if tmpmainarmy == i then
         set tmpmainarmy = -1
       endif
-      if town_threat_army[num] == i then
-        set town_threat_army[num] = -1
-      endif
     endif
     set i = i + 1
   endloop
