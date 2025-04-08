@@ -6490,19 +6490,18 @@ function CheckExpansionTaken takes unit expa returns boolean
         set p = null
         return true
       endif
-      if u == expa then
-        set mineclaimed = false // Mine not been captured by another elf or undead
-      endif
       if IsUnitGoldMine(u) then // This is just informative doesnt affect check
         if p == Player(PLAYER_NEUTRAL_PASSIVE) then
           set minecount = minecount + 1
         elseif p == ai_player then
           set ownedmines = ownedmines + 1
+        else
+          set mineclaimed = true  // Mine not been captured by another elf or undead
         endif
       endif
       // A single town hall of humans and orcs can capture close enough mines
       // For now elf will also claim the mines, due to elf mine has to wait for tree of ages to be built so don't want allies to grab mine before its complete.
-      if IsUnitType(u, UNIT_TYPE_TOWNHALL) and ((not race_uses_mine_expansion and DistanceBetweenUnits(u, expa) < race_max_expa_mine_distance) or (race_uses_mine_expansion and GetOwningPlayer(u) != ai_player)) then
+      if IsUnitType(u, UNIT_TYPE_TOWNHALL) then
         set claimedMines = claimedMines + 1
       endif
     endif
@@ -12125,9 +12124,18 @@ elseif minetimeready and attacking_aggression > 0 and mines > 1 and mines < 4 an
       set u = null
     endif
   else
+    if chaos_expansion != null and chaos_expansion == not_taken_expansion then
+      set not_taken_expansion = null
+    endif
     set chaos_expansion = expansion_list[Max(0, GetRandomInt(0, expansion_list_length - 1))]
     set chaos_expansion_run = false
   endif
+elseif chaos_expansion != null and CheckExpansionTaken(chaos_expansion) then
+  if chaos_expansion == not_taken_expansion then
+    set not_taken_expansion = null
+  endif
+  set chaos_expansion = null
+  set chaos_expansion_run = false
 endif
 //call Trace("ExpansionBuilder: Not ready to build mine")
 endfunction
