@@ -310,7 +310,26 @@ function UpdateTownThreat takes nothing returns nothing
     if i > 0 and ModuloInteger(i, 10) == 0 then
       call Sleep(0.01)  // This can take along time, but this could cause most threatened town to be wrong in other processes, so sleep so at least no other jobs can use this yet
     endif
-    call UpdateSpecificTownThreat(i)
+    if GetPlayerSlotState(Player(town_owner[i])) == PLAYER_SLOT_STATE_PLAYING and GetPlayerStructureCount(Player(town_owner[i]), false) > 0 then
+      call UpdateSpecificTownThreat(i)
+    else
+      if most_threatened_town == i then
+        set most_threatened_town = -1
+      endif
+      if most_threatened_enemy_town == i then
+        set most_threatened_enemy_town = -1
+      endif
+      if most_threatened_player_town == i then
+        set most_threatened_player_town = -1
+      endif
+      if home_town == i then
+        set home_town = -1
+      endif
+      if max_value_town == i then
+        set max_value_town = -1
+      endif
+      set town_threat_army[i] = -1
+    endif
     set i = i + 1
   endloop
   if i >= town_num then
