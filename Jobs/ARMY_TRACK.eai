@@ -371,7 +371,7 @@ function UpdateTownThreat takes nothing returns nothing
       endif
       set captain_home = town_loc[most_threatened_town]
       set captain_tp = town_can_tp[most_threatened_town]
-    elseif town_threatened and town_threat_count < 3 and (most_threatened_town > 0 or most_threatened_player_town > 0) then
+    elseif town_threatened and town_threat_count < 3 and (most_threatened_town >= 0 or most_threatened_player_town >= 0) then
       // persist town threat a bit longer around picked town before standing down
       set town_threat_count = town_threat_count + 1
     elseif most_threatened_player_town >= 0 and town_threat[most_threatened_player_town] > 0 and town_threat[most_threatened_player_town] <= playerthreat then
@@ -412,12 +412,7 @@ function ArmyTrackJob takes nothing returns nothing
     call SeedNewArmies()
   endif
   if mode == 2 then
-    if town_num > 0 then
-      call UpdateTownThreat()
-    else
-      set mode = 3
-      set lastFreeNum = 0
-    endif
+    call UpdateTownThreat()
   endif
   if mode == 3 then
     set mode = 0
