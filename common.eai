@@ -13980,7 +13980,7 @@ function SleepUntilTownDefended takes integer ai_strength returns nothing
   loop
     //call DisplayToAll("Town Threatened:" + B2S(town_threatened) + " HardTown Threatened:" + B2S(TownThreatened()) + " CaptainInCombat:" + B2S(CaptainInCombat(false)) + " i:" )
     call CreateDebugTagLoc("Sleep until town defended", 10, GetLocationX(captain_home), GetLocationY(captain_home), 1.00, 0.80)
-    exitwhen not town_threatened and not TownThreatened() and CaptainInCombat(false)
+    exitwhen not town_threatened and not TownThreatened() and not CaptainInCombat(false)
     exitwhen player_defeated
     set defense_length_counter = defense_length_counter + 1
     if defense_length_counter > attack_reform_length then
