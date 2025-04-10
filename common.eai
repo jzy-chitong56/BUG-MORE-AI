@@ -5214,12 +5214,14 @@ function GetStructureToBuy takes unit ru, unit buy_place returns unit
     if GetOwningPlayer(u) == ai_player and not IsUnitHidden(u) and UnitAlive(u) then
       set ru = u
     endif
+    exitwhen ru != null
     call GroupRemoveUnit(g, u)
   endloop
   call DestroyGroup(g)
   set g = null
   call RemoveLocation(l)
   set l = null
+  set u = null
   return ru
 endfunction
 
@@ -6468,7 +6470,7 @@ function CheckExpansionTaken takes unit expa returns boolean
   local integer minecount = 0
   local integer ownedmines = 0
   //local integer id = 0
-  local boolean mineclaimed = true
+  local boolean mineclaimed = false
   if expa == null or not UnitAlive(expa) then
     return true
   endif
@@ -6480,7 +6482,6 @@ function CheckExpansionTaken takes unit expa returns boolean
   loop
     set u = FirstOfGroup(g)
     exitwhen u == null
-    // Enemy holds the area
     set p = GetOwningPlayer(u)
     if p != Player(PLAYER_NEUTRAL_AGGRESSIVE) and IsUnitType(u, UNIT_TYPE_STRUCTURE) and UnitAlive(u) then  // Creeps dosn't mean expansion is taken
       if IsPlayerEnemy(p, ai_player) then
@@ -6488,15 +6489,16 @@ function CheckExpansionTaken takes unit expa returns boolean
         set g = null
         set u = null
         set p = null
-        return true
+        return true  // Enemy holds the area
       endif
-      if IsUnitGoldMine(u) then // This is just informative doesnt affect check
+      if IsUnitGoldMine(u) then  // This is just informative doesnt affect check
         if p == Player(PLAYER_NEUTRAL_PASSIVE) then
           set minecount = minecount + 1
-        elseif p == ai_player then
-          set ownedmines = ownedmines + 1
         else
-          set mineclaimed = true  // Mine not been captured by another elf or undead
+          if p == ai_player then
+            set ownedmines = ownedmines + 1
+          endif
+          set mineclaimed = true  // Mine captured by another elf or undead
         endif
       endif
       // A single town hall of humans and orcs can capture close enough mines
