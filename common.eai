@@ -144,7 +144,7 @@ globals
     constant integer BLOC_OBSERVATORY = 4
     constant integer BLOC_MERC_CAMP = 5
     constant integer BLOC_DRAGON_ROOST = 6
-    integer NEUTRAL_BUILD_LOCK = -300
+    integer NEUTRAL_BUILD_LOCK = -60
 
     constant integer NOT_ENOUGH_RES = 1
     constant integer CANNOT_BUILD = 2
@@ -11030,7 +11030,7 @@ function BuildAtSpecialLoc takes integer unitid, integer town, integer bloc retu
   local unit peon = GetExpansionPeon()
   local location loc = GetBuildLocation(bloc)
   local real d = 0
-  local integer i = -1
+  local integer i = 0
   if peon == null or not UnitAlive(peon) then
     set peon = GetExpansionPeon2(peon)	// In case we can't get the expansion peon
   endif
@@ -11048,13 +11048,13 @@ function BuildAtSpecialLoc takes integer unitid, integer town, integer bloc retu
     set u = nearest_neutral[NEUTRAL_DRAGON_ROOST]
     set i = NEUTRAL_DRAGON_ROOST
   endif
-  if i >= 0 then
-    if u != null and UnitAlive(u) and not neutral_guarded[i] then
+  if u != null then
+    if UnitAlive(u) and not neutral_guarded[i] then
       set l = GetUnitLoc(u)
       set u = CreateUnitAtLoc(Player(PLAYER_NEUTRAL_PASSIVE), old_id[unitid], l, 270.0)
       set loc = GetUnitLoc(u)
       call RemoveUnitAM(u)
-      if own_race == R_UNDEAD and not IsPointBlighted(GetLocationX(loc), GetLocationY(loc)) then      // can not build
+      if own_race == R_UNDEAD and not IsPointBlighted(GetLocationX(loc), GetLocationY(loc)) then  // can not build
       elseif DistanceBetweenPoints(loc, l) < buy_distance then
         call IssuePointOrderByIdLoc(peon, old_id[unitid], loc)
         call CreateDebugTag("build to neutral", 10, peon, 4.00, 2.00)
@@ -11779,16 +11779,18 @@ endfunction
 
 //============================================================================
 function BuildFarms takes integer qty returns nothing
-  if qty < 1 and 50 + NEUTRAL_BUILD_LOCK > ai_time and c_ai_total < 7 then
-    if qty == -1 then
-      call BuildAtNeutral_O(TownCountDone(racial_farm) + 1, racial_farm, farm_prio)
-      set NEUTRAL_BUILD_LOCK = ai_time
-    elseif qty == -2 then
-      call BuildAtNeutral_M(TownCountDone(racial_farm) + 1, racial_farm, farm_prio)
-      set NEUTRAL_BUILD_LOCK = ai_time
-    elseif qty == -3 then
-      call BuildAtNeutral_D(TownCountDone(racial_farm) + 1, racial_farm, farm_prio)
-      set NEUTRAL_BUILD_LOCK = ai_time
+  if qty < 1 then
+    if 50 + NEUTRAL_BUILD_LOCK > ai_time and c_ai_total < 7 then
+      if qty == -1 then
+        call BuildAtNeutral_O(TownCountDone(racial_farm) + 1, racial_farm, farm_prio)
+        set NEUTRAL_BUILD_LOCK = ai_time
+      elseif qty == -2 then
+        call BuildAtNeutral_M(TownCountDone(racial_farm) + 1, racial_farm, farm_prio)
+        set NEUTRAL_BUILD_LOCK = ai_time
+      elseif qty == -3 then
+        call BuildAtNeutral_D(TownCountDone(racial_farm) + 1, racial_farm, farm_prio)
+        set NEUTRAL_BUILD_LOCK = ai_time
+      endif
     endif
     return  // lock olny success
   endif
