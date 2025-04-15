@@ -1,5 +1,4 @@
 #IFDEF GLOBAL
-  boolean revealdone = false
 #ELSE
 
 function countEnemyReal takes nothing returns nothing
@@ -48,14 +47,13 @@ endfunction
 
 function RevealEnemy takes nothing returns nothing
   call DisplayToAllJobDebug("REVEAL_ENEMY JOB START")
-  if revealdone then
+  if ai_time > 240 then
     if CheckAllianceChange() then  // Prevent map change alliance settings
       call countAllyEnemy()
       call countEnemyReal()
     endif
   else
     call countEnemyReal()
-    set revealdone = true
   endif
 endfunction
 #ENDIF
