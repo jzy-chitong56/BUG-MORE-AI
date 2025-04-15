@@ -63,7 +63,7 @@ endfunction
 
 function TowerRushBuilderFirstControl takes unit u, unit hall returns integer
 	if hall != null and DistanceBetweenUnits(u, hall) < 1000 then
-		if (GetUnitAbilityLevel(u, 'ANha') != 0 or GetUnitAbilityLevel(u, 'Ahar') != 0 or GetUnitAbilityLevel(u, 'Ahr3') != 0) then
+		if GetUnitAbilityLevel(u, 'ANha') != 0 or GetUnitAbilityLevel(u, 'Ahar') != 0 or GetUnitAbilityLevel(u, 'Ahr3') != 0 then
 			call IssueImmediateOrder( u, "returnresources" )
 		endif
 		if race_militia_available and DistanceBetweenPoints_kd(toweringplayerloc, GetUnitLoc(u)) > 6800 then
@@ -104,7 +104,7 @@ function TowerRushBuilderControl_k takes unit u, location t returns nothing
 				call RemoveLocation(loc)
 				call RemoveUnitAM(loccheck)
 				if not IsTerrainPathable(builder_x, builder_y, PATHING_TYPE_BUILDABILITY) then
-					if GetGold() > (GetUnitGoldCost2(racial_shop)) and GetWood() > (GetUnitWoodCost2(racial_shop)) then
+					if GetGold() > GetUnitGoldCost2(racial_shop) and GetWood() > GetUnitWoodCost2(racial_shop) then
 						call IssueBuildOrderById(u, old_id[racial_shop], builder_x, builder_y)
 						call CreateDebugTag("TRush: Shop Building", 10, u, 4.00, 2.00)
 						set race_tower_shop = 1
@@ -380,8 +380,8 @@ function TowerRushJob takes nothing returns nothing
 		call DisplayToAllies(chat_stop_towerrush)
 		call DisplayToObserversImportant(chat_stop_towerrush)
 		if builder[0] != null and GetItemOfTypeOnUnit(race_tower_item, builder[0]) != null then
-			call SetItemPawnable( GetItemOfTypeOnUnit(race_tower_item, builder[0]), true )  //can selling
-			call SetItemDroppable( GetItemOfTypeOnUnit(race_tower_item, builder[0]), true )  //droppable
+			call SetItemPawnable(GetItemOfTypeOnUnit(race_tower_item, builder[0]), true)  //can selling
+			call SetItemDroppable(GetItemOfTypeOnUnit(race_tower_item, builder[0]), true)  //droppable
 		endif
 		call RecycleGuardPosition(builder[0])
 		set builder[0] = null
