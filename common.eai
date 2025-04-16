@@ -144,7 +144,7 @@ globals
     constant integer BLOC_OBSERVATORY = 4
     constant integer BLOC_MERC_CAMP = 5
     constant integer BLOC_DRAGON_ROOST = 6
-    integer NEUTRAL_BUILD_LOCK = -60
+    integer NEUTRAL_BUILD_LOCK = 60
 
     constant integer NOT_ENOUGH_RES = 1
     constant integer CANNOT_BUILD = 2
@@ -3423,10 +3423,10 @@ function DisplayChat takes integer chat, boolean ally, boolean enemy, boolean ob
   local player p = null
   local integer chat_greet_count = 0
   local string parsed_chat = null
-  local string cgold = null
-  local string gold = null
-  local string target = null
-  local string color = null
+  local string current_gold_txt = null
+  local string gold_txt = null
+  local string target_txt = null
+  local string target_color_txt = null
   local string num = null
   local string pi = null
   //call ApplyChatConditions() Not supported in lua
@@ -3434,10 +3434,10 @@ function DisplayChat takes integer chat, boolean ally, boolean enemy, boolean ob
     return
   endif
   set parsed_chat = ApplyChatVars(chat_list[GetRandomInt(0, chat_list_length - 1)])
-  set cgold = ApplyTrans(chat_CurrentGold)
-  set gold = Int2Str(GetGold())
-  set target = ApplyTrans(chat_Target)
-  set color = ApplyTrans(GetChatVar(chat_TargetColor))
+  set current_gold_txt = ApplyTrans(chat_CurrentGold)
+  set gold_txt = Int2Str(GetGold())
+  set target_txt = ApplyTrans(chat_Target)
+  set target_color_txt = ApplyTrans(GetChatVar(chat_TargetColor))
   loop
     exitwhen i >= GetBJMaxPlayers()
     set p = Player(i)
@@ -3446,9 +3446,9 @@ function DisplayChat takes integer chat, boolean ally, boolean enemy, boolean ob
       call SetChatVarsPlayer(p)
       // Only send a limited number of greetings to a single player
       if chat == C_Goldproblem then
-        set parsed_chat = parsed_chat + " " + cgold + ": " + gold
+        set parsed_chat = parsed_chat + " " + current_gold_txt + ": " + gold_txt
       elseif chat == C_Ally or chat == C_Attack or chat == C_Megatarget then
-        set parsed_chat = parsed_chat + " " + target + " (" + color + ")"
+        set parsed_chat = parsed_chat + " " + target_txt + " (" + target_color_txt + ")"
       endif
       if chat == C_Greet then
         set num = Int2Str(GREETINGS_NUM)
@@ -3472,10 +3472,10 @@ function DisplayChat takes integer chat, boolean ally, boolean enemy, boolean ob
   endloop
   set p = null
   set parsed_chat = null
-  set cgold = null
-  set gold = null
-  set target = null
-  set color = null
+  set current_gold_txt = null
+  set gold_txt = null
+  set target_txt = null
+  set target_color_txt = null
   set pi = null
 endfunction
 
@@ -5208,13 +5208,14 @@ function GetStructureToBuy takes unit ru, unit buy_place returns unit
   local location l = GetUnitLoc(buy_place)
   set ru = null
   call GroupEnumUnitsInRangeOfLoc(g, l, buy_distance, null)
+  call GroupRemoveUnit(g, buy_place)
   loop
     set u = FirstOfGroup(g)
     exitwhen u == null
     if GetOwningPlayer(u) == ai_player and not IsUnitHidden(u) and UnitAlive(u) then
       set ru = u
+      exitwhen true
     endif
-    exitwhen ru != null
     call GroupRemoveUnit(g, u)
   endloop
   call DestroyGroup(g)
@@ -6308,8 +6309,10 @@ function BuildBRAtCreep takes nothing returns boolean
     set i = i + 1
   endloop
   if s >= r then  // fail , not found creep
-    call RemoveLocation(loc)
-    set loc = null
+    if loc != null then
+      call RemoveLocation(loc)
+      set loc = null
+    endif
     return false
   endif
   set loc = GetBuildLocationInDistanceFromLoc_d(old_id[racial_rushcreep], loc, 600, false)
@@ -6337,8 +6340,10 @@ function BuildBRAtCreep takes nothing returns boolean
     set success = true
     set u = null
   endif
-  call RemoveLocation(loc)
-  set loc = null
+  if loc != null then
+    call RemoveLocation(loc)
+    set loc = null
+  endif
   return success
 endfunction
 
@@ -9662,6 +9667,57 @@ function GetExistingHero takes nothing returns integer
 endfunction
 
 //============================================================================
+#DEFINE $SKINSTART$ 3
+#DEFINE $SKINEND$ 9
+function GetHeroSkin takes integer hn returns nothing
+  local integer i = 0
+  local integer array skin
+  if p_rare[profile] < 1 or GetRandomInt(0, 100) < 20 then  // not fully use new skin , random int use original skin - 0 : change skin will change proper name (AI Scripts cannot use GetHeroProperName and BlzSetHeroProperName)
+    return
+  #INCLUDETABLE <HeroSkin.txt> #EFR
+  elseif old_id[hero[hn]] == '%2' then
+    #FOR $X$ FROM $SKINSTART$ TO $SKINEND$
+    set skin[#EVAL{$X$-2}] = '%$X$'
+    #ENDFOR
+    set i = GetRandomInt(1, %1)
+    #AFTERINCLUDE
+  #ENDINCLUDE
+  else
+    return // unknow hero
+  endif
+  if skin[i] != '0' then
+    call BlzSetUnitSkinAMAI(hero_unit[hn], skin[i])  // set skin API at 1.33+ and some unit at 1.32+ , old WE make map cannot use - so just in case check max player num
+  endif
+endfunction
+#UNDEF $SKINSTART$
+#UNDEF $SKINEND$
+
+function InitHeroInfo takes integer hn returns nothing
+  if hero_loc[hn] != null then
+    call RemoveLocation(hero_loc[hn])
+  endif
+  set hero_loc[hn] = GetUnitLoc(hero_unit[hn])
+  if hero_enemy_loc[hn] != null then
+    call RemoveLocation(hero_enemy_loc[hn])
+  endif
+  if hero_ally_loc[hn] != null then
+    call RemoveLocation(hero_ally_loc[hn])
+  endif
+  set hero_enemy_loc[hn] = Location(0,0)
+  set hero_ally_loc[hn] = Location(0,0)
+  set hero_hp[hn] = 1
+  call GetHeroSkin(hn)
+endfunction
+
+function SetHeroUnit takes integer hn returns nothing
+  set hero_unit[hn] = GetOneOfId(hero_unit[hn], ai_player, old_id[hero[hn]])
+  if hero_unit[hn] != null then
+    set hero_built[hn] = true
+    call InitHeroInfo(hn)
+    call TQAddJob(1, MICRO_HERO, hn)
+  endif
+endfunction
+
 function ChooseFirstHero takes nothing returns integer
   local integer i = 0
   if hero_built[1] and recalculate_heros then
@@ -9675,8 +9731,8 @@ function ChooseFirstHero takes nothing returns integer
     endloop
   endif
   if IsMapFlagSet(MAP_RANDOM_HERO) then
-//    call DisplayToAll("Map flag set")
     set hero[1] = GetExistingHero()
+    call SetHeroUnit(1)
   else
     call make_hero_rp_positive()
     set chosen = ChooseHero()
@@ -10149,13 +10205,14 @@ endfunction
 //============================================================================
 
 function BuildAdvUpgr2 takes integer qty, integer upgid, integer starttier, integer unitcount, real unitper, integer max, integer prio returns nothing
-//set num = (R2I((100 - FoodUsed()) / GetFoodUsed(old_id[])) - 1) * prio_q_inc   // build upgrade priority at priority of unit
+  local real i = unitper
+  //set num = (R2I((100 - FoodUsed()) / GetFoodUsed(old_id[])) - 1) * prio_q_inc   // build upgrade priority at priority of unit
   if tier >= starttier then
     if unitcount > unitper then
-      if unitper == 0 then
-        set unitper = 1
+      if i == 0 then
+        set i = 1
       endif
-      if GetRandomInt(1, 100) <= Min(R2I((10*unitcount) / unitper), max) or (unitcount > unitper*2 and GetRandomInt(1, 100) <= max) then
+      if GetRandomInt(1, 100) <= Min(R2I((10*unitcount) / i), max) or (unitcount > unitper*2 and GetRandomInt(1, 100) <= max) then
         if qty >= tier-starttier+1 then
           call BuildUpgr(tier-starttier + 1, upgid, prio + ((tier-starttier)*4))
         else
@@ -10198,19 +10255,19 @@ function BuildAtMine takes integer qty, integer unitid, integer prio returns not
 endfunction
 
 function BuildAtNeutral_O takes integer qty, integer unitid, integer prio returns nothing
-  if neutral_available[NEUTRAL_OBSERVATORY] and not IsVisibleToPlayer(GetUnitX(nearest_neutral[NEUTRAL_OBSERVATORY]), GetUnitY(nearest_neutral[NEUTRAL_OBSERVATORY]), ai_player) and GetGoldOwned() > 600 then
+  if nearest_neutral[NEUTRAL_OBSERVATORY] != null and not IsVisibleToPlayer(GetUnitX(nearest_neutral[NEUTRAL_OBSERVATORY]), GetUnitY(nearest_neutral[NEUTRAL_OBSERVATORY]), ai_player) and GetGoldOwned() > 600 then
     call SetBuildAllAM(BUILD_UNIT, qty, unitid, -1, BLOC_OBSERVATORY, prio)
   endif
 endfunction
 
 function BuildAtNeutral_M takes integer qty, integer unitid, integer prio returns nothing
-  if neutral_available[NEUTRAL_MERC_CAMP] and not IsVisibleToPlayer(GetUnitX(nearest_neutral[NEUTRAL_MERC_CAMP]), GetUnitY(nearest_neutral[NEUTRAL_MERC_CAMP]), ai_player) and GetGoldOwned() > 600 then
+  if nearest_neutral[NEUTRAL_MERC_CAMP] != null and not IsVisibleToPlayer(GetUnitX(nearest_neutral[NEUTRAL_MERC_CAMP]), GetUnitY(nearest_neutral[NEUTRAL_MERC_CAMP]), ai_player) and GetGoldOwned() > 600 then
     call SetBuildAllAM(BUILD_UNIT, qty, unitid, -1, BLOC_MERC_CAMP, prio)
   endif
 endfunction
 
 function BuildAtNeutral_D takes integer qty, integer unitid, integer prio returns nothing
-  if neutral_available[NEUTRAL_DRAGON_ROOST] and not IsVisibleToPlayer(GetUnitX(nearest_neutral[NEUTRAL_DRAGON_ROOST]), GetUnitY(nearest_neutral[NEUTRAL_DRAGON_ROOST]), ai_player) and GetGoldOwned() > 600 then
+  if nearest_neutral[NEUTRAL_DRAGON_ROOST] != null and not IsVisibleToPlayer(GetUnitX(nearest_neutral[NEUTRAL_DRAGON_ROOST]), GetUnitY(nearest_neutral[NEUTRAL_DRAGON_ROOST]), ai_player) and GetGoldOwned() > 600 then
     call SetBuildAllAM(BUILD_UNIT, qty, unitid, -1, BLOC_DRAGON_ROOST, prio)
   endif
 endfunction
@@ -11780,7 +11837,7 @@ endfunction
 //============================================================================
 function BuildFarms takes integer qty returns nothing
   if qty < 1 then
-    if 50 + NEUTRAL_BUILD_LOCK > ai_time and c_ai_total < 7 then
+    if ai_time - NEUTRAL_BUILD_LOCK > 0 and c_ai_total < 7 then
       if qty == -1 then
         call BuildAtNeutral_O(TownCountDone(racial_farm) + 1, racial_farm, farm_prio)
         set NEUTRAL_BUILD_LOCK = ai_time
@@ -12145,55 +12202,13 @@ endif
 endfunction
 
 //============================================================================
-#DEFINE $SKINSTART$ 3
-#DEFINE $SKINEND$ 9
-function GetHeroSkin takes integer hn returns nothing
-  local integer i = 0
-  local integer array skin
-  if p_rare[profile] < 1 or GetRandomInt(0, 100) < 20 then  // not fully use new skin , random int use original skin - 0 : change skin will change proper name (AI Scripts cannot use GetHeroProperName and BlzSetHeroProperName)
-    return
-  #INCLUDETABLE <HeroSkin.txt> #EFR
-  elseif old_id[hero[hn]] == '%2' then
-    #FOR $X$ FROM $SKINSTART$ TO $SKINEND$
-    set skin[#EVAL{$X$-2}] = '%$X$'
-    #ENDFOR
-    set i = GetRandomInt(1, %1)
-    #AFTERINCLUDE
-  #ENDINCLUDE
-  else
-    return // unknow hero
-  endif
-  if skin[i] != '0' then
-    call BlzSetUnitSkinAMAI(hero_unit[hn], skin[i])  // set skin API at 1.33+ and some unit at 1.32+ , old WE make map cannot use - so just in case check max player num
-  endif
-endfunction
-#UNDEF $SKINSTART$
-#UNDEF $SKINEND$
-
-function InitHeroInfo takes integer hn returns nothing
-  set hero_loc[hn] = GetUnitLoc(hero_unit[hn])
-  set hero_dir[hn] = Location(0,0)
-  set hero_enemy_loc[hn] = Location(0,0)
-  set hero_ally_loc[hn] = Location(0,0)
-  set hero_hp[hn] = 1
-  if major_hero == null or (not IsUnitType(major_hero, UNIT_TYPE_HERO) and ver_heroes) or not UnitAlive(major_hero) then
-    set major_hero = hero_unit[hn]
-  endif
-  call GetHeroSkin(hn)
-endfunction
-
 function HeroReviver takes nothing returns nothing
   local integer i = 1
   loop
     exitwhen i > 3
     if GetUnitCountDone(old_id[hero[i]]) > 0 then
       if not hero_built[i] then
-        set hero_unit[i] = GetOneOfId(hero_unit[i], ai_player, old_id[hero[i]])
-        if hero_unit[i] != null then
-          set hero_built[i] = true
-          call InitHeroInfo(i)
-          call TQAddJob(1, MICRO_HERO, i)
-        endif
+        call SetHeroUnit(i)
       endif
     elseif hero_built[i] then
       if not TavernResurrect then
@@ -12323,15 +12338,15 @@ endfunction
 
 //============================================================================
 function TimeKeeper takes nothing returns nothing
-  local integer t = ai_time
   //local real new_time_of_day = GetFloatGameState(GAME_STATE_TIME_OF_DAY)
   //if new_time_of_day < time_of_day then
   //  call Chat(C_NewYear)
   //endif
   //set time_of_day = new_time_of_day
   set ai_time = R2I(TimerGetElapsed(tq_timer) / 5)
-  if ai_time - t >= taunt_start_time then
+  if ai_time - taunt_start_time >= 0 then
     call Chat(C_Taunt)
+    set taunt_start_time = ai_time
   endif
 endfunction
 
@@ -14501,7 +14516,7 @@ function GetArmyHealthState takes nothing returns real
   loop
     set u = FirstOfGroup(g)
     exitwhen u == null
-    if UnitAlive(u) and not (IsUnitHidden(u) or IsUnitType(u, UNIT_TYPE_PEON) or IsUnitType(u, UNIT_TYPE_STRUCTURE) or IsUnitIllusion(u)) and not IsUnitBuying(u) then
+    if UnitAlive(u) and not (IsUnitHidden(u) or IsUnitType(u, UNIT_TYPE_PEON) or IsUnitType(u, UNIT_TYPE_STRUCTURE) or IsUnitIllusion(u) or IsUnitBuying(u)) then
       if GetUnitTypeId(u) == 'ohwd' then
         set prev_ward = true
       else
