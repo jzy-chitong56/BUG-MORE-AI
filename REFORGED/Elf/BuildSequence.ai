@@ -2160,6 +2160,7 @@ function init_strategy_AoWMix takes nothing returns nothing
 
 
 
+
 endfunction
 function build_sequence_AoWMix takes nothing returns nothing
 if tier == 3 then
@@ -2173,6 +2174,7 @@ if tier == 3 then
       call BuildUpgr(Min(((TownCountDone(ARCHER)/2)-2),1), UPG_BOWS, 50)
       call BuildUpgr(Min(((TownCountDone(HUNTRESS)/2)-2),1), UPG_GLAIVE, 50)
       call BuildUpgr(Min((TownCountDone(BALLISTA)/2),1), UPG_BOLT, 50)
+
 
 
 
@@ -2257,11 +2259,13 @@ elseif tier == 2 then
 
 
 
+
 else
 
       call SetBuildReact(26, 8, HUNTRESS, 4, ARCHER, (enemy_unarmored + (enemy_lightarmor * 2) + enemy_air + enemy_magic - (enemy_normal * 2)), 3, 18, 60) 
       call BuildUnit(1, TREE_AGES, 55)
       call BuildUnit(1, hero[1], 150)
+
 
 
 
