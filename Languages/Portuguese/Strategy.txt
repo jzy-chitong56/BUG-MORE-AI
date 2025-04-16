@@ -68,6 +68,7 @@ OAntiTower	Anti Torre	Estou fazendo equipamentos de cerco em massa
 VersusHuman	Raiders e Spirtwalkers	Vou de Raiders e Spirit Walkers
 VersusUndead	Grunts e Beastiary	Vou de Grunts e uma mistura do Beastiary
 VersusElf	Raiders e Demolishers	Vou de Raiders e Demolishers
+OrcVersusOrc	Taurens and Spirit Walkers	Vou de Taurens and Spirit Walkers
 ROCNormalUndead	Normal	Eu vou fazer um pouco de tudo
 ROCWyrms	Wyrms	Farei wyrms e algumas Crypt Fiends
 ROCBanshee	Banshees	Farei muitas Banshees

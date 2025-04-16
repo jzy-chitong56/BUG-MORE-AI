@@ -65,9 +65,10 @@ BestiaryMix	BestiaryMix	Jag mixar enheter fran bestiary
 AntiPierce	Anti Pierce	Jag skaffar melee och raiders
 AntiAir	Batriders	Jag massar bats
 OAntiTower	Anti Torn	Jag massar siege
-VersusHuman	Raiders and Spirtwalkers	Jag bygger p?raiders och spirit walkers
+VersusHuman	Raiders and Spirtwalkers	Jag bygger raiders och spirit walkers
 VersusUndead	Grunts and Beastiary	Jag bygger grunts och lite blandat fran beastiary
 VersusElf	Raiders and Demolishers	Jag bygger raiders och demolishers
+OrcVersusOrc	Taurens and Spirtwalkers	Jag bygger Taurens och spirtwalkers
 ROCNormalUndead	Normal	Jag spelar som vanligt och bygger lite av varje
 ROCWyrms	Wyrms	Jag bygger wyrms och crypt fiends
 ROCBanshee	Banshees	Jag skaffar banshees

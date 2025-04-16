@@ -68,6 +68,7 @@ OAntiTower	Anti Tärme	Ich baue massiv Belagerungswaffen
 VersusHuman	Räuber und Geistläufer	Ich baue Räuber und Geisterläufer
 VersusUndead	Grunzer und Bestiarium	Ich baue Grunzer und mixe Einheiten aus dem Bestiarium
 VersusElf	Räuber und Verwüster	Ich baue Räuber und Verwüster
+OrcVersusOrc	Tauren und Geisterläufer	Ich baue Tauren und Geisterläufer
 ROCNormalUndead	Normal	Ich spiele normal und baue von Allem etwas
 ROCWyrms	Wyrms	Ich versuche einen Wyrmrush mit ein paar Gruftbestien
 ROCBanshee	Banshees	Ich baue hauptsächlich Banshees

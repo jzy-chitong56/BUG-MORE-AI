@@ -68,6 +68,7 @@ OAntiTower	Anti Tower	I'm massing siege equipment
 VersusHuman	Raiders and Spirtwalkers	I'm mixing Raiders and Spirit Walkers
 VersusUndead	Grunts and Beastiary	I'm building Grunts with a mix from the beastiary
 VersusElf	Raiders and Demolishers	I'm building Raiders and Demolishers
+OrcVersusOrc	Taurens and Spirtwalkers	I'm building Taurens and Spirtwalkers
 ROCNormalUndead	Normal	I will play normal and build a little bit of everything
 ROCWyrms	Wyrms	Going wyrms and a few crypt fiends
 ROCBanshee	Banshees	I'll go mostly banshees
