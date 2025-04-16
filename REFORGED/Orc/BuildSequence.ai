@@ -2158,7 +2158,9 @@ else
 endif
 endfunction
 
-function init_strategy_VersusOrc takes nothing returns nothing
+function init_strategy_OrcVersusOrc takes nothing returns nothing
+
+
 
 
 
@@ -2175,7 +2177,7 @@ function init_strategy_VersusOrc takes nothing returns nothing
 
 
 endfunction
-function build_sequence_VersusOrc takes nothing returns nothing
+function build_sequence_OrcVersusOrc takes nothing returns nothing
 if tier == 3 then
 
       call BuildUnit(1, hero[1], 140)
@@ -2188,6 +2190,8 @@ if tier == 3 then
       call BuildUpgr(1, UPG_ORC_PULVERIZE, 70)
       call BuildUpgr(2, UPG_ORC_SWALKER, 40)
       call BuildUpgr(2, UPG_ORC_DOCS, 30)
+
+
 
 
 
@@ -2217,11 +2221,15 @@ elseif tier == 2 then
 
 
 
+
+
 else
 
     call BuildUnit(1, hero[1], 150)
     call BuildUnit(11, GRUNT, 40)
     call BuildUnit(1, STRONGHOLD, 50)
+
+
 
 
 
