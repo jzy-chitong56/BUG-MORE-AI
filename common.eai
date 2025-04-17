@@ -10571,6 +10571,7 @@ endfunction
 
 function AddHarassUnittype takes group g, group harasser, integer qty, integer uid, integer key returns group
   local group cg = null
+  local group tg = CreateGroup()
   local unit u = null
   local real player_sum = 0
   local integer i = 0
@@ -10581,6 +10582,7 @@ function AddHarassUnittype takes group g, group harasser, integer qty, integer u
     exitwhen u == null or i >= qty
     if GetUnitTypeId(u) == id and not IsUnitInGroup(u, unit_harassing) and not IsUnitBuying(u) and IsStandardUnit(u) then  // Will ensure units are not already harassing somewhere else
       call GroupAddUnit(harasser,u)
+      call CreateDebugTag("Add to harasser group , soon", 10, u, 3.00, 1.50)
       set player_sum = player_sum + GetUnitStrength(u)
       call GroupRemoveUnit(g,u)
       set i = i + 1
@@ -10606,6 +10608,7 @@ function StartHarass takes integer groupnum, integer harass_target, boolean avoi
   local real getstrength = 0
   local integer qty = 0
   local integer uid = 0
+  local boolean heroharass = false
   if LoadInteger(additional_info, key, STATE_RETREAT) == 1 or resetharass then
     // This harass is still running
     return
@@ -10638,6 +10641,9 @@ function StartHarass takes integer groupnum, integer harass_target, boolean avoi
     if qty > 0 and uid > 0 then
       set harasser = AddHarassUnittype(g, harasser, qty, uid, key)
       set strength = strength + LoadReal(additional_info, key, START_STRENGTH_TEMP)
+      if uid == hero[1] or uid == hero[2] or uid == hero[3] then
+        set heroharass = true
+      endif
     endif
     set i = i + 2
   endloop
@@ -10668,7 +10674,7 @@ function StartHarass takes integer groupnum, integer harass_target, boolean avoi
     call SaveInteger(additional_info, key, HARASS_UNITGROUP, 0)
     call AddUnitsToHashtable(additional_info, key, HARASS_UNITGROUP, harasser)
     call TQAddUnitJob(0, HARASS, key, null)
-  else
+  elseif not heroharass and LoadBoolean(additional_info, key, STATE_ATTACKING) then
     call GroupAddGroup(unit_harassing, harasser)
     set g = CreateGroup()
     set g = ReturnLivingUnitsOfHashtable(additional_info, key, HARASS_UNITGROUP, g)
@@ -10694,9 +10700,9 @@ function GetHarassGroupStrength takes integer groupnum returns real
   if not resetharass then
     loop
       exitwhen i >= harass_size[groupnum] or t >= 12
-      set id = LoadInteger(harass_groups, groupnum, i)
+      set id = LoadInteger(harass_groups, groupnum, i + 1)
       if id > 0 then
-        set qty = LoadInteger(harass_groups, groupnum, i + 1)
+        set qty = LoadInteger(harass_groups, groupnum, i)
         set t = t + qty
         if t + qty > 12 then
           set qty = 12 - t
