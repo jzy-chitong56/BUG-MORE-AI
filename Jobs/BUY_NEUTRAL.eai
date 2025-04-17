@@ -102,7 +102,6 @@ function BuyNeutral takes integer id returns nothing
         call IssueImmediateOrder(neutral_sent[nn], "holdposition")  // stop will let panda cancel element clone
       endif
       call IssueNeutralImmediateOrderById(ai_player, buy_place, old_id[id])
-      call CreateDebugTag("buy ", 10, zep, 3.00, 1.50)
       if buy_time_small[nn] < 0 then
         set buy_time_small[nn] = current_time
       endif
