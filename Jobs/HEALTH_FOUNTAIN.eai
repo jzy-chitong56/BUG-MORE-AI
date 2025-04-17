@@ -58,6 +58,7 @@ local boolean creepsawake = false
   if (distance <= 600 and (detectedenemies >= unitstrengt or creepsawake)) or (difficulty == HARD and (enemiesatfountain >= unitstrengt or creepsawake)) then
 //    call DisplayToAll("Fountain Return Home")
     call IssuePointOrder(u, "move", GetLocationX(home_location), GetLocationY(home_location))
+    call CreateDebugTag("HEALTH_FOUNTAIN go home", 10, u, 3.00, 1.50)
     call TQAddUnitJob(2, SEND_HOME, 0, u)
   elseif GetUnitState(u, UNIT_STATE_LIFE) >= GetUnitState(u, UNIT_STATE_MAX_LIFE) * (I2R(p) / 100) then
 //    call DisplayToAll("Fountain Healed")
@@ -68,13 +69,17 @@ local boolean creepsawake = false
       if detectedenemies > 0 and (GetUnitAbilityLevel(u, 'AIhm') > 0 or GetUnitAbilityLevel(u, 'Ashm') > 0) then
         set distance = GetFloatGameState(GAME_STATE_TIME_OF_DAY)
         if IssueImmediateOrder(u, "ambush") then  //no need do anything
+          call CreateDebugTag("HEALTH_FOUNTAIN ambush", 10, u, 3.00, 1.50)
         elseif distance >= 18 and distance < 5 then
           call IssueImmediateOrder(u, "ambush")
+          call CreateDebugTag("HEALTH_FOUNTAIN ambushing", 10, u, 3.00, 1.50)
         else
           call IssuePointOrder(u, "move", x, y)
+          call CreateDebugTag("HEALTH_FOUNTAIN cannot ambush , move fountain", 10, u, 3.00, 1.50)
         endif
       else
         call IssuePointOrder(u, "move", x, y)
+        call CreateDebugTag("HEALTH_FOUNTAIN move fountain", 10, u, 3.00, 1.50)
       endif
     else
       if GetUnitAbilityLevel(u, 'AIhm') > 0 or GetUnitAbilityLevel(u, 'Ashm') > 0 then
@@ -86,6 +91,7 @@ local boolean creepsawake = false
       elseif not IsUnitType(u, UNIT_TYPE_FLYING) and GetUnitCurrentOrder(u) != OrderId("patrol") then
         call IssuePointOrder( u, "patrol", x + ISign() * GetRandomReal(280,350), y + ISign() * GetRandomReal(280,350))  //Prevent units from being blocked by other units coming from behind when leaving
       endif
+      call CreateDebugTag("HEALTH_FOUNTAIN at fountain", 10, u, 3.00, 1.50)
     endif
     call TQAddUnitJob(8, HEALTH_FOUNTAIN, p, u)
   endif

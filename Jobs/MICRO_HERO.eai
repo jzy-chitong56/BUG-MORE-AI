@@ -374,6 +374,7 @@ function SaveHero takes integer hn , integer armyOfHero returns nothing
 endfunction
 
 function HeroBugFixHealthCheck takes integer hn returns boolean
+  call CreateDebugTag("hero in harasser group : " + B2S(IsUnitInGroup(unit_harassing, hero_unit[hn])), 10, hero_unit[hn], 3.00, 1.50)
   return GetUnitState(hero_unit[hn], UNIT_STATE_LIFE) >= 0.80 * GetUnitState(hero_unit[hn], UNIT_STATE_MAX_LIFE) and IsUnitInGroup(hero_unit[hn], unit_healing)
 endfunction
 
