@@ -58,6 +58,7 @@ function ManaFountainJob takes unit u, integer p returns nothing
   set unitstrengt = GetUnitStrength(u)
   set distance = DistanceBetweenUnits(u, fountain)
   if (distance <= 600 and (detectedenemies >= unitstrengt or creepsawake)) or (difficulty == HARD and (enemiesatfountain >= unitstrengt or creepsawake)) then
+    call CreateDebugTag("MANA_FOUNTAIN go home", 10, u, 3.00, 1.50)
     call IssuePointOrder(u, "move", GetLocationX(home_location), GetLocationY(home_location))
     call TQAddUnitJob(2, SEND_HOME, 0, u)
   elseif GetUnitState(u, UNIT_STATE_MANA) >= GetUnitState(u, UNIT_STATE_MAX_MANA) * (I2R(p) / 100) then
@@ -67,13 +68,17 @@ function ManaFountainJob takes unit u, integer p returns nothing
       if detectedenemies > 0 and (GetUnitAbilityLevel(u, 'AIhm') > 0 or GetUnitAbilityLevel(u, 'Ashm') > 0) then
         set distance = GetFloatGameState(GAME_STATE_TIME_OF_DAY)
         if IssueImmediateOrder(u, "ambush") then  //no need do anything
+          call CreateDebugTag("MANA_FOUNTAIN ambush", 10, u, 3.00, 1.50)
         elseif distance >= 18 and distance < 5 then
           call IssueImmediateOrder(u, "ambush")
+          call CreateDebugTag("MANA_FOUNTAIN ambushing", 10, u, 3.00, 1.50)
         else
           call IssuePointOrder(u, "move", x, y)
+          call CreateDebugTag("MANA_FOUNTAIN cannot ambush , move fountain", 10, u, 3.00, 1.50)
         endif
       else
         call IssuePointOrder(u, "move", x, y)
+        call CreateDebugTag("MANA_FOUNTAIN move fountain", 10, u, 3.00, 1.50)
       endif
     else
       if GetUnitAbilityLevel(u, 'AIhm') > 0 or GetUnitAbilityLevel(u, 'Ashm') > 0 then
@@ -85,6 +90,7 @@ function ManaFountainJob takes unit u, integer p returns nothing
       elseif not IsUnitType(u, UNIT_TYPE_FLYING) and GetUnitCurrentOrder(u) != OrderId("patrol") then
         call IssuePointOrder( u, "patrol", x + ISign() * GetRandomReal(280,350), y + ISign() * GetRandomReal(280,350))  //Prevent units from being blocked by other units coming from behind when leaving
       endif
+      call CreateDebugTag("MANA_FOUNTAIN at fountain", 10, u, 3.00, 1.50)
     endif
     call TQAddUnitJob(8, MANA_FOUNTAIN, p, u)
   endif

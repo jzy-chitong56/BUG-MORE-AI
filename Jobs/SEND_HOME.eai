@@ -28,7 +28,7 @@ function SomeUnitHasHealingItem takes unit ru, unit u, integer rhi returns unit
   loop
     set ru = FirstOfGroup(g)
     exitwhen ru == null
-    if GetOwningPlayer(ru) == ai_player and GetUnitAbilityLevel(ru, 'AInv') > 0 and GetItemNumberOnUnit(rhi, ru) > 0 and UnitAlive(ru) then
+    if GetOwningPlayer(ru) == ai_player and GetUnitAbilityLevel(ru, 'AInv') > 0 and GetItemNumberOnUnit(rhi, ru) > 0 and UnitAlive(ru) and not IsUnitHidden(ru) then
       call DestroyGroup(g)
       set g = null
       return ru
@@ -169,7 +169,7 @@ function SendUnitHomeJob takes unit u, integer p returns nothing
             loop
               set corpse = FirstOfGroup(g)
               exitwhen corpse == null
-              exitwhen not UnitAlive(corpse) and IsUnitType(corpse, UNIT_TYPE_DEAD) and not IsUnitType(corpse, UNIT_TYPE_STRUCTURE)
+              exitwhen not UnitAlive(corpse) and not IsUnitHidden(corpse) and IsUnitType(corpse, UNIT_TYPE_DEAD) and not IsUnitType(corpse, UNIT_TYPE_STRUCTURE)
               call GroupRemoveUnit(g, corpse)
             endloop
             call GroupClear(g)
@@ -183,7 +183,7 @@ function SendUnitHomeJob takes unit u, integer p returns nothing
             loop
               set corpse = FirstOfGroup(g) // Not a corpse, is it a town hall we can return wood too?
               exitwhen corpse == null
-              exitwhen UnitAlive(corpse) and (IsUnitType(corpse, UNIT_TYPE_TOWNHALL) or GetUnitTypeId(corpse) == old_id[racial_lumber])
+              exitwhen UnitAlive(corpse) and not IsUnitHidden(corpse) and (IsUnitType(corpse, UNIT_TYPE_TOWNHALL) or GetUnitTypeId(corpse) == old_id[racial_lumber])
               call GroupRemoveUnit(g, corpse)
             endloop
             if corpse != null then
@@ -217,6 +217,7 @@ function SendUnitHomeJob takes unit u, integer p returns nothing
               call IssueImmediateOrder(u, "unbearform")
             endif
             call IssueTargetOrder(u, "rejuvination", u)
+            call CreateDebugTag("SEND_HOME heal rejuvination", 10, u, 3.00, 1.50)
           endif
         endif
       endif
