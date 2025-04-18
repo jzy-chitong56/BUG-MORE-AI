@@ -10731,8 +10731,6 @@ endfunction
 // (AMAI) Harrass Functions
 //============================================================================
 function InitHarass takes nothing returns nothing
-  local integer i = 1
-  local group g = null
   set resetharass = true
   loop
     exitwhen i >= max_harass_groups
@@ -10744,21 +10742,13 @@ function InitHarass takes nothing returns nothing
   if harass_groups == null then
     set harass_groups = InitHashtable()
   else
-    set i = 1
-    loop
-      exitwhen i >= max_harass_groups
-      set g = CreateGroup()
-      set g = ReturnLivingUnitsOfHashtable(additional_info, i, HARASS_UNITGROUP, g)
-      call GroupRecycleGuardPositionInstant(g)
-      set i = i + 1
-    endloop
     call FlushParentHashtable(harass_groups)
     set harass_groups = InitHashtable()
+    call GroupRecycleHarrassPositionInstant(unit_harassing)
   endif
   //call Trace("InitHarassEnd")
   set distraction_group = 0
   set resetharass = false
-  set g = null
 endfunction
 
 function AddHarass takes integer groupnum, integer qty, integer unitid returns nothing
