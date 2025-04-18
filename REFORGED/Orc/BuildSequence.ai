@@ -236,7 +236,8 @@ function global_build_sequence takes nothing returns nothing
 
     // TIER 1 UPGRADES
     //--------------------------------------------------------
-    if tier == 1 then
+    if tier >= 1 then
+      call BuildUpgr(1, UPG_BACKPACK_ORC, 10)
     endif
     if not (c_enemy_total == c_enemy[R_ELF]) then
       call BuildAdvUpgr(2, UPG_ORC_SPIKES, 1, 1, 1, 30, 15)
