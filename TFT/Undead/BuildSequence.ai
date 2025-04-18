@@ -132,6 +132,9 @@ function global_build_sequence takes nothing returns nothing
 
     // Global Items
     call BuildItem(1, M_TOWN_PORTAL, 100)
+    if AatpAbility then
+      call BuildItem(1, RITUAL_DAGGER, 30)
+    endif
     if tier > 1 then
       call BuildItem(1, HEALING_POTION, 60)
       call BuildItem(1, TOWN_PORTAL, 150)
