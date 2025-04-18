@@ -5667,7 +5667,7 @@ function GetPlayer%1Strength takes player p returns real
   #ENDINCLUDE
   #DEFINE $CSTRENGTH$ %1
   #INCLUDETABLE <$VER$\StrengthPredictionRules.txt> #EFR #COND '%1' eq '$CSTRENGTH$'
-  if ai_time >= %2 and ai_time <= %3 and %4 then
+  if ai_time >= %2 and ((%3 >= 0 and ai_time <= %3) or %3 < 0) and %4 then
     set strength = strength + %5
   endif
   #ENDINCLUDE
@@ -10526,8 +10526,7 @@ endfunction
 // (AMAI) Harrass Functions
 //============================================================================
 function InitHarass takes nothing returns nothing
-  local integer i = 1
-  local group g = null
+  local integer i = 0
   set resetharass = true
   loop
     exitwhen i >= max_harass_groups
@@ -10539,21 +10538,13 @@ function InitHarass takes nothing returns nothing
   if harass_groups == null then
     set harass_groups = InitHashtable()
   else
-    set i = 1
-    loop
-      exitwhen i >= max_harass_groups
-      set g = CreateGroup()
-      set g = ReturnLivingUnitsOfHashtable(additional_info, i, HARASS_UNITGROUP, g)
-      call GroupRecycleGuardPositionInstant(g)
-      set i = i + 1
-    endloop
     call FlushParentHashtable(harass_groups)
     set harass_groups = InitHashtable()
+    call GroupRecycleHarrassPositionInstant(unit_harassing)
   endif
   //call Trace("InitHarassEnd")
   set distraction_group = 0
   set resetharass = false
-  set g = null
 endfunction
 
 function AddHarass takes integer groupnum, integer qty, integer unitid returns nothing
