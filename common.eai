@@ -12181,18 +12181,13 @@ elseif minetimeready and attacking_aggression > 0 and mines > 1 and mines < 4 an
       endif
       set u = null
     endif
-  else
-    if chaos_expansion != null and chaos_expansion == not_taken_expansion then
-      set not_taken_expansion = null
-    endif
-    set chaos_expansion = expansion_list[Max(0, GetRandomInt(0, expansion_list_length - 1))]
-    set chaos_expansion_run = false
   endif
-elseif chaos_expansion != null and CheckExpansionTaken(chaos_expansion) then
+endif
+if chaos_expansion != null and CheckExpansionTaken(chaos_expansion) then
   if chaos_expansion == not_taken_expansion then
     set not_taken_expansion = null
   endif
-  set chaos_expansion = null
+  set chaos_expansion = expansion_list[Max(0, GetRandomInt(0, expansion_list_length - 1))]
   set chaos_expansion_run = false
 endif
 //call Trace("ExpansionBuilder: Not ready to build mine")
