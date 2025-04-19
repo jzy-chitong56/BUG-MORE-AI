@@ -95,11 +95,11 @@ function global_build_sequence takes nothing returns nothing
     // exp tower
     if HasExpanded() then
       if GetUnitCount(old_id[ARCANE_TOWER]) < TownCount(racial_expansion) + 1 then
-        call DefendTownsFrontDone(1, ARCANE_TOWER, 75)
+        call DefendTownsFrontDone(2, ARCANE_TOWER, 75)
       else
         call DefendTownsFrontDone(1, GUARD_TOWER, 70)
       endif
-      if tier >= 3 and GetGold() > 2000 then
+      if GetGold() > 2000 then
         if GetUnitCount(old_id[GUARD_TOWER]) < TownCount(racial_expansion) + 1 then
           call DefendTownsFrontDone(2, GUARD_TOWER, 75)
         else
@@ -110,7 +110,7 @@ function global_build_sequence takes nothing returns nothing
         else
           call DefendTownsFrontDone(2, ARCANE_TOWER, 35)
         endif
-        if GetUnitCount(old_id[GUARD_TOWER]) + GetUnitCount(old_id[ARCANE_TOWER]) >= 4 and TownCount(ARCANE_VAULT) < 2 then
+        if tier >= 2 and GetUnitCount(old_id[GUARD_TOWER]) + GetUnitCount(old_id[ARCANE_TOWER]) >= 4 and TownCount(ARCANE_VAULT) < 2 then
           call DefendTownsDone(1, ARCANE_VAULT, 40)
         endif
       endif
