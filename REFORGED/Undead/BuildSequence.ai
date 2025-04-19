@@ -91,10 +91,10 @@ function global_build_sequence takes nothing returns nothing
       else
         call BuildUnit(1, ZIGGURAT_2, 45)
       endif
+      if TownCount(NECROPOLIS_1) < TownCountDone(racial_expansion) and GetGold() > 800 then
+        call DefendTownsDone(1, NECROPOLIS_1, 95)
+      endif
       if tier > 2 and GetGold() > 2000 then
-        if TownCount(NECROPOLIS_1) < TownCountDone(racial_expansion) then
-          call DefendTownsDone(1, NECROPOLIS_1, 95)
-        endif
         if GetUnitCount(old_id[ZIGGURAT_FROST]) < TownCount(racial_expansion) + 1 then
           call DefendTownsDone(1, ZIGGURAT_FROST, 50)
         else
