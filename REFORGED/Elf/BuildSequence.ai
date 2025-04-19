@@ -2084,7 +2084,7 @@ elseif tier == 2 then
 
 else
 
-      call SetBuildReact(26, 6, ARCHER, 4, HUNTRESS, (enemy_normal + enemy_mediumarmor - (enemy_air * 2) - enemy_piercing - enemy_siege), 4, 25, 60) 
+      call SetBuildReact(26, 6, ARCHER, 4, HUNTRESS, (enemy_normal + enemy_mediumarmor - (enemy_air * 2) - enemy_piercing - enemy_siege), 4, 25, 60)
       call BuildUnit(1, TREE_AGES, 50)
       call BuildUnit(1, hero[1], 150)
 
@@ -2265,7 +2265,7 @@ elseif tier == 2 then
 
 else
 
-      call SetBuildReact(26, 8, HUNTRESS, 4, ARCHER, (enemy_unarmored + (enemy_lightarmor * 2) + enemy_air + enemy_magic - (enemy_normal * 2)), 3, 18, 60) 
+      call SetBuildReact(26, 8, HUNTRESS, 4, ARCHER, (enemy_unarmored + (enemy_lightarmor * 2) + enemy_air + enemy_magic - (enemy_normal * 2)), 3, 18, 60)
       call BuildUnit(1, TREE_AGES, 55)
       call BuildUnit(1, hero[1], 150)
 
@@ -2364,7 +2364,6 @@ if tier == 3 then
       call BuildUnit(1, hero[1], 140)
       call BuildUnit(1, hero[2], 130)
       call BuildUnit(1, hero[3], 120)
-      call BuildUpgr(3, UPG_HIDES, 30)
       call BuildUpgr(Min(((TownCountDone(DRYAD)/2)-2),1), UPG_ABOLISH, 50)
       call BuildUpgr(Min((TownCountDone(DRUID_CLAW)/2),2), UPG_DRUID_CLAW, 70)
       call BuildUpgr(Min((TownCountDone(DRUID_CLAW)/4),1), UPG_MARK_CLAW, 40)
@@ -2419,8 +2418,7 @@ elseif tier == 2 then
       call BuildUnit(1, TREE_ETERNITY, 80)
       call BuildUnit(1, hero[1], 140)
       call BuildUnit(1, hero[2], 130)
-      
-      call BuildUpgr(2, UPG_HIDES, 30)
+
       call BuildUpgr(Min((TownCountDone(DRUID_CLAW)/2),1), UPG_DRUID_CLAW, 70)
       call BuildUpgr(Min((((TownCountDone(DRYAD)*2) + TownCountDone(DRUID_CLAW) + TownCountDone(MOUNTAIN_GIANT))/5),2), UPG_STR_WILD, 35)
       call BuildUpgr(Min(((TownCountDone(DRYAD)/2)-2),1), UPG_ABOLISH, 50)
