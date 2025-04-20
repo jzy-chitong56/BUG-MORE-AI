@@ -290,7 +290,7 @@ function FixBlockJob takes nothing returns nothing
   set blockunittemp = null
   call DisplayToAllJobDebug("Fix_Block Job Start, state")
   call TryFixBlock(2, home_location, 1000)
-  if ISign() < 0 then
+  if c_ally_total < 1 or ISign() < 0 then
     set l = GetPlayerStartLocationLoc(enemy_force[Max(0, GetRandomInt(0, c_enemy_total - 1))])
   else
     set l = GetPlayerStartLocationLoc(ally_force[Max(0, GetRandomInt(0, c_ally_total - 1))])
