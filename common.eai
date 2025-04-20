@@ -991,33 +991,34 @@ globals
     boolean console_on = false
     boolean creeping_only = false
 
-    boolean break_attack 	= false
-    boolean go_home		= false
-    boolean attack_player	= false
-    boolean attack_point	= false
-    boolean attack_unit		= false
-    boolean no_attack		= false
-    boolean no_creep_attack	= false
-    boolean no_player_attack	= false
+    boolean break_attack = false
+    boolean go_home = false
+    boolean attack_player = false
+    boolean attack_point = false
+    boolean attack_unit = false
+    boolean no_attack = false
+    boolean no_creep_attack = false
+    boolean no_player_attack = false
     boolean strat_change_allowed = true
-    integer attack_target_p	= 0
-    integer attack_target_x	= 0
-    integer attack_target_y	= 0
+    //boolean new_year = false
+    integer attack_target_p = 0
+    integer attack_target_x = 0
+    integer attack_target_y = 0
 #INCLUDETABLE <$VER$\CommandBuilds.txt> #EFR
     integer bn_%1 = 0
 #ENDINCLUDE
-    unit 	target_unit = null
+    unit target_unit = null
     integer array target_queue_x
     integer array target_queue_y
     unit    array target_queue_u
-    integer queue_length	= 0
-    integer queue_pointer	= 0
-    boolean queue_running	= false
-    boolean queue_attack_p	= false
-    boolean queue_attack_u	= false
-    integer queue_t_x		= 0
-    integer queue_t_y		= 0
-    unit	queue_t_u = null
+    integer queue_length = 0
+    integer queue_pointer = 0
+    boolean queue_running = false
+    boolean queue_attack_p = false
+    boolean queue_attack_u = false
+    integer queue_t_x = 0
+    integer queue_t_y = 0
+    unit queue_t_u = null
 
     real lastcaptainx = 0
     real lastcaptainy = 0
@@ -8749,6 +8750,10 @@ function cmd_misc takes integer cmd, integer data returns nothing
 
   elseif cmd == 53 then
     set strat_change_allowed = not strat_change_allowed
+
+  elseif cmd == 54 then
+    //set new_year = true
+    call TQAddJob(GetRandomReal(5, 30), TIMED_CHAT, C_NewYear)
 
   elseif cmd == 60 then // Show strat name
     call DisplayToAllies(GetCurrentStrategyReport() + GetCurrentDynamicReport())
