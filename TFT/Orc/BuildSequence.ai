@@ -76,7 +76,7 @@ function global_build_sequence takes nothing returns nothing
       call BuildFront(2, ORC_WATCH_TOWER, 45)
     endif
     // home_location tower
-    if GetGold() > 500 then
+    if GetGold() > 800 then
       call BuildFront(3, ORC_WATCH_TOWER, 40)
     endif
     // exp tower

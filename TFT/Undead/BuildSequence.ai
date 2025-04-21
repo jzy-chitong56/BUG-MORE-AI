@@ -61,7 +61,7 @@ function global_init_strategy takes nothing returns nothing
 endfunction
 function global_build_sequence takes nothing returns nothing
     if TownCount(GHOUL) == 0 and GetWood() < 500 then
-      call BuildUnit(1, GHOUL, 260)
+      call BuildUnit(1, GHOUL, ghoul_prio)
     endif
     // Anti rush
     if GetRushFactor() < 5000 then
@@ -78,7 +78,7 @@ function global_build_sequence takes nothing returns nothing
       endif
     endif
     // home_location tower
-    if GetGold() > 530 then
+    if GetGold() > 800 then
       if GetUnitCount(old_id[ZIGGURAT_FROST]) < 1 then
         call BuildAtMine(1, ZIGGURAT_FROST, 52)
       else
