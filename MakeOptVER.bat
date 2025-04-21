@@ -3,7 +3,7 @@ SET VER=%~1
 SET SILENT=%~2
 SET RESULTOPTVER=0
 ECHO Optimizing %VER% Scripts
-call perlcheck.bat
+@call perlcheck.bat
 if "%errorlevel%"=="1" SET RESULTOPTVER=1
 if "%RESULTOPTVER%"=="1" (
   ECHO Compilation AMAI Optimization %VER% error

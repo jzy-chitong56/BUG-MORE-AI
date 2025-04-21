@@ -2,10 +2,10 @@
 SET VER=%~1
 SET SILENT=%~2
 SET RESULTMAKEVER=0
-call perlcheck.bat
+@call perlcheck.bat
 if "%errorlevel%"=="1" SET RESULTMAKEVER=1
 if "%RESULTMAKEVER%"=="1" (
-  ECHO Compilation AMAI Optimization %VER% error
+  ECHO Compilation AMAI %VER% error
   ECHO Perl version check failed. Exiting. Download : https://strawberryperl.com/
   exit /b %RESULTMAKEVER%
 )
