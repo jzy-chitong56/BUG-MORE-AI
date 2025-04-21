@@ -82,10 +82,10 @@ function global_build_sequence takes nothing returns nothing
       endif
     endif
     // home_location tower
-    if GetGold() > 550 then
+    if GetGold() > 800 then
       if GetUnitCount(old_id[ARCANE_TOWER]) < 1 then
         call BuildFront(1, ARCANE_TOWER, 50)
-      elseif GetGold() > 800 and GetUnitCount(old_id[ARCANE_TOWER]) < 2 and GetUnitCount(old_id[GUARD_TOWER]) > 1 then
+      elseif GetUnitCount(old_id[ARCANE_TOWER]) < 2 and GetUnitCount(old_id[GUARD_TOWER]) > 1 then
         call BuildFront(2, ARCANE_TOWER, 30)
       else
         call BuildFront(3, GUARD_TOWER, 45)
