@@ -11840,7 +11840,7 @@ endfunction
 //============================================================================
 function BuildFarms takes integer qty returns nothing
   if qty < 1 then
-    if ai_time - NEUTRAL_BUILD_LOCK > 0 and c_ai_total < 7 then
+    if ai_time - NEUTRAL_BUILD_LOCK > 60 and c_ai_total < 7 then
       if qty == -1 then
         call BuildAtNeutral_O(TownCountDone(racial_farm) + 1, racial_farm, farm_prio)
         set NEUTRAL_BUILD_LOCK = ai_time
@@ -11865,9 +11865,6 @@ endfunction
 
 //============================================================================
 function FarmBuilder takes nothing returns nothing
-  if FoodSpace() > farm_food then
-    call BuildFarms(GetRandomInt(-1, -4))
-  endif
   if FoodCap() >= ver_food_limit then
     call BuildFarms(GetRandomInt(-1, -4))
     return
@@ -11876,6 +11873,8 @@ function FarmBuilder takes nothing returns nothing
     call BuildFarms(2)
   elseif FoodSpace() <= farm_food then
     call BuildFarms(1)
+  else
+    call BuildFarms(GetRandomInt(-1, -4))
   endif
 endfunction
 
