@@ -11325,10 +11325,11 @@ function BuildAtSpecialLoc takes integer unitid, integer town, integer bloc retu
         call CreateDebugTag("build to neutral", 10, peon, 4.00, 2.00)
       endif
       call RemoveLocation(loc)
-      set loc = null
       call RemoveLocation(l)
       set l = null
     endif
+    set peon = null
+    set loc = null
     set u = null
     return BUILT_SOME
   endif
