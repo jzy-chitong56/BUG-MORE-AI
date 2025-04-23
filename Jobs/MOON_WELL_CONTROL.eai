@@ -5,11 +5,13 @@
 
 function GetMoonWell takes unit u, player p, integer id returns unit
   local group g = CreateGroup()
+  local integer i = 0
   call GroupEnumUnitsOfPlayer(g, p, null)
   loop
     set u = FirstOfGroup(g)
     exitwhen u == null
-    if GetUnitTypeId(u) == id and UnitAlive(u) and GetUnitState(u, UNIT_STATE_MANA) >= 30 then
+    set i = GetUnitTypeId(u)
+    if (i == id or i == 'ncmw') and UnitAlive(u) and GetUnitState(u, UNIT_STATE_MANA) >= 30 then
       call DestroyGroup(g)
       set g = null
       return u
@@ -54,9 +56,6 @@ function MoonWellJob takes unit u, integer p returns nothing
     call TQAddUnitJob(2, RESET_GUARD_POSITION, p, u)
   elseif nearest_moon_well == null or not UnitAlive(nearest_moon_well) or GetUnitState(nearest_moon_well, UNIT_STATE_MANA) < 30 then
     set nearest_moon_well = GetMoonWell(nearest_moon_well, ai_player, old_id[racial_farm])
-    if nearest_moon_well == null and GetUnitCountDone('ncmw') > 0 then
-      set nearest_moon_well = GetMoonWell(nearest_moon_well, ai_player, 'ncmw')
-    endif
     if nearest_moon_well == null then
       if GetLocationNonCreepStrength(GetUnitX(u), GetUnitY(u), 800) > 0 then
         set dist = DistanceBetweenPoints_dk(GetUnitLoc(u), home_location)
