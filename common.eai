@@ -841,7 +841,7 @@ globals
     location array own_town_loc
     real array own_town_dist
     unit array own_town_mine
-    unit home_gold_mine = null
+    boolean home_have_mine = false
     integer first_town_mine = 0
     location array exist_town
     integer Forced_Harvest_total = 0
@@ -6587,7 +6587,7 @@ function RebuildMine takes nothing returns nothing
       endif
     endif
   elseif e > 0 then
-    set home_gold_mine = null
+    set home_have_mine = false
   endif
   call DestroyGroup(g)
   set g = null
@@ -8987,7 +8987,9 @@ function InitTownBuilt takes nothing returns nothing
   set exist_town[0] = home_location
   set own_town_dist[0] = 0
   set own_town_mine[0] = GetMineNearLoc(own_town_mine[0] ,home_location, 1500)
-  set home_gold_mine = GetOneOfIdNearLoc(home_gold_mine, Player(PLAYERPASSIVE), old_id[GOLD_MINE], home_location, 1300)
+  if race_manual_loading or race_uses_mine_expansion then
+    set home_have_mine = own_town_mine[0] != null  // elf and ud maybe can not get gold mine
+  endif
 endfunction
 
 //============================================================================
@@ -12584,7 +12586,7 @@ function CheckTownBuilt takes nothing returns nothing
     endif
     if own_town_mine[i] != null and UnitAlive(own_town_mine[i]) then
       call CreateDebugTag("own town mine : " + Int2Str(i), 5, own_town_mine[i], 1.50, 1.50)
-    elseif home_gold_mine != null and first_town_mine < 1 and own_town_dist[i] < 1300 and (race_manual_loading or race_uses_mine_expansion) then
+    elseif home_have_mine and first_town_mine < 1 and own_town_dist[i] < 1300 then
       call RebuildMine()
     endif
     set i = i + 1
