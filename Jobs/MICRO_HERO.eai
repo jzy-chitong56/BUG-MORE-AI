@@ -444,7 +444,7 @@ function MicroHeroJob takes integer hn returns nothing
     //  call DisplayToAll(Int2Str(R2I(hero_enemy_density[hn] * 10)))
     //  call DisplayToAll(Int2Str(R2I(DistanceBetweenPoints(hero_enemy_loc[hn],GetUnitLoc(hero_unit[hn])))))
     if GetUnitTypeId(hero_unit[hn]) == 'Nrob' and healing and not teleporting and enemy_density <= 0 then
-      call IssueImmediateOrder(hero_unit[hn], "unrobogoblin")  // let hero can use healing item
+      call IssueImmediateOrder(hero_unit[hn], "unrobogoblin")  // let hero can use all healing item and fountain
       call GroupRemoveUnit(unit_healing, hero_unit[hn])  // let save hero run
       call RecycleGuardPosition(hero_unit[hn])
       set healing = false
