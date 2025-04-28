@@ -8790,7 +8790,7 @@ function InitTownBuilt takes nothing returns nothing
   set exist_town[0] = home_location
   set own_town_dist[0] = 0
   set own_town_mine[0] = GetMineNearLoc(own_town_mine[0] ,home_location, 1500)
-  set home_gold_mine = GetOneOfIdNearLoc(home_gold_mine, PLAYER_NEUTRAL_PASSIVE, old_id[GOLD_MINE], home_location, 1300)
+  set home_gold_mine = GetOneOfIdNearLoc(home_gold_mine, Player(PLAYER_NEUTRAL_PASSIVE), old_id[GOLD_MINE], home_location, 1300)
 endfunction
 
 //============================================================================
