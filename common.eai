@@ -822,6 +822,7 @@ globals
     location array own_town_loc
     real array own_town_dist
     unit array own_town_mine
+    unit home_gold_mine = null
     integer first_town_mine = 0
     location array exist_town
     integer Forced_Harvest_total = 0
@@ -6340,6 +6341,65 @@ function BuildBRAtCreep takes nothing returns boolean
   return success
 endfunction
 
+function RebuildMine takes nothing returns nothing
+  local group g = CreateGroup()
+  local unit u = null
+  local unit t = null
+  local unit m = null
+  local unit p = null
+  local location l = null
+  local integer e = old_id[GOLD_MINE]
+  call Trace("ReBuild Home Mine")
+  call GroupEnumUnitsInRangeOfLoc(g, home_location, expansion_taken_radius, null)
+  loop
+    set u = FirstOfGroup(g)
+    exitwhen u == null
+    if UnitAlive(u) and not IsUnitHidden(u) then
+      if GetResourceAmount(u) > 0 then
+        if GetOwningPlayer(u) == ai_player and GetUnitTypeId(u) != e then
+          set e = 0
+          exitwhen true  // no own_town_mine - shouldn't happen
+        else
+          set m = u
+        endif
+      elseif IsUnitType(u, UNIT_TYPE_TOWNHALL) and IsUnitType(u, UNIT_TYPE_ANCIENT) then
+        set t = u
+      elseif p == null and IsUnitType(u, UNIT_TYPE_PEON) then
+        set p = u
+      endif
+    endif
+    call GroupRemoveUnit(g, u)
+  endloop
+  if m != null then
+    if t != null then
+      call IssueImmediateOrder(t, "cancel")
+      call IssueTargetOrder(t, "entangle", m)
+    else
+      if p != null then
+        if race_manual_loading then
+          set t = CreateUnit(Player(PLAYER_NEUTRAL_PASSIVE), old_id[racial_expansion], GetUnitX(m), GetUnitY(m), 270.0)
+          set l = GetUnitLoc(m)
+          call RemoveUnitAM(t)
+          call IssuePointOrderByIdLoc(p, old_id[racial_expansion], l)
+          call RemoveLocation(l)
+          set l = null
+        else
+          call IssueTargetOrderById(p, old_id[racial_expansion], m)
+        endif
+        call CreateDebugTag("ReBuild Home Mine", 10, p, 10.00, 8.00)
+      endif
+    endif
+  elseif e > 0 then
+    set home_gold_mine = null
+  endif
+  call DestroyGroup(g)
+  set g = null
+  set u = null
+  set t = null
+  set m = null
+  set p = null
+endfunction
+
 //home_location have multiple mine
 function MultipleMinefix takes nothing returns boolean
   local integer c = 0
@@ -6401,6 +6461,7 @@ function MultipleMinefix takes nothing returns boolean
           set ancient_exp_unit = FirstOfGroup(g)
         endif
         if ancient_exp_unit != null and (GetUnitCurrentOrder(ancient_exp_unit) != OrderId("entangle") or GetRandomInt(0,3) == 1) then  // random prevent tree stop
+          call IssueImmediateOrder(ancient_exp_unit, "cancel")
           call IssueTargetOrder(ancient_exp_unit, "entangle", fixmine)  // first entangle , not build , this API only return false , cannot set b
           call CreateDebugTag("Multiple Mine fix - entangle", 10, ancient_exp_unit, 10.00, 8.00)
           set b = true
@@ -8729,6 +8790,7 @@ function InitTownBuilt takes nothing returns nothing
   set exist_town[0] = home_location
   set own_town_dist[0] = 0
   set own_town_mine[0] = GetMineNearLoc(own_town_mine[0] ,home_location, 1500)
+  set home_gold_mine = GetOneOfIdNearLoc(home_gold_mine, PLAYER_NEUTRAL_PASSIVE, old_id[GOLD_MINE], home_location, 1300)
 endfunction
 
 //============================================================================
@@ -9883,8 +9945,8 @@ function isTieringUp takes nothing returns boolean
   local integer i = tiernum
   loop
     exitwhen i <= 1
-    if GetUnitCountDone(racial_hall[i - 1]) > 0 then
-      return GetUnitCountDone(racial_hall[i]) < GetUnitCount(racial_hall[i])
+    if GetUnitCountDone(racial_hall[i]) < GetUnitCount(racial_hall[i]) then
+      return true
     endif
     set i = i - 1
   endloop
@@ -12317,6 +12379,8 @@ function CheckTownBuilt takes nothing returns nothing
     endif
     if own_town_mine[i] != null and UnitAlive(own_town_mine[i]) then
       call CreateDebugTag("own town mine : " + Int2Str(i), 5, own_town_mine[i], 1.50, 1.50)
+    elseif home_gold_mine != null and first_town_mine < 1 and own_town_dist[i] < 1300 and (race_manual_loading or race_uses_mine_expansion) then
+      call RebuildMine()
     endif
     set i = i + 1
   endloop
@@ -14539,6 +14603,9 @@ function GetArmyHealthState takes nothing returns real
         elseif uhs < 1 then
           call GroupAddUnit(small_healing_group, u)
           set small_healing_count = small_healing_count + 1
+        endif
+        if GetUnitTypeId(u) == 'Nrob' then
+          call IssueImmediateOrder(u, "unrobogoblin")  // let hero can use all healing item
         endif
       endif
     endif
