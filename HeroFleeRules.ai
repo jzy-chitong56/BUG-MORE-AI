@@ -48,4 +48,4 @@
     call ActionRule(not neutral_available[mFountainID] or (neutral_guarded[mFountainID] and (not neutral_night_buy[mFountainID] or (daytime > 6 and daytime < 18))) or GetLocationNonCreepStrength(GetUnitX(nearest_neutral[mFountainID]), GetUnitY(nearest_neutral[mFountainID]), 1500) > 0 , ACTION_MANA_FOUNTAIN, -1000000.0)
   endif
   call ActionRule(GetItemNumberOnUnit(tp_item, hero_unit[hn]) <= 0 or teleporting, ACTION_TP, -1000000)
-  call ActionRule(healer == null, ACTION_HEALER, -1000000)
+  call ActionRule(healer == null or IsUnitType(hero_unit[hn], UNIT_TYPE_MECHANICAL), ACTION_HEALER, -1000000)  // hero can not 'Nrob'

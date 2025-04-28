@@ -23,7 +23,10 @@ COPY Scripts\%VER%\vsai\undead2.ai Scripts\OPT%VER%\vsai\undead2.ai
 COPY Scripts\%VER%\vsai\elf2.ai Scripts\OPT%VER%\vsai\elf2.ai
 COPY Scripts\%VER%\Blizzard.j Scripts\OPT%VER%\Blizzard.j
 COPY Scripts\%VER%\vsai\Blizzard.j Scripts\OPT%VER%\vsai\Blizzard.j
+
 ECHO _____________________________
+ECHO Disable Debug
+
 perl -i -pe"s#(call TraceN)#//$1#g" Scripts/OPT%VER%/common.ai
 perl -i -pe"s#(call TraceN)#//$1#g" Scripts/OPT%VER%/Blizzard.j
 perl -i -pe"s#(call TraceN)#//$1#g" Scripts/OPT%VER%/elf.ai
