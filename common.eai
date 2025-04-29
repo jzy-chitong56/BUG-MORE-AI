@@ -13219,6 +13219,7 @@ function CommonSleepUntilTargetDeadAM takes unit target, boolean iscreeping, boo
   local unit ally_target = null
   //local group g = null
   local string a = Int2Str(ALLIANCE_TARGET)
+  local boolean b = ally_override and c_ally_total > 0
   set lastcaptainx = GetUnitX(target)
   set lastcaptainy = GetUnitY(target)
   loop
@@ -13263,7 +13264,7 @@ function CommonSleepUntilTargetDeadAM takes unit target, boolean iscreeping, boo
       //	exitwhen GetLocationNonCreepStrength(unitx, unity, battle_radius) <= 0 and not UnitAlive(target) and GetLocationCreepStrength(unitx, unity, 500) <= 0
     //endif
     set dist = DistanceBetweenPoints_kd(ally_loc, GetUnitLoc(target))
-    if c_ally_total > 0 and dist > 1300 and dist < 2500 and ally_override and CheckAttackWait(target) then
+    if b and dist > 1300 and dist < 2500 and CheckAttackWait(target) then
       set lastcaptainx = GetLocationX(ally_loc)
       set lastcaptainy = GetLocationY(ally_loc)
       //call SetCaptainHome(, lastcaptainx, lastcaptainy)
@@ -13274,13 +13275,13 @@ function CommonSleepUntilTargetDeadAM takes unit target, boolean iscreeping, boo
       endif
       call CreateDebugTagLoc("Reform near ally", 10, lastcaptainx, lastcaptainy, 1.00, 0.80)
     else
-      set lastcaptainx = GetUnitX(target)
-      set lastcaptainy = GetUnitY(target)
       set ally_target = I2U(GetStoredInteger(amaiCache, a, "0"))
       // We now control ally, only certain attack operations will let AMAI join around a shared ally target
-      if ally_override and c_ally_total > 0 and ally_target != null and UnitAlive(ally_target) then
+      if b and ally_target != null and UnitAlive(ally_target) then
         set target = ally_target
       endif
+      set lastcaptainx = GetUnitX(target)
+      set lastcaptainy = GetUnitY(target)
       if true or CaptainAtGoal() or (attack_length_counter == 0 and not CaptainInCombat(true)) or CaptainInCombat(true) or ally_override or c_ally_total == 0 then
         call AttackMoveKill(target) // use attack length counter to do an ocassional attack move incase enemies nearby
       elseif (c_ally_total > 0 and not ally_override) then // CURRENTLY DISABLED AS FIGHTS WITH ABOVE, NEED NEW COMBAT ATTACK MOVE FUNCTION
@@ -14814,15 +14815,21 @@ function GetArmyHealthState takes nothing returns real
           call GroupAddUnit(small_healing_group, u)
           set small_healing_count = small_healing_count + 1
         endif
-        if GetUnitTypeId(u) == 'Nrob' then
-          call IssueImmediateOrder(u, "unrobogoblin")  // let hero can use all healing item
-        endif
       endif
     endif
     call GroupRemoveUnit(g,u)
   endloop
   call DestroyGroup(g)
   set g = null
+  if hero_unit[1] != null and UnitAlive(hero_unit[1]) and GetUnitTypeId(hero_unit[1]) == 'Nrob' then
+    call IssueImmediateOrder(hero_unit[1], "unrobogoblin")  // let hero can use all healing item
+  endif
+  if hero_unit[2] != null and UnitAlive(hero_unit[2]) and GetUnitTypeId(hero_unit[2]) == 'Nrob' then
+    call IssueImmediateOrder(hero_unit[2], "unrobogoblin")
+  endif
+  if hero_unit[3] != null and UnitAlive(hero_unit[3]) and GetUnitTypeId(hero_unit[3]) == 'Nrob' then
+    call IssueImmediateOrder(hero_unit[3], "unrobogoblin")
+  endif
   if nearest_neutral[hFountainID] == null or not neutral_available[hFountainID] or not race_use_fountain then
     set fountain_available = false
   else
