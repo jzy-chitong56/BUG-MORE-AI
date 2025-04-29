@@ -31,16 +31,22 @@ function SaveYourself takes nothing returns boolean
         call TQAddJob(2, ANCIENT_EXPANSION, 0)
         set ancient_expanding = true
         set SaveYourselfMode = ANCIENT_EXPANSION
+        set not_taken_expansion = current_expansion
+        set current_expansion = null
         return true
       elseif race_militia_expansion_available == true and not militia_expanding then
         call TQAddJob(2, MILITIA_EXPAND, 0)
         set militia_expanding = true
         set SaveYourselfMode = MILITIA_EXPAND
+        set not_taken_expansion = current_expansion
+        set current_expansion = null
         return true
       elseif race_item_expansion_available == true and not item_expanding and race_item_expansion_item_id != 0 and GetItemNumber(race_item_expansion_item_id) > 0 then
         call TQAddJob(2, ITEM_EXPANSION, 0)
         set item_expanding = true
         set SaveYourselfMode = ITEM_EXPANSION
+        set not_taken_expansion = current_expansion
+        set current_expansion = null
         return true
       endif
     endif
@@ -220,37 +226,7 @@ function CheckDefeated takes nothing returns nothing
     set agg = 0
   endif
 
-  if town_threatened and most_threatened_town >= 0 and town_threat_army[most_threatened_town] >= 0 then
-    set enemy_sum = army_strength[town_threat_army[most_threatened_town]]
-  else
-    call GroupEnumUnitsInRange(g,GetLocationX(home_location),GetLocationY(home_location),front_base_distance,null)
-    set g = SelectByPlayer(g, Player(PLAYERAGGRESSIVE), false)
-    set g = SelectByPlayer(g, Player(PLAYERPASSIVE), false)
-    set g = SelectByHidden(g, false)  // towerrush will create hidden unit
-    set g = SelectByAlive(g, true)
-    loop
-      set u = FirstOfGroup(g)
-      exitwhen u == null
-      if IsPlayerEnemy(ai_player, GetOwningPlayer(u)) then
-        set enemy_sum = enemy_sum + GetUnitStrength(u)
-      endif
-      call GroupRemoveUnit(g,u)
-    endloop
-  endif
-  call DestroyGroup(g)
-  set g = null
-
-  loop
-    exitwhen i >= c_ally_total
-    set p = ally_force[i]
-    if GetPlayerSlotState(p) == PLAYER_SLOT_STATE_PLAYING then
-      set ally_sum = ally_sum + GetPlayerStrength(p)
-    endif
-    set i = i + 1
-  endloop
-  set ally_sum = ally_sum + player_sum
-  set p = null
-// Have nothing left checks
+  // Have nothing left checks
   if GetPlayerUnitCount(ai_player, true) == 0 and GetPlayerStructureCount(ai_player, true) == 0 then
     call KillYourself(no_ai_ally)
     return
@@ -279,6 +255,34 @@ function CheckDefeated takes nothing returns nothing
       return
     endif
   endif
+
+  if town_threatened and most_threatened_town >= 0 and town_threat_army[most_threatened_town] >= 0 then
+    set enemy_sum = army_strength[town_threat_army[most_threatened_town]]
+  else
+    call GroupEnumUnitsInRange(g,GetLocationX(home_location),GetLocationY(home_location),front_base_distance,null)
+    loop
+      set u = FirstOfGroup(g)
+      exitwhen u == null
+      set p = GetOwningPlayer(u)
+      if IsPlayerEnemy(ai_player, p) and p != Player(PLAYERAGGRESSIVE) and UnitAlive(u) and not IsUnitHidden(u) then  // towerrush will create hidden unit
+        set enemy_sum = enemy_sum + GetUnitStrength(u)
+      endif
+      call GroupRemoveUnit(g,u)
+    endloop
+  endif
+  call DestroyGroup(g)
+  set g = null
+
+  loop
+    exitwhen i >= c_ally_total
+    set p = ally_force[i]
+    if GetPlayerSlotState(p) == PLAYER_SLOT_STATE_PLAYING then
+      set ally_sum = ally_sum + GetPlayerStrength(p)
+    endif
+    set i = i + 1
+  endloop
+  set ally_sum = ally_sum + player_sum
+  set p = null
 
   // Overwhelmed
   if agg > 1 and enemy_sum > ((player_sum + ally_sum + 5) * (5 - (agg - 2))) and hall_count <= 1 then // each agg above 2 increases give up chance by 1 multiplicative factor
