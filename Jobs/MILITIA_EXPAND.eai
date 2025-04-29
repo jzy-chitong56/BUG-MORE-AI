@@ -3,7 +3,7 @@
 boolean militia_expanding = false
 //boolean militia = true
 boolean militia_exp_attack = false
-integer militia_time_out = 0
+//integer militia_time_out = 0
 integer militia_state = 0
 unit militia_builder = null
 //unit militia_fastb1 = null
@@ -25,7 +25,6 @@ function BuildMilitiaExpansion takes nothing returns boolean
     call CreateDebugTag("Militia Expansion - build", 10, militia_builder, 3.00, 1.50)
     call IssuePointOrderById(militia_builder, old_id[racial_expansion], x, y)
     call TQAddUnitJob(200, RESET_GUARD_POSITION, 80, militia_builder)
-    set militia_builder = null  // no need reset
     if race_has_power_build then
       call FastBuildCheck()
     endif
@@ -41,7 +40,7 @@ function MilitiaExpansionReset takes nothing returns nothing
 		set gold_buffer = 0
 		set wood_buffer = 0
 	endif
-	set militia_time_out = 0
+	//set militia_time_out = 0
 	set militia_state = 0
 	set militia_expanding = false
 	set not_taken_expansion = null
@@ -110,9 +109,11 @@ local real d = 0
 		endif
 	elseif militia_state == 2 then
 		call Trace("Militia state 2 get militia")
+		set l = GetUnitLoc(not_taken_expansion)
 		set g = CreateGroup()
-		call GroupEnumUnitsOfPlayer(g, ai_player,null)
-		set g = SelectNumberOfId(g, 50, old_id[racial_militia])
+		call GroupEnumUnitsInRangeOfLoc(g, l, 1600, null)
+		set g = SelectByIdOr(g, old_id[racial_peon], old_id[racial_militia], true)
+		set g = SelectByPlayer(g, ai_player, true)
 		set g = SelectByHidden(g, false)
 		set g = SelectByAlive(g, true)
 		if FirstOfGroup(g) == null then
@@ -121,9 +122,9 @@ local real d = 0
 			set g = SelectNumberOfId(g, 50, old_id[racial_peon])
 			set g = SelectByHidden(g, false)
 			set g = SelectByAlive(g, true)
+			set g = GetNearestSubGroupOfGroup(g, l, 4)
+			set d = 1
 		endif
-		set l = GetUnitLoc(not_taken_expansion)
-		set g = GetNearestSubGroupOfGroup(g, l, 4)
 		call RemoveLocation(l)
 		set l = null
 		set militia_builder = FirstOfGroup(g)
@@ -139,13 +140,17 @@ local real d = 0
 			call CreateDebugTag("Militia Expansion - take peon", 10, militia_builder, 3.00, 1.50)
 			set militia_state = 3
 			call Trace("Militia state 2 to 3")
-			call TQAddJob(1, MILITIA_EXPAND, 0)
+			if d == 1 then
+				call TQAddJob(1, MILITIA_EXPAND, 0)
+			else
+				call TQAddJob(4, MILITIA_EXPAND, 0)
+			endif
 			return
-		elseif militia_time_out < 1 then
-			call Trace("Militia state 2 wait get peon")
-			set militia_time_out = militia_time_out + 1
-			call TQAddJob(8, MILITIA_EXPAND, 0)
-			return
+		// elseif militia_time_out < 1 then
+		// 	call Trace("Militia state 2 wait get peon")
+		// 	set militia_time_out = militia_time_out + 1
+		// 	call TQAddJob(6, MILITIA_EXPAND, 0)
+		// 	return
 		endif
 		call MilitiaExpansionReset()
 		call Trace("Militia state 2 Ended , not peon")
@@ -161,7 +166,7 @@ local real d = 0
 					call Trace("Militia state 3 , Build Success")
 				else
 					call Trace("Militia state 3 , Build Fail")
-					call CreateDebugTag("Militia Expansion -  Build Fail", 10, militia_builder, 3.00, 1.50)
+					call CreateDebugTag("Militia Expansion - Build Fail", 10, militia_builder, 3.00, 1.50)
 				endif
 			else
 				call Trace("Militia state 3 , Moving expansion")
