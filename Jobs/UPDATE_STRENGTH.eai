@@ -29,6 +29,12 @@ loop
   #INCLUDETABLE <$VER$\Strengths.txt>
       set %1 = %1 + ((GetPlayer%1Strength(p)) * Handicap)
   #ENDINCLUDE
+      if GetPlayerRace(p) == RACE_NIGHTELF then  // prevent player use tree attack
+        set tree = GetPlayerStructureCount(p, true) - GetPlayerUnitTypeCount(p, oMOON_WELL)
+        if tree > 16 then
+          set heavyarmor = heavyarmor + Max(22, tree - 5)  // 5 is correction factor: Exclude some trees and non tree buildings that do not participate in the attack
+        endif
+      endif
     elseif IsPlayerAlly(ai_player, p) then
       set ally_num = ally_num + 1
   #INCLUDETABLE <$VER$\Strengths.txt>
