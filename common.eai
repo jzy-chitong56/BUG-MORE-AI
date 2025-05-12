@@ -1104,7 +1104,7 @@ globals
     unit fixmine = null
     integer fixharvest = 0
     boolean first_expansion_chosen = false
-    unit not_taken_expansion = null  // used to MultipleMinefix , militai expansion , ancient expansion , item expansion and chaos_expansion system
+    unit not_taken_expansion = null  // used to MultipleMinefix , militai expansion , ancient expansion , item expansion and chaos expansion system
     unit chaos_expansion = null
     boolean chaos_expansion_run = false
     boolean pathing_done = false
@@ -2913,8 +2913,8 @@ function InitMapSizeVars takes nothing returns nothing
       set mapSize = 7
     endif
   endif
-  set raceshop_distance_limit = raceshop_distance_limit * Max(mapSize, 1)
-  set merchant_distance_limit = merchant_distance_limit * Max(mapSize, 1)
+  set raceshop_distance_limit = raceshop_distance_limit * Max(Min(mapSize, 5), 1)
+  set merchant_distance_limit = merchant_distance_limit * Max(Min(mapSize, 4), 1)
 endfunction
 
 //============================================================================
@@ -4683,6 +4683,7 @@ endfunction
 function GetMineNearLoc takes unit u, location l, real dist returns unit
   local group g = CreateGroup()
   local integer i = 0
+  local integer id = 0
   local real d1 = 0
   local real d2 = dist
   local unit mine = null
@@ -4697,10 +4698,10 @@ function GetMineNearLoc takes unit u, location l, real dist returns unit
       set mine = FirstOfGroup(g)
       exitwhen mine == null
       if UnitAlive(mine) and GetResourceAmount(mine) > 0 and (not captures_mines or GetOwningPlayer(mine) == ai_player) then
-        set i = 0
+        set id = GetUnitTypeId(mine)
         loop
           exitwhen i >= minearray
-          if GetUnitTypeId(mine) == racial_goldmine[i] then
+          if id == racial_goldmine[i] then
             set i = minearray
             set d1 = DistanceBetweenPoints_dk(GetUnitLoc(mine), l)
             if d1 <= d2 then  // get close mine
@@ -4710,6 +4711,7 @@ function GetMineNearLoc takes unit u, location l, real dist returns unit
           endif
           set i = i + 1
         endloop
+        set i = 0
       endif
       call GroupRemoveUnit(g,mine)
     endloop
@@ -5746,7 +5748,7 @@ endfunction
 function IsUnitTower takes unit u returns boolean
   local integer i = 0
   if IsUnitType(u, UNIT_TYPE_STRUCTURE) then
-    if IsUnitType(u, UNIT_TYPE_RANGED_ATTACKER) then
+    if IsUnitType(u, UNIT_TYPE_RANGED_ATTACKER) or IsUnitType(u, UNIT_TYPE_MELEE_ATTACKER) then
       return true
     endif
     set i = GetUnitTypeId(u)
@@ -6681,7 +6683,7 @@ function MultipleMinefix takes nothing returns boolean
       endif
     endif
   elseif race_uses_mine_expansion then
-    if fixmine != null and (TownCount(racial_expansion) < 2 or (GetGold() > 1200 and TownCount(racial_expansion) < 3)) and Min(GetResourceAmount(fixmine) * 2, GetGold()) > GetUnitGoldCost(old_id[racial_expansion]) and GetWood() > GetUnitWoodCost(old_id[racial_expansion]) then
+    if fixmine != null and UnitAlive(fixmine) and (TownCount(racial_expansion) < 2 or (GetGold() > 1200 and TownCount(racial_expansion) < 3)) and Min(GetResourceAmount(fixmine) * 2, GetGold()) > GetUnitGoldCost(old_id[racial_expansion]) and GetWood() > GetUnitWoodCost(old_id[racial_expansion]) then
       if expansion_peon == null or not UnitAlive(expansion_peon) then
         set expansion_peon = GetExpansionPeon()
       endif
@@ -6747,7 +6749,7 @@ function CheckExpansionTaken takes unit expa returns boolean
         set p = null
         return true  // Enemy holds the area
       endif
-      if IsUnitGoldMine(u) then //  This is just informative doesnt affect check
+      if IsUnitGoldMine(u) then  // This is just informative doesnt affect check
         if p == Player(PLAYERPASSIVE) then
           set minecount = minecount + 1
         else
@@ -10782,8 +10784,8 @@ endfunction
 function StrengthDynamicDistribute takes nothing returns nothing
   local group cg = null
   local group g = CreateGroup()
-  call Trace("Strength Dynamic Distribute")
   if TownCountDone(DRUID_TALON) > 0 or TownCountDone(GARGOYLE) > 0 then
+    call Trace("Strength Dynamic Distribute")
     call GroupEnumUnitsOfPlayer(g, ai_player, null)
     set g = SelectByHidden(g, false)
     set g = SelectByAlive(g, true)
@@ -11880,8 +11882,8 @@ function StartExpansionAM takes integer qty, integer hall returns integer
         call Trace("AMAIStartexpa: Water expansion required waiting to create a zeppelin")
         return CANNOT_BUILD
       endif
-      if build_zeppelin != null and UnitAlive(build_zeppelin) then
-        if not BuildMovePeonZeppelin(expansion_peon, current_expansion, w) and UnitAlive(expansion_peon) then
+      if build_zeppelin != null and UnitAlive(build_zeppelin) and UnitAlive(expansion_peon) then
+        if not BuildMovePeonZeppelin(expansion_peon, current_expansion, w) then
           call Trace("AMAIStartexpa: Expanding via a zeppelin")
           return BUILT_SOME
         endif
@@ -12494,6 +12496,34 @@ function HeroReviver takes nothing returns nothing
 endfunction
 
 //============================================================================
+function LocalizeOldTown takes integer num returns boolean
+  local group g = CreateGroup()
+  local unit u = null
+  call GroupEnumUnitsInRangeOfLoc(g, own_town_loc[num], 1200, null)
+  loop
+    set u = FirstOfGroup(g)
+    exitwhen u == null
+    if IsUnitType(u, UNIT_TYPE_STRUCTURE) and GetOwningPlayer(u) == ai_player and UnitAlive(u) and not IsUnitHidden(u) then
+      exitwhen GetTownUnitCount(GetUnitTypeId(u), num, true) > 0 or IsUnitType(u, UNIT_TYPE_TOWNHALL)
+    endif
+    call GroupRemoveUnit(g,u)
+  endloop
+  call DestroyGroup(g)
+  set g = null
+  if u == null then
+    call RemoveLocation(own_town_loc[num])
+    set own_town_loc[num] = null
+    if own_town_mine[num] != null and DistanceBetweenPoints_dk(GetUnitLoc(own_town_mine[num]), own_town_loc[num]) < town_radius then
+      set own_town_mine[num] = null
+    endif
+    set own_town_dist[num] = 0
+    return false
+  endif
+  set u = null
+  return true
+endfunction
+
+//============================================================================
 function CheckUnitNewTown takes unit u returns boolean
   local integer i = 0
   local location l = GetUnitLoc(u)
@@ -12511,60 +12541,75 @@ function CheckUnitNewTown takes unit u returns boolean
   return true
 endfunction
 
-//============================================================================
-function LocalizeOldTown takes integer num returns boolean
-  local group g = CreateGroup()
-  local unit u = null
-  call GroupEnumUnitsInRangeOfLoc(g, own_town_loc[num], 1400, null)
-  loop
-    set u = FirstOfGroup(g)
-    exitwhen u == null
-    exitwhen GetOwningPlayer(u) == ai_player and IsUnitType(u, UNIT_TYPE_STRUCTURE) and UnitAlive(u) and not IsUnitHidden(u) and GetTownUnitCount(GetUnitTypeId(u), num, true) > 0
-    call GroupRemoveUnit(g,u)
-  endloop
-  call DestroyGroup(g)
-  set g = null
-  if u == null then
-    call RemoveLocation(own_town_loc[num])
-    set own_town_loc[num] = null
-    set own_town_mine[num] = null
-    set own_town_dist[num] = 0
-    return false
-  endif
-  set u = null
-  return true
-endfunction
-
 function LocalizeNewTown takes integer num returns boolean
   local group g = CreateGroup()
   local unit u = null
-  local integer e = old_id[racial_expansion]
+  local unit t = null
+  local unit m = null
+  local location l = null
+  local boolean b = race_manual_loading or race_uses_mine_expansion
+  local boolean h = false
+  local integer e = 0
   call GroupEnumUnitsOfPlayer(g, ai_player, null)
+  loop
+    exitwhen e >= max_towns
+    call GroupRemoveUnit(g,own_town_mine[e])
+    set e = e + 1
+  endloop
+  set e = old_id[racial_expansion]
+  if race_manual_loading then
+    set e = old_id[race_manual_loading_mine]
+  endif
   loop
     set u = FirstOfGroup(g)
     exitwhen u == null
-    exitwhen GetUnitTypeId(u) == e and UnitAlive(u) and not IsUnitHidden(u) and CheckUnitNewTown(u)
+    if UnitAlive(u) and not IsUnitHidden(u) then
+      set h = IsUnitType(u, UNIT_TYPE_TOWNHALL)
+      if (h or GetUnitTypeId(u) == e) and CheckUnitNewTown(u) then
+        if m == null and own_town_mine[num] == null then
+          if b and not h then
+            set m = u
+          elseif h then
+            set l = GetUnitLoc(u)
+            set m = GetMineNearLoc(m, l, 1200)
+            call RemoveLocation(l)
+          endif
+        endif
+        if h and t == null then
+          set t = u
+          exitwhen m != null
+        endif
+      endif
+    endif
     call GroupRemoveUnit(g,u)
   endloop
   call DestroyGroup(g)
   set g = null
+  set u = null
   if own_town_loc[num] != null then
     call RemoveLocation(own_town_loc[num])
   endif
-  if u == null then
+  if t == null then
 //    call DisplayToAll("Debug: New town not found")
     set own_town_loc[num] = null
-    set own_town_mine[num] = null
+    // set own_town_mine[num] = null  // As harvest naturally fades away
     set own_town_dist[num] = 0
+    set m = null
     return false
   endif
-  set own_town_loc[num] = GetUnitLoc(u)
-  set own_town_mine[num] = GetMineNearLoc(own_town_mine[num], own_town_loc[num], 1500)
+  set own_town_loc[num] = GetUnitLoc(t)
+  if own_town_mine[num] == null then
+    set own_town_mine[num] = GetMineNearLoc(own_town_mine[num], own_town_loc[num], 1500)
+  endif
+  if own_town_mine[num] == null then
+    set own_town_mine[num] = m
+  endif
   set own_town_dist[num] = DistanceBetweenPoints(home_location, own_town_loc[num])
   if debugging > 0 then
-    call PingMinimap(GetUnitX(u), GetUnitY(u), 20)
+    call PingMinimap(GetUnitX(t), GetUnitY(t), 20)
   endif
-  set u = null
+  set m = null
+  set t = null
   return true
 endfunction
 
@@ -12572,11 +12617,18 @@ endfunction
 function CheckTownBuilt takes nothing returns nothing
   local integer i = 0
   local integer c = 1
+  local integer t = TownCountDone(racial_expansion)
+  if race_manual_loading then  //check actual number mines
+    set t = TownCountDone(race_manual_loading_mine)
+  endif
   loop
     exitwhen i >= max_towns
     if not town_built[i] then
-      if TownCountEx(racial_expansion, true, i) > 0 then
+      if TownCountEx(racial_expansion, true, i) > 0 or t > 0 then
         set town_built[i] = LocalizeNewTown(i)
+      endif
+      if town_built[i] then
+        set t = t - 1
       endif
     else
       set town_built[i] = LocalizeOldTown(i)
@@ -12834,9 +12886,6 @@ function BuildLoopAM takes nothing returns nothing
 //    call DisplayToAll("Shutting down BuildLoopAM")
 //    call DebugSequenceEnd()
   call InitBuildArrayAM()
-  loop
-    call Sleep(100)
-  endloop
 endfunction
 
 //============================================================================
@@ -15128,27 +15177,28 @@ endfunction
 // (AMAI) Universal peon assignment
 //============================================================================
 function ForcedHarvest takes nothing returns boolean
-  local integer T = 0
+  local integer m = 0
   local integer i = 0
   local integer c = Min(TownCountDone(racial_expansion), GetMinesOwned())
+  local boolean b = false
   if Forced_Harvest_total == 0 and first_town_mine < 1 and (c > 1 or GetGoldOwned() < 3000) and (FoodUsed() < 26 or GetGold() < (1000 + tier * 200)) then  // later stages of the game, AI may not be harvest
     loop
-      exitwhen i >= max_towns or T > c
+      exitwhen i >= max_towns or m > c
       if own_town_mine[i] != null and UnitAlive(own_town_mine[i]) and GetResourceAmount(own_town_mine[i]) > 0 then
-        call PeonMineCheck(own_town_mine[i])
-        set T = T + 1
+        set b = b or PeonMineCheck(own_town_mine[i])
+        set m = m + 1
         call CreateDebugTag("Forced Harvest mine " + Int2Str(i), 10, own_town_mine[i], 3.00, 1.50)
       endif
       set i = i + 1
     endloop
-    // call Trace("Forced Harvest mine total : " + Int2Str(T))
+    // call Trace("Forced Harvest mine total : " + Int2Str(m))
   endif
-  if (Forced_Harvest_total > 3 and c > 1) or Forced_Harvest_total > 6 then
+  if (not b and m > 0 and GetGold() < 800) or (Forced_Harvest_total > 3 and c > 1) or Forced_Harvest_total > 6 then
     set Forced_Harvest_total = 0  //Prevent peon excessive harvest
   else
     set Forced_Harvest_total = Forced_Harvest_total + 1
   endif
-  return T > 0
+  return m > 0
 endfunction
 
 function universal_peon_assignment takes nothing returns nothing
