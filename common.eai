@@ -13326,7 +13326,7 @@ function CommonSleepUntilTargetDeadAM takes unit target, boolean iscreeping, boo
     else
       set ally_target = I2U(GetStoredInteger(amaiCache, a, "0"))
       // We now control ally, only certain attack operations will let AMAI join around a shared ally target
-      if b and ally_target != null and UnitAlive(ally_target) then
+      if b and ally_target != null and UnitAlive(ally_target) and DistanceBetweenUnits(ally_target, target) < 1600 then
         set target = ally_target
       endif
       set lastcaptainx = GetUnitX(target)
@@ -13429,6 +13429,7 @@ function SetAllianceTargetIfLead takes unit u returns nothing
   endif
   if (u == null or not UnitAlive(u)) and HaveStoredInteger(amaiCache, t, "0") then
     call FlushStoredInteger(amaiCache, t, "0")
+    call SetAllianceTarget(null)
   endif
   set t = null
 endfunction
@@ -13441,8 +13442,8 @@ function SetAllianceTargetIfLeadAndChat takes unit u, integer chat returns nothi
     call SetChatVarsAttack(u)
     call Chat(chat)
   elseif (u == null or not UnitAlive(u)) and HaveStoredInteger(amaiCache, t, "0") then
-    call SetAllianceTarget(null)
     call FlushStoredInteger(amaiCache, t, "0")
+    call SetAllianceTarget(null)
   endif
   set t = null
 endfunction
@@ -13861,12 +13862,13 @@ endfunction
 // (AMAI)  ChooseAttackTarget
 //============================================================================
 function GetRangePenalty takes unit target, player p returns real
+  local real i = 1400 * Min(Max(mapSize - 1, 1), 5)
   if major_hero == null or not UnitAlive(major_hero) or target == null or not UnitAlive(target) or IsUnitHidden(target) then
     if major_hero != null and UnitAlive(major_hero) then
       if p != null then
-        return DistanceBetweenPoints_dd(GetUnitLoc(major_hero), GetPlayerStartLocationLoc(p)) / 1400
+        return DistanceBetweenPoints_dd(GetUnitLoc(major_hero), GetPlayerStartLocationLoc(p)) / i
       elseif target != null and not IsUnitHidden(target) then
-        return DistanceBetweenPoints_dd(GetUnitLoc(major_hero), GetPlayerStartLocationLoc(GetOwningPlayer(target))) / 1400
+        return DistanceBetweenPoints_dd(GetUnitLoc(major_hero), GetPlayerStartLocationLoc(GetOwningPlayer(target))) / i
       endif
     else
       if p != null then
@@ -13875,9 +13877,9 @@ function GetRangePenalty takes unit target, player p returns real
         return DistanceBetweenPoints_kd(home_location, GetPlayerStartLocationLoc(GetOwningPlayer(target)))
       endif
     endif
-    return 100.0
+    return 100000.0
   endif
-  return DistanceBetweenUnits(major_hero, target) / 1400
+  return DistanceBetweenUnits(major_hero, target) / i
 endfunction
 
 //============================================================================
@@ -14159,9 +14161,13 @@ function ChooseAnEnemyTarget takes unit u returns unit
     //call Trace("Choosing weakest closest Enemy")
   endif
   if target_enemy != null then
-    call GroupEnumUnitsOfPlayer(g, target_enemy, null)
     set enemy_base = GetPlayerStartLocationLoc(target_enemy)
+    call GroupEnumUnitsOfPlayer(g, target_enemy, null)
     set g = SelectUnittype(g, UNIT_TYPE_TOWNHALL, true)
+    if (u == null or not UnitAlive(u) or IsUnitHidden(u)) and GetPlayerRace(target_enemy) == RACE_UNDEAD and GetPlayerUnitTypeCount(target_enemy, 'ugol') > 0 then
+      call GroupEnumUnitsOfPlayer(g, target_enemy, null)
+      set g = SelectById(g, 'ugol', true)
+    endif
     set g = SelectByLocation(g, enemy_base, 1000, false)
     set g = SelectByAlive(g, true)
     set g = SelectByHidden(g, false)
@@ -14455,6 +14461,7 @@ endif
 
 if town_threatened then
   set break_attack = false
+  call ClearAllianceTarget(null)
   call SleepUntilTownDefended(ai_strength)
   return
 endif
@@ -14473,6 +14480,7 @@ call set_aggression()
 if no_attack then
   call Trace("No Attack is on" )
   call Sleep(4 * sleep_multiplier)
+  call ClearAllianceTarget(null)
   call ClearCaptainTargets()
   return
 endif
@@ -14595,9 +14603,6 @@ if not creeping_only then	// Do the normal attack sequence
     call FromGroupAndGhoulsAM(3)
     call AttackMoveKillAAM(double_expansion_target, false)
     call ClearAllianceTarget(double_expansion_target)
-    if double_expansion_target != null and not UnitAlive(double_expansion_target) then
-      set double_expansion_target = null
-    endif
     return
   endif
 
@@ -14691,7 +14696,7 @@ if not creeping_only then	// Do the normal attack sequence
         call Trace("Attack Choose target")
         call FromGroupAndGhoulsAM(3)
         call AttackMoveKillAAM(hall, true)
-        //call ClearAllianceTarget(null)
+        call ClearAllianceTarget(null)
         set hall = null
         return
       endif
