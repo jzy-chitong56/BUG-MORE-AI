@@ -289,7 +289,7 @@ function MicroUnitsJob takes nothing returns nothing
             endif
             #ENDINCLUDE
             set unit_mana = GetUnitState(u, UNIT_STATE_MANA)
-            if not IsUnitType(u, UNIT_TYPE_MECHANICAL) and not IsUnitType(u, UNIT_TYPE_SUMMONED) and id != 'ubsp' and GetUnitState(u, UNIT_STATE_MAX_MANA) > 0 and unit_mana < RMax(0.35 * GetUnitState(u, UNIT_STATE_MAX_MANA), 50) then
+            if not IsUnitType(u, UNIT_TYPE_MECHANICAL) and not IsUnitType(u, UNIT_TYPE_SUMMONED) and id != 'ubsp' and GetUnitState(u, UNIT_STATE_MAX_MANA) > 0 and unit_mana < RMax(0.15 * GetUnitState(u, UNIT_STATE_MAX_MANA), 50) then
               call GetMana(u)
             endif
             set hid = GetHealerId(id)
