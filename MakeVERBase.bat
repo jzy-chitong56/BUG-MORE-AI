@@ -76,6 +76,10 @@ if "%errorlevel%"=="1" SET RESULTMAKEVER=1
 ECHO _____________________________
 COPY Scripts\%VER%\Blizzard.j Scripts\Blizzard.j
 COPY Scripts\%VER%\vsai\Blizzard.j Scripts\Blizzard_VSAI.j
+COPY Scripts\%VER%\elf2.ai Scripts\%VER%\vsai\elf2.ai
+COPY Scripts\%VER%\undead2.ai Scripts\%VER%\vsai\undead2.ai
+COPY Scripts\%VER%\orc2.ai Scripts\%VER%\vsai\orc2.ai
+COPY Scripts\%VER%\human2.ai Scripts\%VER%\vsai\human2.ai
 ECHO Compatible with old installers
 ECHO _____________________________
 rmdir /s /q "%VER%/tmp"

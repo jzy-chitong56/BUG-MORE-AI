@@ -76,19 +76,15 @@ cls
 ECHO.
 ECHO 请选择魔兽3版本:
 ECHO.
-ECHO 1. 重制版 REFORGED (1.33+) (默认)
-ECHO 2. 经典版-冰封王座  (1.24e+)
-ECHO 3. 经典版-混乱之治  (1.24e ~ 1.31)
+ECHO 1. 经典版-冰封王座  (1.24e+)(默认)
+ECHO 2. 经典版-混乱之治  (1.24e ~ 1.31)
 ECHO.
-set /p choice=请输入并回车(1 ~ 3):
+set /p choice=请输入并回车(1 ~ 2):
 
 if "%choice%"=="1" (
-  set VER=REFORGED
-)
-if "%choice%"=="2" (
   set VER=TFT
 )
-if "%choice%"=="3" (
+if "%choice%"=="2" (
   set VER=ROC
 )
 if "%SETMAP%"=="1" (
