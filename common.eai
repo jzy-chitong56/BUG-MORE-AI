@@ -13156,8 +13156,8 @@ function SleepInCombatAM takes boolean ally_override returns nothing
         call GroupClear(g)
       endif
       if u == null then
-        exitwhen noenemycount >= 4 // no enemies so exit
-        set noenemycount = noenemycount + 1 // 8 seconds to pick up items on ground
+        exitwhen noenemycount >= 5 // no enemies so exit
+        set noenemycount = noenemycount + 1 // 5 seconds to pick up items on ground
         if not CaptainInCombat(true) then
           call TeleportCaptain(lastcaptainx, lastcaptainy)
         endif
@@ -13326,7 +13326,7 @@ function CommonSleepUntilTargetDeadAM takes unit target, boolean iscreeping, boo
     else
       set ally_target = I2U(GetStoredInteger(amaiCache, a, "0"))
       // We now control ally, only certain attack operations will let AMAI join around a shared ally target
-      if b and ally_target != null and UnitAlive(ally_target) and DistanceBetweenUnits(ally_target, target) < 1600 then
+      if b and ally_target != null and UnitAlive(ally_target) and DistanceBetweenUnits(ally_target, target) < 2500 then
         set target = ally_target
       endif
       set lastcaptainx = GetUnitX(target)
@@ -13427,10 +13427,10 @@ function SetAllianceTargetIfLead takes unit u returns nothing
     call StoreInteger(amaiCache, t, "0", GetHandleId(u))
     //call SetAllianceTarget(u)
   endif
-  if (u == null or not UnitAlive(u)) and HaveStoredInteger(amaiCache, t, "0") then
-    call FlushStoredInteger(amaiCache, t, "0")
-    call SetAllianceTarget(null)
-  endif
+  // if (u == null or not UnitAlive(u)) and HaveStoredInteger(amaiCache, t, "0") then
+  //   call FlushStoredInteger(amaiCache, t, "0")
+  //   call SetAllianceTarget(null)
+  // endif
   set t = null
 endfunction
 
@@ -13441,17 +13441,20 @@ function SetAllianceTargetIfLeadAndChat takes unit u, integer chat returns nothi
     call SetAllianceTarget(u) // Just sends alliance attack signal, doesn't actually control ally attack target as originally thought, thats hardcoded into attackmovekill
     call SetChatVarsAttack(u)
     call Chat(chat)
-  elseif (u == null or not UnitAlive(u)) and HaveStoredInteger(amaiCache, t, "0") then
-    call FlushStoredInteger(amaiCache, t, "0")
-    call SetAllianceTarget(null)
+  // elseif (u == null or not UnitAlive(u)) and HaveStoredInteger(amaiCache, t, "0") then
+  //   call FlushStoredInteger(amaiCache, t, "0")
+  //   call SetAllianceTarget(null)
   endif
   set t = null
 endfunction
 
 function ClearAllianceTarget takes unit old returns nothing
-  if old == null or not UnitAlive(old) or GetHandleId(old) == GetStoredInteger(amaiCache, Int2Str(ALLIANCE_TARGET), "0") then
-    call SetAllianceTargetIfLead(null)
+  local string t = Int2Str(ALLIANCE_TARGET)
+  if old != null and GetHandleId(old) == GetStoredInteger(amaiCache, t, "0") then
+    call FlushStoredInteger(amaiCache, t, "0")
+    call SetAllianceTarget(null)
   endif
+  set t = null
 endfunction
 
 //============================================================================
@@ -14461,7 +14464,6 @@ endif
 
 if town_threatened then
   set break_attack = false
-  call ClearAllianceTarget(null)
   call SleepUntilTownDefended(ai_strength)
   return
 endif
@@ -14480,7 +14482,6 @@ call set_aggression()
 if no_attack then
   call Trace("No Attack is on" )
   call Sleep(4 * sleep_multiplier)
-  call ClearAllianceTarget(null)
   call ClearCaptainTargets()
   return
 endif
@@ -14696,7 +14697,7 @@ if not creeping_only then	// Do the normal attack sequence
         call Trace("Attack Choose target")
         call FromGroupAndGhoulsAM(3)
         call AttackMoveKillAAM(hall, true)
-        call ClearAllianceTarget(null)
+        call ClearAllianceTarget(hall)
         set hall = null
         return
       endif
