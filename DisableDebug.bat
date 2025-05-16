@@ -116,33 +116,33 @@ perl -i -pe"s#(call DisplayToAllJobDebug)#//$1#g" Scripts/TFT/orc.ai
 perl -i -pe"s#(call DisplayToAllJobDebug)#//$1#g" Scripts/TFT/undead.ai
 perl -i -pe"s#(call DisplayToAllJobDebug)#//$1#g" Scripts/TFT/vsai/Blizzard.j
 
-pjass ROC\common.j Scripts\ROC\common.ai
+pjass common.j Scripts\ROC\common.ai
 if "%errorlevel%"=="1" SET DisableROC=1
-jassparser ROC\common.j Scripts\ROC\common.ai
+jassparser common.j Scripts\ROC\common.ai
 if "%errorlevel%"=="1" SET DisableROC=1
-pjass ROC\common.j Scripts\ROC\common.ai Scripts\ROC\elf.ai
+pjass common.j Scripts\ROC\common.ai Scripts\ROC\elf.ai
 if "%errorlevel%"=="1" SET DisableROC=1
-jassparser ROC\common.j Scripts\ROC\common.ai Scripts\ROC\elf.ai
+jassparser common.j Scripts\ROC\common.ai Scripts\ROC\elf.ai
 if "%errorlevel%"=="1" SET DisableROC=1
-pjass ROC\common.j Scripts\ROC\common.ai Scripts\ROC\human.ai
+pjass common.j Scripts\ROC\common.ai Scripts\ROC\human.ai
 if "%errorlevel%"=="1" SET DisableROC=1
-jassparser ROC\common.j Scripts\ROC\common.ai Scripts\ROC\human.ai
+jassparser common.j Scripts\ROC\common.ai Scripts\ROC\human.ai
 if "%errorlevel%"=="1" SET DisableROC=1
-pjass ROC\common.j Scripts\ROC\common.ai Scripts\ROC\orc.ai
+pjass common.j Scripts\ROC\common.ai Scripts\ROC\orc.ai
 if "%errorlevel%"=="1" SET DisableROC=1
-jassparser ROC\common.j Scripts\ROC\common.ai Scripts\ROC\orc.ai
+jassparser common.j Scripts\ROC\common.ai Scripts\ROC\orc.ai
 if "%errorlevel%"=="1" SET DisableROC=1
-pjass ROC\common.j Scripts\ROC\common.ai Scripts\ROC\undead.ai
+pjass common.j Scripts\ROC\common.ai Scripts\ROC\undead.ai
 if "%errorlevel%"=="1" SET DisableROC=1
-jassparser ROC\common.j Scripts\ROC\common.ai Scripts\ROC\undead.ai
+jassparser common.j Scripts\ROC\common.ai Scripts\ROC\undead.ai
 if "%errorlevel%"=="1" SET DisableROC=1
-pjass ROC\common.j Scripts\ROC\Blizzard.j
+pjass common.j Scripts\ROC\Blizzard.j
 if "%errorlevel%"=="1" SET DisableROC=1
-jassparser ROC\common.j Scripts\ROC\Blizzard.j
+jassparser common.j Scripts\ROC\Blizzard.j
 if "%errorlevel%"=="1" SET DisableROC=1
-pjass ROC\common.j Scripts\ROC\vsai\Blizzard.j
+pjass common.j Scripts\ROC\vsai\Blizzard.j
 if "%errorlevel%"=="1" SET DisableROC=1
-jassparser ROC\common.j Scripts\ROC\vsai\Blizzard.j
+jassparser common.j Scripts\ROC\vsai\Blizzard.j
 if "%errorlevel%"=="1" SET DisableROC=1
 if "%DisableROC%"=="1" (
   ECHO Disable Debug ROC scripts error
@@ -151,33 +151,33 @@ if "%DisableROC%"=="1" (
   ECHO Disable Debug ROC scripts finish
 )
 
-pjass TFT\common.j Scripts\TFT\common.ai
+pjass common.j Scripts\TFT\common.ai
 if "%errorlevel%"=="1" SET DisableTFT=1
-jassparser TFT\common.j Scripts\TFT\common.ai
+jassparser common.j Scripts\TFT\common.ai
 if "%errorlevel%"=="1" SET DisableTFT=1
-pjass TFT\common.j Scripts\TFT\common.ai Scripts\TFT\elf.ai
+pjass common.j Scripts\TFT\common.ai Scripts\TFT\elf.ai
 if "%errorlevel%"=="1" SET DisableTFT=1
-jassparser TFT\common.j Scripts\TFT\common.ai Scripts\TFT\elf.ai
+jassparser common.j Scripts\TFT\common.ai Scripts\TFT\elf.ai
 if "%errorlevel%"=="1" SET DisableTFT=1
-pjass TFT\common.j Scripts\TFT\common.ai Scripts\TFT\human.ai
+pjass common.j Scripts\TFT\common.ai Scripts\TFT\human.ai
 if "%errorlevel%"=="1" SET DisableTFT=1
-jassparser TFT\common.j Scripts\TFT\common.ai Scripts\TFT\human.ai
+jassparser common.j Scripts\TFT\common.ai Scripts\TFT\human.ai
 if "%errorlevel%"=="1" SET DisableTFT=1
-pjass TFT\common.j Scripts\TFT\common.ai Scripts\TFT\orc.ai
+pjass common.j Scripts\TFT\common.ai Scripts\TFT\orc.ai
 if "%errorlevel%"=="1" SET DisableTFT=1
-jassparser TFT\common.j Scripts\TFT\common.ai Scripts\TFT\orc.ai
+jassparser common.j Scripts\TFT\common.ai Scripts\TFT\orc.ai
 if "%errorlevel%"=="1" SET DisableTFT=1
-pjass TFT\common.j Scripts\TFT\common.ai Scripts\TFT\undead.ai
+pjass common.j Scripts\TFT\common.ai Scripts\TFT\undead.ai
 if "%errorlevel%"=="1" SET DisableTFT=1
-jassparser TFT\common.j Scripts\TFT\common.ai Scripts\TFT\undead.ai
+jassparser common.j Scripts\TFT\common.ai Scripts\TFT\undead.ai
 if "%errorlevel%"=="1" SET DisableTFT=1
-pjass TFT\common.j Scripts\TFT\Blizzard.j
+pjass common.j Scripts\TFT\Blizzard.j
 if "%errorlevel%"=="1" SET DisableTFT=1
-jassparser TFT\common.j Scripts\TFT\Blizzard.j
+jassparser common.j Scripts\TFT\Blizzard.j
 if "%errorlevel%"=="1" SET DisableTFT=1
-pjass TFT\common.j Scripts\TFT\vsai\Blizzard.j
+pjass common.j Scripts\TFT\vsai\Blizzard.j
 if "%errorlevel%"=="1" SET DisableTFT=1
-jassparser TFT\common.j Scripts\TFT\vsai\Blizzard.j
+jassparser common.j Scripts\TFT\vsai\Blizzard.j
 if "%errorlevel%"=="1" SET DisableTFT=1
 if "%DisableTFT%"=="1" (
   ECHO Disable Debug TFT scripts error
