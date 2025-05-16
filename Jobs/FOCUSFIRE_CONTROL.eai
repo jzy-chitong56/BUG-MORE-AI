@@ -268,7 +268,7 @@ function FocusFire takes unit u returns nothing
       set focus_fire_unit = u
     endif
     call CreateDebugTag("FF: here:" + "GroupSize not 0", 10, u, 1.00, 0.80)
-    if u == deny_unit and own_race == R_UNDEAD then
+    if u == deny_unit and own_race == R_UNDEAD and GetUnitRace(u) == RACE_UNDEAD then
       call GroupOrderDeny_kd(temp_focus,CopyGroup(temp_focus,t), u)
     endif
     set temp_focus = FocusGroupRemoveGuard(temp_focus)  // Not currently fully controlling focus fire
