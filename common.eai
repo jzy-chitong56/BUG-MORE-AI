@@ -5748,14 +5748,14 @@ endfunction
 function IsUnitTower takes unit u returns boolean
   local integer i = 0
   if IsUnitType(u, UNIT_TYPE_STRUCTURE) then
-    if IsUnitType(u, UNIT_TYPE_RANGED_ATTACKER) then
+    if IsUnitType(u, UNIT_TYPE_RANGED_ATTACKER) or IsUnitType(u, UNIT_TYPE_MELEE_ATTACKER) then
       return true
     endif
     set i = GetUnitTypeId(u)
     if i == 'hwtw' or i == 'uzig' then
       return true
     endif
-  elseif GetUnitMoveSpeed(u) == 0 and not IsUnitType(u, UNIT_TYPE_SUMMONED) then
+  elseif not IsUnitType(u, UNIT_TYPE_SUMMONED) then
     set i = GetUnitTypeId(u)
     if i == 'osp1' or i == 'osp2' or i == 'osp3' or i == 'osp4' then
       return true
@@ -6028,7 +6028,7 @@ function GetLocationTowerStrength takes real x, real y, real radius returns real
   loop
     set u = FirstOfGroup(g)
     exitwhen u == null
-    if IsPlayerEnemy(ai_player, GetOwningPlayer(u)) and IsUnitTower(u) and UnitAlive(u) and not IsUnitHidden(u) then
+    if IsPlayerEnemy(ai_player, GetOwningPlayer(u)) and UnitAlive(u) and not IsUnitHidden(u) and IsUnitTower(u)  then
       set sum = sum + GetTowerStrength(u)
     endif
     call GroupRemoveUnit(g,u)
