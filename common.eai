@@ -5748,7 +5748,7 @@ endfunction
 function IsUnitTower takes unit u returns boolean
   local integer i = 0
   if IsUnitType(u, UNIT_TYPE_STRUCTURE) then
-    if IsUnitType(u, UNIT_TYPE_RANGED_ATTACKER) or IsUnitType(u, UNIT_TYPE_MELEE_ATTACKER) then
+    if IsUnitType(u, UNIT_TYPE_RANGED_ATTACKER) then
       return true
     endif
     set i = GetUnitTypeId(u)
