@@ -6,7 +6,7 @@ SET RESULTMAKEVER=0
 if "%errorlevel%"=="1" SET RESULTMAKEVER=1
 if "%RESULTMAKEVER%"=="1" (
   ECHO Compilation AMAI %VER% error
-  ECHO Perl version check failed. Exiting. Download : https://strawberryperl.com/
+  pause
   exit /b %RESULTMAKEVER%
 )
 mkdir Scripts\
