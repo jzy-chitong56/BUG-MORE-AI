@@ -7,7 +7,7 @@ ECHO Optimizing %VER% Scripts
 if "%errorlevel%"=="1" SET RESULTOPTVER=1
 if "%RESULTOPTVER%"=="1" (
   ECHO Compilation AMAI Optimization %VER% error
-  ECHO Perl version check failed. Exiting. Download : https://strawberryperl.com/
+  pause
   exit /b %RESULTOPTVER%
 )
 mkdir Scripts\OPT%VER%

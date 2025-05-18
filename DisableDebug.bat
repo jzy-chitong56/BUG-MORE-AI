@@ -3,6 +3,14 @@ SET DisableROC=0
 SET DisableTFT=0
 SET DisableREFORGED=0
 SET Disable=0
+@call perlcheck.bat
+if "%errorlevel%"=="1" SET Disable=1
+if "%Disable%"=="1" (
+  ECHO Disable AMAI Debug error
+  pause
+  exit /b %Disable%
+)
+
 ECHO Disable Debug
 
 perl -i -pe"s#(call TraceN)#//$1#g" Scripts/ROC/common.ai
