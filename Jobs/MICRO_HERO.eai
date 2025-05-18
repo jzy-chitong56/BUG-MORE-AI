@@ -99,7 +99,8 @@ endfunction
 
 function GoHomeIfMainHero takes unit u, real x, real y returns nothing
   if main_army >= 0 and army_group[main_army] != null and IsUnitInGroup(u, army_group[main_army]) then
-    call CaptainGoHome() // Retreat attack captain.
+    call ClearCaptainTargets() // Retreat attack captain.
+    //call CaptainGoHome()
     call TeleportCaptain(x, y)
     set break_attack = attack_running
     set isfleeing = true
