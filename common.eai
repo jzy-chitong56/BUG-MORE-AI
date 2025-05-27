@@ -11507,6 +11507,12 @@ function StartUnitAM takes integer ask_qty, integer unitid, integer town, intege
     set gold_cost = GetUnitGoldCost2(unitid) // When hero is free this is returning 0 correctly
     set wood_cost = GetUnitWoodCost2(unitid)
     set food_cost = GetFoodUsed(old_id[unitid])
+    if gold_cost < 0 and needed3[unitid] == UPGRADED and buy_type[unitid] == BT_BUILDING then  // force fix default version game data without upgrading base
+      set gold_cost = GetUnitGoldCost(old_id[unitid])
+    endif
+    if wood_cost < 0 and needed3[unitid] == UPGRADED and buy_type[unitid] == BT_BUILDING then
+      set wood_cost = GetUnitWoodCost(old_id[unitid])
+    endif
 
     if gold_cost == 0 then
       set afford_gold = need_qty
@@ -11820,10 +11826,10 @@ function StartExpansionAM takes integer qty, integer hall returns integer
   // call DisplayTextToPlayer(GetLocalPlayer(), 0, 0, "Expansion choosen")
   set gold_cost = GetUnitGoldCost2(hall)
   set wood_cost = GetUnitWoodCost2(hall)
-  // if item_expanding and not item_job_running then
-  //   set gold_cost = gold_price[race_item_expansion_item_id]
-  //   set wood_cost = wood_price[race_item_expansion_item_id]
-  // endif
+  if item_expanding and not item_job_running then
+    set gold_cost = gold_price[race_item_expansion_item_id]
+    set wood_cost = wood_price[race_item_expansion_item_id]
+  endif
 
   set total_gold = total_gold - gold_cost
   set total_wood = total_wood - wood_cost
@@ -11850,6 +11856,11 @@ function StartExpansionAM takes integer qty, integer hall returns integer
   endif
   if total_wood < 0 and wood_cost > 0 then
     return NOT_ENOUGH_RES
+  endif
+
+  if item_expanding then
+    call TQAddJob(2, ITEM_EXPANSION, 0)
+    return BUILT_SOME
   endif
 
   // call DisplayTextToPlayer(GetLocalPlayer(), 0, 0, "Expansion rescources sorted")
@@ -12416,9 +12427,6 @@ if not_taken_expansion == null and race_item_expansion_available and not item_ex
     call Trace("Item expansion check - Begin Job")
     set item_expanding = true
     set not_taken_expansion = current_expansion
-    set current_expansion = null
-    call TQAddJob(2, ITEM_EXPANSION, 0)
-    return
   endif
 endif
 
@@ -12443,13 +12451,12 @@ if mines < 1 or gold_left < 2500 or exp_prepared then
   else
     call BuildExpa(TownCount(racial_expansion) + 1, racial_expansion, expa_prio)
   endif
-elseif minetimeready and attacking_aggression > 0 and mines > 1 and mines < 4 and not_taken_expansion == null then
+elseif minetimeready and attacking_aggression > 0 and mines > 1 and mines < 4 and not_taken_expansion != chaos_expansion then
   if chaos_expansion != null and UnitAlive(chaos_expansion) and chaos_expansion != current_expansion and GetResourceAmount(chaos_expansion) >= GetUnitGoldCost(old_id[racial_expansion]) and not CheckExpansionTaken(chaos_expansion) then
     if not chaos_expansion_run and GetLocationCreepStrength(GetUnitX(chaos_expansion), GetUnitY(chaos_expansion), expansion_radius) <= 0 then
       set u = GetExpansionPeon()
       if u != null and UnitAlive(u) and u != expansion_peon then
         set chaos_expansion_run = true
-        set not_taken_expansion = chaos_expansion
         call IssueTargetOrderById(u, old_id[racial_expansion], chaos_expansion)
         call CreateDebugTag("chaos expansion", 10, u, 3.00, 1.50)
         call Trace("ExpansionBuilder: chaos expansion")
@@ -12460,11 +12467,11 @@ elseif minetimeready and attacking_aggression > 0 and mines > 1 and mines < 4 an
   endif
 endif
 if chaos_expansion != null and CheckExpansionTaken(chaos_expansion) then
-  if chaos_expansion == not_taken_expansion then
-    set not_taken_expansion = null
-  endif
   set chaos_expansion = expansion_list[Max(0, GetRandomInt(0, expansion_list_length - 1))]
   set chaos_expansion_run = false
+  if chaos_expansion == not_taken_expansion then
+    set chaos_expansion = null
+  endif
 endif
 //call Trace("ExpansionBuilder: Not ready to build mine")
 endfunction
