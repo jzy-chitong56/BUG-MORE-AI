@@ -3728,7 +3728,7 @@ endfunction
 function SetNearestEnemy takes nothing returns nothing
   local integer i = 0
   local real nr = 0
-  local real humanrange = Max(3, mapSize) * 3200  // preventing long-distance attacks
+  local real humanrange = Max(3, mapSize) * 4000  // preventing long-distance attacks
   set nearest_enemy = null
   set nearest_human_enemy = null
   loop
@@ -13670,7 +13670,7 @@ endfunction
 // (AMAI)  ChooseAttackTarget
 //============================================================================
 function GetRangePenalty takes unit target, player p returns real
-  local real i = 1400 * Min(Max(mapSize - 1, 1), 5)
+  local real i = 1400 * Min(mapSize + 1, 5)
   if major_hero == null or not UnitAlive(major_hero) or target == null or not UnitAlive(target) or IsUnitHidden(target) then
     if major_hero != null and UnitAlive(major_hero) then
       if p != null then
@@ -14642,6 +14642,12 @@ endfunction
 //============================================================================
 // (AMAI) HealArmy
 //============================================================================
+function UnRobogoblin takes unit u returns nothing
+  if u != null and UnitAlive(u) and GetUnitTypeId(u) == 'Nrob' and GetUnitState(u, UNIT_STATE_LIFE) < GetUnitState(u, UNIT_STATE_MAX_LIFE) * 0.8 and not IsUnitBuying(u) then
+    call IssueImmediateOrder(u, "unrobogoblin")  // let hero can use all healing item
+  endif
+endfunction
+
 function GetArmyHealthState takes nothing returns real
   local group g = CreateGroup()
   local unit u = null
@@ -14663,10 +14669,10 @@ function GetArmyHealthState takes nothing returns real
     set u = FirstOfGroup(g)
     exitwhen u == null
     if UnitAlive(u) and not (IsUnitHidden(u) or IsUnitType(u, UNIT_TYPE_PEON) or IsUnitType(u, UNIT_TYPE_STRUCTURE) or IsUnitIllusion(u) or IsUnitBuying(u)) then
-      if GetUnitTypeId(u) == 'ohwd' then
+      if GetUnitTypeId(u) == 'ohwd' and IsUnitType(u, UNIT_TYPE_SUMMONED) then  // just check summoned
         set prev_ward = true
       else
-        if not prev_ward and ward == null and (GetUnitAbilityLevel(u, 'Ahwd') > 0 or GetUnitAbilityLevel(u, 'AChw') > 0) then
+        if ward == null and (GetUnitAbilityLevel(u, 'Ahwd') > 0 or GetUnitAbilityLevel(u, 'AChw') > 0) and GetUnitState(u, UNIT_STATE_MANA) > 150 then
           set ward = u
         endif
         if IsUnitType(u, UNIT_TYPE_MECHANICAL) or IsUnitType(u, UNIT_TYPE_SUMMONED) then
@@ -14693,15 +14699,9 @@ function GetArmyHealthState takes nothing returns real
   endloop
   call DestroyGroup(g)
   set g = null
-  if hero_unit[1] != null and UnitAlive(hero_unit[1]) and GetUnitTypeId(hero_unit[1]) == 'Nrob' then
-    call IssueImmediateOrder(hero_unit[1], "unrobogoblin")  // let hero can use all healing item
-  endif
-  if hero_unit[2] != null and UnitAlive(hero_unit[2]) and GetUnitTypeId(hero_unit[2]) == 'Nrob' then
-    call IssueImmediateOrder(hero_unit[2], "unrobogoblin")
-  endif
-  if hero_unit[3] != null and UnitAlive(hero_unit[3]) and GetUnitTypeId(hero_unit[3]) == 'Nrob' then
-    call IssueImmediateOrder(hero_unit[3], "unrobogoblin")
-  endif
+  call UnRobogoblin(hero_unit[1])
+  call UnRobogoblin(hero_unit[2])
+  call UnRobogoblin(hero_unit[3])
   if nearest_neutral[hFountainID] == null or not neutral_available[hFountainID] or not race_use_fountain then
     set fountain_available = false
   else
@@ -14710,8 +14710,6 @@ function GetArmyHealthState takes nothing returns real
   if ward != null and not prev_ward and CaptainIsHome() and UnitAlive(ward) and not IsUnitBuying(ward) then
     call IssuePointOrder(ward, "healingward", GetUnitX(ward), GetUnitY(ward))
     set ward_cast = true
-  else
-    set ward_cast = prev_ward
   endif
   set ward = null
   if count == 0 or (urgent_healing_count + medium_healing_count + small_healing_count == 0) then
