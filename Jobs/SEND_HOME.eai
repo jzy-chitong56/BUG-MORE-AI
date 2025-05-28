@@ -49,8 +49,7 @@ function SendUnitHomeJob takes unit u, integer p returns nothing
   local item it = null
   local integer racial_healing_item = 0
   local integer racial_mana_item = 0
-  local integer enemystrength = 0
-  local integer id = 0
+  //local integer enemystrength = 0
   local unit otherhero = null
 
   call DisplayToAllJobDebug("SEND_HOME Job")
@@ -202,7 +201,7 @@ function SendUnitHomeJob takes unit u, integer p returns nothing
           set g = null
         // Below attempt to heal myself
         elseif GetUnitState(u, UNIT_STATE_MANA) > 100 then  //Note : this writing may not be compatible with custom maps
-          if (GetUnitAbilityLevel(u, 'Ahwd') > 0 or GetUnitAbilityLevel(u, 'AChw') > 0) and TimerGetElapsed(tq_timer) >= ward_cast_sendhome[p] + 30 then
+          if (GetUnitAbilityLevel(u, 'Ahwd') > 0 or GetUnitAbilityLevel(u, 'AChw') > 0) and TimerGetElapsed(tq_timer) >= ward_cast_sendhome[p] + 25 then
             call IssuePointOrder(u, "healingward", GetUnitX(u), GetUnitY(u))
             call CreateDebugTag("SEND_HOME try use healingward", 10, u, 3.00, 1.50)
             set ward_cast_sendhome[p] = TimerGetElapsed(tq_timer)  // one exist town just one ward
