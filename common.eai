@@ -3728,7 +3728,7 @@ endfunction
 function SetNearestEnemy takes nothing returns nothing
   local integer i = 0
   local real nr = 0
-  local real humanrange = Max(3, mapSize) * 4000  // preventing long-distance attacks
+  local real humanrange = 18000  // preventing long-distance attacks
   set nearest_enemy = null
   set nearest_human_enemy = null
   loop
@@ -10471,6 +10471,9 @@ function ResetDynamicSystem takes nothing returns nothing
 	set totalchance_%1 = 0
 	set dydistribute_%1 = false
 #ENDINCLUDE
+endfunction
+
+function ResetDynamicUint takes nothing returns nothing
 	set chosen_counter_unit = 0
 endfunction
 
@@ -13670,7 +13673,7 @@ endfunction
 // (AMAI)  ChooseAttackTarget
 //============================================================================
 function GetRangePenalty takes unit target, player p returns real
-  local real i = 1400 * Min(mapSize + 1, 5)
+  local real i = 1400 * Max(mapSize, 1)
   if major_hero == null or not UnitAlive(major_hero) or target == null or not UnitAlive(target) or IsUnitHidden(target) then
     if major_hero != null and UnitAlive(major_hero) then
       if p != null then
