@@ -231,6 +231,7 @@ function global_build_sequence takes nothing returns nothing
       call DynamicBuildUnit(100, 40)
       call DragonAndMercBuilder()
     endif
+    call ResetDynamicUint()
 
     // Global upgrades
     call BuildAdvUpgr2(3, UPG_ORC_MELEE, 1,TownCountDone(GRUNT) + TownCountDone(TAUREN) + TownCountDone(RAIDER), 4,15,40)

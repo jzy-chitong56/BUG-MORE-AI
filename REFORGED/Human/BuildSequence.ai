@@ -248,6 +248,7 @@ function global_build_sequence takes nothing returns nothing
 		call DynamicBuildUnit(100, 40)
 		call DragonAndMercBuilder()
 	endif
+	call ResetDynamicUint()
 
     // Global Upgrades
     call BuildAdvUpgr(2, UPG_WOOD,1,1,1,5,40)
