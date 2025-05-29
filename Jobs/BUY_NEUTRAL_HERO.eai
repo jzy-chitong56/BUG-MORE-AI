@@ -25,6 +25,7 @@ endfunction
 function AwakenHero takes unit u, integer i returns nothing
   if hero_built[i] and TownCount(hero[i]) < 1 then
     call IssueNeutralTargetOrder(ai_player, u, "awaken", hero_unit[i])
+    call AddAssault(1,GetUnitTypeId(hero_unit[i]))
   endif
 endfunction
 
