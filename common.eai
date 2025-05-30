@@ -13075,6 +13075,12 @@ function CommonSleepUntilTargetDeadAM takes unit target, boolean iscreeping, boo
   //local group g = null
   local string a = Int2Str(ALLIANCE_TARGET)
   local boolean b = ally_override and c_ally_total > 0
+  local location l = null
+  if target == null then
+    set a = null
+    return
+  endif
+  set l = GetUnitLoc(target)
   set lastcaptainx = GetUnitX(target)
   set lastcaptainy = GetUnitY(target)
   loop
@@ -13118,7 +13124,7 @@ function CommonSleepUntilTargetDeadAM takes unit target, boolean iscreeping, boo
       //call Trace("Units, Creeps: " + Int2Str(GetLocationNonCreepStrength(unitx, unity, battle_radius)) + "," + Int2Str(GetLocationCreepStrength(unitx, unity, 500)))
       //	exitwhen GetLocationNonCreepStrength(unitx, unity, battle_radius) <= 0 and not UnitAlive(target) and GetLocationCreepStrength(unitx, unity, 500) <= 0
     //endif
-    set dist = DistanceBetweenPoints_kd(ally_loc, GetUnitLoc(target))
+    set dist = DistanceBetweenPoints(ally_loc, l)
     if b and dist > 1300 and dist < 2500 and CheckAttackWait(target) then
       set lastcaptainx = GetLocationX(ally_loc)
       set lastcaptainy = GetLocationY(ally_loc)
@@ -13132,8 +13138,10 @@ function CommonSleepUntilTargetDeadAM takes unit target, boolean iscreeping, boo
     else
       set ally_target = I2U(GetStoredInteger(amaiCache, a, "0"))
       // We now control ally, only certain attack operations will let AMAI join around a shared ally target
-      if b and ally_target != null and UnitAlive(ally_target) and DistanceBetweenUnits(ally_target, target) < 2500 then
+      if b and ally_target != null and UnitAlive(ally_target) and DistanceBetweenPoints_dk(GetUnitLoc(ally_target), l) < 2500 then
         set target = ally_target
+        call RemoveLocation(l)
+        set l = GetUnitLoc(target)
       endif
       set lastcaptainx = GetUnitX(target)
       set lastcaptainy = GetUnitY(target)
@@ -13174,15 +13182,21 @@ function CommonSleepUntilTargetDeadAM takes unit target, boolean iscreeping, boo
       if CaptainInCombat(true) and combat_length_counter > attack_reform_length then
         set combat_length_counter = 0
         call FormGroupAM(0) // Safe in combat as reinforces while fight is ongoing
+        call RemoveLocation(l)
+        set l = GetUnitLoc(target)  // update loc
       elseif not CaptainInCombat(true) and attack_length_counter > R2I(LinearInterpolation(30, 80, attack_reform_length, attack_reform_length * 10, FoodUsed())+0.5) then // If a large army generally don't want to wait for reinforcements, so only reform occasionally
         set attack_length_counter = 0
         set combat_length_counter = 0
         //call TraceAll("Reform army")
         call FormGroupAM(1)
+        call RemoveLocation(l)
+        set l = GetUnitLoc(target)
       endif
     endif
   endloop
   //set g = null
+  call RemoveLocation(l)
+  set l = null
   set a = null
 endfunction
 
