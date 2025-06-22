@@ -5,7 +5,12 @@ function global_init_strategy takes nothing returns nothing
     call SetTierBlock(1, 0.75, 60, true)
     call SetTierBlock(2, 0.75, 90, true)
     if IsMapFlagSet(MAP_RANDOM_HERO) then
-      call AddBlock(1, CRYPT, false, 0, UNDEAD_ALTAR, 12)
+      call AddBlock(1, NECROPOLIS_2, false, 0, UNDEAD_ALTAR, 36)
+      call AddBlock(1, CRYPT, true, 0, TOMB_OF_RELICS, 36)
+      call AddBlock(1, CRYPT, false, 0, ZIGGURAT_1, 16)
+      call AddBlock(1, CRYPT, true, 0, ZIGGURAT_2, 20)
+      call AddBlock(1, CRYPT, true, 0, ZIGGURAT_FROST, 16)
+      
     else
       call AddBlock(1, UNDEAD_ALTAR, true, 0, TOMB_OF_RELICS, 36)
       call AddBlock(1, UNDEAD_ALTAR, false, 0, CRYPT, 16)
@@ -66,6 +71,9 @@ function global_build_sequence takes nothing returns nothing
     if TownCount(GHOUL) == 0 and GetWood() < 500 then
       call BuildUnit(1, GHOUL, ghoul_prio)
     endif
+    if IsMapFlagSet(MAP_RANDOM_HERO) then
+      call BuildUnit(1, UNDEAD_ALTAR, 56)
+    endif
     // Anti rush
     if GetRushFactor() < 5000 then
       if GetUnitCount(old_id[ZIGGURAT_FROST]) < 1 then
@@ -90,23 +98,14 @@ function global_build_sequence takes nothing returns nothing
     endif
     // exp tower
     if HasExpanded() then
-      if GetUnitCount(old_id[ZIGGURAT_FROST]) < TownCount(racial_expansion) + 1 then
-        call BuildUnit(1, ZIGGURAT_FROST, 40)
-      else
-        call BuildUnit(1, ZIGGURAT_2, 45)
-      endif
+      call DefendTownsDone(1, ZIGGURAT_FROST, 70)
+      call DefendTownsDone(2, ZIGGURAT_2, 68)
       if TownCount(NECROPOLIS_1) < TownCountDone(racial_expansion) and GetGold() > 800 then
         call DefendTownsDone(1, NECROPOLIS_1, 95)
       endif
-      if GetGold() > 2000 then	
-        if GetUnitCount(old_id[ZIGGURAT_FROST]) < TownCount(racial_expansion) + 1 then
-          call DefendTownsDone(1, ZIGGURAT_FROST, 50)
-        else
-          call DefendTownsDone(3, ZIGGURAT_2, 90)
-        endif
-        if GetUnitCount(old_id[ZIGGURAT_FROST]) < TownCount(racial_expansion) + 2 then
-          call DefendTownsCond(1, ZIGGURAT_FROST, 0, 8000, 0, 80)
-        endif
+      if GetGold() > 2000 then
+        call DefendTownsDone(3, ZIGGURAT_2, 35)
+        call DefendTownsDone(2, ZIGGURAT_FROST, 35)
         if tier >= 2 then
           if GetUnitCount(old_id[ZIGGURAT_2]) + GetUnitCount(old_id[ZIGGURAT_FROST]) >= 4 and TownCount(TOMB_OF_RELICS) < 2 then
             call DefendTownsDone(1, TOMB_OF_RELICS, 40)
@@ -120,10 +119,10 @@ function global_build_sequence takes nothing returns nothing
     // updata
     if GetGold() > 550 and GetUnitCountDone(old_id[ZIGGURAT_1]) > 0 then
       if GetUnitCount(old_id[ZIGGURAT_FROST]) >= TownCount(racial_expansion) then
-        call BuildUnit(1, ZIGGURAT_2, 40)
-       else
-        call BuildUnit(1, ZIGGURAT_FROST, 33)
-       endif
+        call BuildUnit(1, ZIGGURAT_2, 56)
+      else
+        call BuildUnit(1, ZIGGURAT_FROST, 62)
+      endif
     endif
 
     // transition train , sequence should be at the beginning
@@ -160,76 +159,76 @@ function global_build_sequence takes nothing returns nothing
     // DYNAMIC and Global Mercenaries
     call ResetDynamicSystem()
     if tier == 1 then
-      //call AddUnitToAntiair(CRYPT_FIEND,GetUpgradeLevel(old_id[UPG_FIEND_WEB])*29)
-      call AddUnitToAnticasters(CRYPT_FIEND,29)
-      call AddUnitToAntitowers(CRYPT_FIEND,29)
-      call AddUnitToAntipiercing(GHOUL, 29)
-      call AddUnitToAntinormal(GHOUL, 29)
-      call AddUnitToAntisiege(CRYPT_FIEND,29)
-      call AddUnitToAntisiege(GHOUL,26)
-      call AddUnitToAntimagic(CRYPT_FIEND,29)
-      call AddUnitToAntiunarmored(CRYPT_FIEND,29)
-      call AddUnitToAntilightarmor(CRYPT_FIEND,29)
-      call AddUnitToAntimediumarmor(GHOUL,29)
-      call AddUnitToAntiheavyarmor(GHOUL,29)
+      //call AddUnitToAntiair(CRYPT_FIEND,GetUpgradeLevel(old_id[UPG_FIEND_WEB])*29,-1)
+      call AddUnitToAnticasters(CRYPT_FIEND,29,-1)
+      call AddUnitToAntitowers(CRYPT_FIEND,29,-1)
+      call AddUnitToAntipiercing(GHOUL, 29,-1)
+      call AddUnitToAntinormal(GHOUL, 29,-1)
+      call AddUnitToAntisiege(CRYPT_FIEND,29,-1)
+      call AddUnitToAntisiege(GHOUL,26,-1)
+      call AddUnitToAntimagic(CRYPT_FIEND,29,-1)
+      call AddUnitToAntiunarmored(CRYPT_FIEND,29,-1)
+      call AddUnitToAntilightarmor(CRYPT_FIEND,29,-1)
+      call AddUnitToAntimediumarmor(GHOUL,29,-1)
+      call AddUnitToAntiheavyarmor(GHOUL,29,-1)
       call DynamicBuildUnit(32, 40)
       call MercBuilder(merc_range,merc_stopper)
     elseif tier == 2 then
-      call AddUnitToAntiair(CRYPT_FIEND,GetUpgradeLevel(old_id[UPG_FIEND_WEB]))
-      call AddUnitToAntiair(GARGOYLE,2)
-      call AddUnitToAnticasters(BANSHEE,3+2*GetUpgradeLevel(old_id[UPG_BANSHEE]))
-      call AddUnitToAnticasters(GARGOYLE,4)
-      call AddUnitToAntitowers(MEAT_WAGON,1)
-      call AddUnitToAntipiercing(CRYPT_FIEND, 2)
-      call AddUnitToAntipiercing(GHOUL, 1)
-      call AddUnitToAntinormal(GARGOYLE, 2)
-      call AddUnitToAntinormal(GHOUL, 1)
-      call AddUnitToAntisiege(CRYPT_FIEND,2)
-      call AddUnitToAntisiege(GHOUL,1)
-      call AddUnitToAntimagic(BANSHEE,2*GetUpgradeLevel(old_id[UPG_BANSHEE]))
-      call AddUnitToAntimagic(GARGOYLE,2)
-      call AddUnitToAntimagic(CRYPT_FIEND,1)
-      call AddUnitToAntiunarmored(CRYPT_FIEND,7)
-      call AddUnitToAntiunarmored(GARGOYLE,3)
-      call AddUnitToAntiunarmored(MEAT_WAGON,1)
-      call AddUnitToAntilightarmor(CRYPT_FIEND,8)
-      call AddUnitToAntilightarmor(GARGOYLE,6)
-      call AddUnitToAntilightarmor(NECRO,1)
-      call AddUnitToAntilightarmor(BANSHEE,1)
-      call AddUnitToAntimediumarmor(GHOUL,7)
-      call AddUnitToAntiheavyarmor(NECRO,1)
-      call AddUnitToAntiheavyarmor(BANSHEE,1)
-      call AddUnitToAntiheavyarmor(GARGOYLE,2)
+      call AddUnitToAntiair(CRYPT_FIEND,GetUpgradeLevel(old_id[UPG_FIEND_WEB]),-1+GetUpgradeLevel(old_id[UPG_FIEND_WEB]))
+      call AddUnitToAntiair(GARGOYLE,2,0)
+      call AddUnitToAnticasters(BANSHEE,3+2*GetUpgradeLevel(old_id[UPG_BANSHEE]),0)
+      call AddUnitToAnticasters(GARGOYLE,4,0)
+      call AddUnitToAntitowers(MEAT_WAGON,1,-1)
+      call AddUnitToAntipiercing(CRYPT_FIEND,2,-1+GetUpgradeLevel(old_id[UPG_FIEND_WEB]))
+      call AddUnitToAntipiercing(GHOUL,1,-1)
+      call AddUnitToAntinormal(GARGOYLE,2,0)
+      call AddUnitToAntinormal(GHOUL,1,-1)
+      call AddUnitToAntisiege(CRYPT_FIEND,2,-1+GetUpgradeLevel(old_id[UPG_FIEND_WEB]))
+      call AddUnitToAntisiege(GHOUL,1,-1)
+      call AddUnitToAntimagic(BANSHEE,2*GetUpgradeLevel(old_id[UPG_BANSHEE]),0)
+      call AddUnitToAntimagic(GARGOYLE,2,0)
+      call AddUnitToAntimagic(CRYPT_FIEND,1,-1+GetUpgradeLevel(old_id[UPG_FIEND_WEB]))
+      call AddUnitToAntiunarmored(CRYPT_FIEND,7,-1+GetUpgradeLevel(old_id[UPG_FIEND_WEB]))
+      call AddUnitToAntiunarmored(GARGOYLE,3,0)
+      call AddUnitToAntiunarmored(MEAT_WAGON,1,-1)
+      call AddUnitToAntilightarmor(CRYPT_FIEND,8,-1+GetUpgradeLevel(old_id[UPG_FIEND_WEB]))
+      call AddUnitToAntilightarmor(GARGOYLE,6,0)
+      call AddUnitToAntilightarmor(NECRO,1,0)
+      call AddUnitToAntilightarmor(BANSHEE,1,0)
+      call AddUnitToAntimediumarmor(GHOUL,7,-1)
+      call AddUnitToAntiheavyarmor(NECRO,1,0)
+      call AddUnitToAntiheavyarmor(BANSHEE,1,0)
+      call AddUnitToAntiheavyarmor(GARGOYLE,2,0)
       call DynamicBuildUnit(64, 40)
       call MercBuilder(merc_range,merc_stopper)
     else
-      call AddUnitToAntiair(GARGOYLE,2)
-      call AddUnitToAntiair(CRYPT_FIEND,2)
-      call AddUnitToAntiair(FROST_WYRM,1)
-      call AddUnitToAnticasters(BLK_SPHINX,6)
-      call AddUnitToAnticasters(BANSHEE,8)
-      call AddUnitToAntitowers(MEAT_WAGON,1)
-      call AddUnitToAntipiercing(ABOMINATION, 2)
-      call AddUnitToAntipiercing(CRYPT_FIEND, 1)
-      call AddUnitToAntinormal(ABOMINATION, 1)
-      //call AddUnitToAntinormal(GHOUL, 1)
-      call AddUnitToAntisiege(CRYPT_FIEND,2)
-      call AddUnitToAntimagic(BANSHEE,2*GetUpgradeLevel(old_id[UPG_BANSHEE]))
-      call AddUnitToAntimagic(GARGOYLE,2)
-      call AddUnitToAntimagic(CRYPT_FIEND,1)
-      call AddUnitToAntiunarmored(CRYPT_FIEND,7)
-      call AddUnitToAntiunarmored(GARGOYLE,3)
-      call AddUnitToAntiunarmored(MEAT_WAGON,1)
-      call AddUnitToAntilightarmor(CRYPT_FIEND,5)
-      call AddUnitToAntilightarmor(GARGOYLE,5)
-      call AddUnitToAntilightarmor(BLK_SPHINX,1)
-      call AddUnitToAntilightarmor(FROST_WYRM,1)
-      call AddUnitToAntimediumarmor(ABOMINATION,2)
-      call AddUnitToAntimediumarmor(GHOUL,GetUpgradeLevel(old_id[UPG_GHOUL_FRENZY]))
-      call AddUnitToAntiheavyarmor(NECRO,1)
-      call AddUnitToAntiheavyarmor(BANSHEE,1)
-      call AddUnitToAntiheavyarmor(FROST_WYRM,5)
-      call AddUnitToAntiheavyarmor(BLK_SPHINX,4)
+      call AddUnitToAntiair(GARGOYLE,2,0)
+      call AddUnitToAntiair(CRYPT_FIEND,2,-1+GetUpgradeLevel(old_id[UPG_FIEND_WEB]))
+      call AddUnitToAntiair(FROST_WYRM,1,0)
+      call AddUnitToAnticasters(BLK_SPHINX,6,0)
+      call AddUnitToAnticasters(BANSHEE,8,0)
+      call AddUnitToAntitowers(MEAT_WAGON,1,-1)
+      call AddUnitToAntipiercing(ABOMINATION,2,-1)
+      call AddUnitToAntipiercing(CRYPT_FIEND,1,-1+GetUpgradeLevel(old_id[UPG_FIEND_WEB]))
+      call AddUnitToAntinormal(ABOMINATION,1,-1)
+      //call AddUnitToAntinormal(GHOUL,1,-1)
+      call AddUnitToAntisiege(CRYPT_FIEND,2,-1+GetUpgradeLevel(old_id[UPG_FIEND_WEB]))
+      call AddUnitToAntimagic(BANSHEE,2*GetUpgradeLevel(old_id[UPG_BANSHEE]),0)
+      call AddUnitToAntimagic(GARGOYLE,2,0)
+      call AddUnitToAntimagic(CRYPT_FIEND,1,-1+GetUpgradeLevel(old_id[UPG_FIEND_WEB]))
+      call AddUnitToAntiunarmored(CRYPT_FIEND,7,-1+GetUpgradeLevel(old_id[UPG_FIEND_WEB]))
+      call AddUnitToAntiunarmored(GARGOYLE,3,0)
+      call AddUnitToAntiunarmored(MEAT_WAGON,1,-1)
+      call AddUnitToAntilightarmor(CRYPT_FIEND,5,-1+GetUpgradeLevel(old_id[UPG_FIEND_WEB]))
+      call AddUnitToAntilightarmor(GARGOYLE,5,0)
+      call AddUnitToAntilightarmor(BLK_SPHINX,1,0)
+      call AddUnitToAntilightarmor(FROST_WYRM,1,0)
+      call AddUnitToAntimediumarmor(ABOMINATION,2,-1)
+      call AddUnitToAntimediumarmor(GHOUL,GetUpgradeLevel(old_id[UPG_GHOUL_FRENZY]),-1)
+      call AddUnitToAntiheavyarmor(NECRO,1,0)
+      call AddUnitToAntiheavyarmor(BANSHEE,1,0)
+      call AddUnitToAntiheavyarmor(FROST_WYRM,5,0)
+      call AddUnitToAntiheavyarmor(BLK_SPHINX,4,0)
       call DynamicBuildUnit(100, 40)
       call DragonAndMercBuilder()
     endif

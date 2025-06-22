@@ -5,7 +5,9 @@ function global_init_strategy takes nothing returns nothing
     call SetTierBlock(1, 0.75, 60, true)
     call SetTierBlock(2, 0.75, 90, true)
     if IsMapFlagSet(MAP_RANDOM_HERO) then
-      call AddBlock(1, BARRACKS, false, 0, HUMAN_ALTAR, 12)
+      call AddBlock(1, KEEP, false, 0, HUMAN_ALTAR, 36)
+      call AddBlock(1, BARRACKS, false, 0, ARCANE_VAULT, 16)
+      call AddBlock(1, BARRACKS, false, 0, HOUSE, 16)
     else
       call AddBlock(1, HUMAN_ALTAR, false, 0, ARCANE_VAULT, 16)
       call AddBlock(1, HUMAN_ALTAR, false, 0, HOUSE, 16)
@@ -78,6 +80,9 @@ function global_init_strategy takes nothing returns nothing
 
 endfunction
 function global_build_sequence takes nothing returns nothing
+    if IsMapFlagSet(MAP_RANDOM_HERO) then
+      call BuildUnit(1, HUMAN_ALTAR, 56)
+    endif
     // Anti rush
     if GetRushFactor() < 5000 then
       if GetUnitCount(old_id[ARCANE_TOWER]) < 1 then
@@ -98,22 +103,11 @@ function global_build_sequence takes nothing returns nothing
     endif
     // exp tower
     if HasExpanded() then
-      if GetUnitCount(old_id[ARCANE_TOWER]) < TownCount(racial_expansion) + 1 then
-        call DefendTownsFrontDone(2, ARCANE_TOWER, 75)
-      else
-        call DefendTownsFrontDone(1, GUARD_TOWER, 70)
-      endif
+      call DefendTownsFrontDone(1, GUARD_TOWER, 70)
+      call DefendTownsFrontDone(2, ARCANE_TOWER, 75)
       if GetGold() > 2000 then
-        if GetUnitCount(old_id[GUARD_TOWER]) < TownCount(racial_expansion) + 1 then
-          call DefendTownsFrontDone(2, GUARD_TOWER, 75)
-        else
-          call DefendTownsFrontDone(1, ARCANE_TOWER, 70)
-        endif
-        if GetUnitCount(old_id[GUARD_TOWER]) < TownCount(racial_expansion) + 2 then
-          call DefendTownsFrontDone(3, GUARD_TOWER, 35)
-        else
-          call DefendTownsFrontDone(2, ARCANE_TOWER, 35)
-        endif
+        call DefendTownsFrontDone(3, ARCANE_TOWER, 35)
+        call DefendTownsFrontDone(2, GUARD_TOWER, 35)
         if tier >= 2 and GetUnitCount(old_id[GUARD_TOWER]) + GetUnitCount(old_id[ARCANE_TOWER]) >= 4 and TownCount(ARCANE_VAULT) < 2 then
           call DefendTownsDone(1, ARCANE_VAULT, 40)
         endif
@@ -121,12 +115,12 @@ function global_build_sequence takes nothing returns nothing
     endif
     // updata
     if GetGold() > 550 and GetUnitCountDone(old_id[WATCH_TOWER]) > 0 then
-      if GetUnitCount(old_id[ARCANE_VAULT]) < 2 then
-        call BuildUnit(1, ARCANE_VAULT, 45)
+      if GetUnitCount(old_id[GUARD_TOWER]) < 2 then
+        call BuildUnit(1, GUARD_TOWER, 52)
       elseif TownCount(WORKSHOP) > 0 and TownCount(CANNON_TOWER) < TownCount(racial_expansion) then
         call BuildUnit(1, CANNON_TOWER, 40)
       else
-        call BuildUnit(1, GUARD_TOWER, 45)
+        call BuildUnit(1, ARCANE_TOWER, 56)
       endif
     endif
 
@@ -165,86 +159,86 @@ function global_build_sequence takes nothing returns nothing
 	// DYNAMIC and Global Mercenaries
 	call ResetDynamicSystem()
 	if tier == 1 then
-		call AddUnitToAntiair(RIFLEMAN,29)
-		call AddUnitToAnticasters(RIFLEMAN,29)
-		call AddUnitToAntitowers(FOOTMAN,29)
-		call AddUnitToAntipiercing(FOOTMAN, 29)
-		call AddUnitToAntinormal(FOOTMAN, 29)
-		call AddUnitToAntisiege(RIFLEMAN,29)
-		call AddUnitToAntisiege(FOOTMAN,24)
-		call AddUnitToAntimagic(RIFLEMAN,29)
-		call AddUnitToAntiunarmored(RIFLEMAN,29)
-		call AddUnitToAntilightarmor(RIFLEMAN,29)
-		call AddUnitToAntimediumarmor(FOOTMAN,29)
-		call AddUnitToAntiheavyarmor(FOOTMAN,29)
+		call AddUnitToAntiair(RIFLEMAN,29,0)
+		call AddUnitToAnticasters(RIFLEMAN,29,0)
+		call AddUnitToAntitowers(FOOTMAN,29,-1)
+		call AddUnitToAntipiercing(FOOTMAN,29,-1)
+		call AddUnitToAntinormal(FOOTMAN,29,-1)
+		call AddUnitToAntisiege(RIFLEMAN,29,0)
+		call AddUnitToAntisiege(FOOTMAN,24,-1)
+		call AddUnitToAntimagic(RIFLEMAN,29,0)
+		call AddUnitToAntiunarmored(RIFLEMAN,29,0)
+		call AddUnitToAntilightarmor(RIFLEMAN,29,0)
+		call AddUnitToAntimediumarmor(FOOTMAN,29,-1)
+		call AddUnitToAntiheavyarmor(FOOTMAN,29,-1)
 		call DynamicBuildUnit(32, 40)
 		call MercBuilder(merc_range,merc_healer)
 	elseif tier == 2 then
-		call AddUnitToAntiair(RIFLEMAN,5)
-		call AddUnitToAntiair(COPTER,3+GetUpgradeLevel(old_id[UPG_FLAK]))
-		call AddUnitToAntiair(HUMAN_DRAGON_HAWK,5)
-		call AddUnitToAnticasters(SPELL_BREAKER,3)
-		call AddUnitToAnticasters(PRIEST,4*GetUpgradeLevel(old_id[UPG_PRAYING]))
-		call AddUnitToAntitowers(MORTAR,10)
-		//call AddUnitToAntitowers(HUMAN_DRAGON_HAWK,10)  // need tier 3 UPG_CLOUD
-		call AddUnitToAntipiercing(SPELL_BREAKER, 7)
-		call AddUnitToAntipiercing(RIFLEMAN, 3)
-		call AddUnitToAntipiercing(FOOTMAN, 2)
-		call AddUnitToAntinormal(HUMAN_DRAGON_HAWK, 3)
-		call AddUnitToAntinormal(FOOTMAN, 1)
-		call AddUnitToAntisiege(RIFLEMAN,3)
-		call AddUnitToAntisiege(SPELL_BREAKER,2)
-		call AddUnitToAntisiege(FOOTMAN,1)
-		call AddUnitToAntimagic(RIFLEMAN,1)
-		call AddUnitToAntimagic(SPELL_BREAKER,3)
-		call AddUnitToAntiunarmored(RIFLEMAN,6)
-		call AddUnitToAntiunarmored(HUMAN_DRAGON_HAWK,3)
-		call AddUnitToAntiunarmored(COPTER,1+GetUpgradeLevel(old_id[UPG_FLAK]))
-		call AddUnitToAntiunarmored(MORTAR,2)
-		call AddUnitToAntilightarmor(RIFLEMAN,6)
-		call AddUnitToAntilightarmor(HUMAN_DRAGON_HAWK,5)
-		call AddUnitToAntimediumarmor(SPELL_BREAKER,3)
-		call AddUnitToAntimediumarmor(FOOTMAN,1)
-		call AddUnitToAntiheavyarmor(SORCERESS,3)
-		call AddUnitToAntiheavyarmor(PRIEST,2)
+		call AddUnitToAntiair(RIFLEMAN,5,0)
+		call AddUnitToAntiair(COPTER,3+GetUpgradeLevel(old_id[UPG_FLAK]),1)
+		call AddUnitToAntiair(HUMAN_DRAGON_HAWK,5,0)
+		call AddUnitToAnticasters(SPELL_BREAKER,3,-1)
+		call AddUnitToAnticasters(PRIEST,4*GetUpgradeLevel(old_id[UPG_PRAYING]),0)
+		call AddUnitToAntitowers(MORTAR,10,-1)
+		//call AddUnitToAntitowers(HUMAN_DRAGON_HAWK,10,0)  // need tier 3 UPG_CLOUD
+		call AddUnitToAntipiercing(SPELL_BREAKER,7,-1)
+		call AddUnitToAntipiercing(RIFLEMAN,3,0)
+		call AddUnitToAntipiercing(FOOTMAN,2,-1)
+		call AddUnitToAntinormal(HUMAN_DRAGON_HAWK,3,0)
+		call AddUnitToAntinormal(FOOTMAN,1,-1)
+		call AddUnitToAntisiege(RIFLEMAN,3,0)
+		call AddUnitToAntisiege(SPELL_BREAKER,2,-1)
+		call AddUnitToAntisiege(FOOTMAN,1,-1)
+		call AddUnitToAntimagic(RIFLEMAN,1,-1)
+		call AddUnitToAntimagic(SPELL_BREAKER,3,-1)
+		call AddUnitToAntiunarmored(RIFLEMAN,6,0)
+		call AddUnitToAntiunarmored(HUMAN_DRAGON_HAWK,3,0)
+		call AddUnitToAntiunarmored(COPTER,1+GetUpgradeLevel(old_id[UPG_FLAK]),1)
+		call AddUnitToAntiunarmored(MORTAR,2,-1)
+		call AddUnitToAntilightarmor(RIFLEMAN,6,0)
+		call AddUnitToAntilightarmor(HUMAN_DRAGON_HAWK,5,0)
+		call AddUnitToAntimediumarmor(SPELL_BREAKER,3,-1)
+		call AddUnitToAntimediumarmor(FOOTMAN,1,-1)
+		call AddUnitToAntiheavyarmor(SORCERESS,3,0)
+		call AddUnitToAntiheavyarmor(PRIEST,2,0)
 		call DynamicBuildUnit(64, 40)
 		call MercBuilder(merc_range,merc_rush)
 	else
-		call AddUnitToAntiair(RIFLEMAN,5)
-		call AddUnitToAntiair(COPTER,3+GetUpgradeLevel(old_id[UPG_FLAK]))
-		call AddUnitToAntiair(HUMAN_DRAGON_HAWK,5)
-		call AddUnitToAntiair(GRYPHON,2)
-		call AddUnitToAntiair(STEAM_TANK,2*GetUpgradeLevel(UPG_TANK))
-		call AddUnitToAnticasters(SPELL_BREAKER,4+GetUpgradeLevel(old_id[UPG_CONT_MAGIC]))
-		call AddUnitToAnticasters(PRIEST,8)
-		call AddUnitToAntitowers(MORTAR,6)
-		call AddUnitToAntitowers(HUMAN_DRAGON_HAWK,1)
-		call AddUnitToAntitowers(STEAM_TANK,2)
-		call AddUnitToAntitowers(COPTER,2*GetUpgradeLevel(old_id[UPG_BOMBS]))
-		call AddUnitToAntipiercing(SPELL_BREAKER, 7)
-		call AddUnitToAntipiercing(RIFLEMAN, 3)
-		call AddUnitToAntipiercing(KNIGHT, 2)
-		call AddUnitToAntinormal(KNIGHT, 9)
-		call AddUnitToAntinormal(GRYPHON, 3)
-		call AddUnitToAntinormal(HUMAN_DRAGON_HAWK, 2)
-		call AddUnitToAntisiege(RIFLEMAN,3)
-		call AddUnitToAntisiege(SPELL_BREAKER,2)
-		call AddUnitToAntisiege(KNIGHT,1)
-		call AddUnitToAntimagic(RIFLEMAN,1)
-		call AddUnitToAntimagic(SPELL_BREAKER,3)
-		call AddUnitToAntiunarmored(RIFLEMAN,6)
-		call AddUnitToAntiunarmored(HUMAN_DRAGON_HAWK,2)
-		call AddUnitToAntiunarmored(COPTER,1+GetUpgradeLevel(old_id[UPG_FLAK])+GetUpgradeLevel(old_id[UPG_BOMBS]))
-		call AddUnitToAntiunarmored(MORTAR,2)
-		call AddUnitToAntilightarmor(RIFLEMAN,8)
-		call AddUnitToAntilightarmor(HUMAN_DRAGON_HAWK,6)
-		call AddUnitToAntilightarmor(GRYPHON,4)
-		call AddUnitToAntimediumarmor(KNIGHT,8)
-		call AddUnitToAntimediumarmor(SPELL_BREAKER,3)
-		//call AddUnitToAntimediumarmor(FOOTMAN,1)
-		call AddUnitToAntiheavyarmor(GRYPHON,8)
-		call AddUnitToAntiheavyarmor(SORCERESS,3)
-		call AddUnitToAntiheavyarmor(PRIEST,2)
+		call AddUnitToAntiair(RIFLEMAN,5,0)
+		call AddUnitToAntiair(COPTER,3+GetUpgradeLevel(old_id[UPG_FLAK]),1-GetUpgradeLevel(old_id[UPG_FLAK]))
+		call AddUnitToAntiair(HUMAN_DRAGON_HAWK,5,0)
+		call AddUnitToAntiair(GRYPHON,2,0)
+		call AddUnitToAntiair(STEAM_TANK,2*GetUpgradeLevel(UPG_TANK),0)
+		call AddUnitToAnticasters(SPELL_BREAKER,4+GetUpgradeLevel(old_id[UPG_CONT_MAGIC]),-1)
+		call AddUnitToAnticasters(PRIEST,8,0)
+		call AddUnitToAntitowers(MORTAR,6,-1)
+		call AddUnitToAntitowers(HUMAN_DRAGON_HAWK,1,0)
+		call AddUnitToAntitowers(STEAM_TANK,2,-1+GetUpgradeLevel(UPG_TANK))
+		call AddUnitToAntitowers(COPTER,2*GetUpgradeLevel(old_id[UPG_BOMBS]),1-GetUpgradeLevel(old_id[UPG_BOMBS]))
+		call AddUnitToAntipiercing(SPELL_BREAKER,7,-1)
+		call AddUnitToAntipiercing(RIFLEMAN,3,0)
+		call AddUnitToAntipiercing(KNIGHT,2,-1)
+		call AddUnitToAntinormal(KNIGHT,9,-1)
+		call AddUnitToAntinormal(GRYPHON,3,0)
+		call AddUnitToAntinormal(HUMAN_DRAGON_HAWK,2,0)
+		call AddUnitToAntisiege(RIFLEMAN,3,0)
+		call AddUnitToAntisiege(SPELL_BREAKER,2,-1)
+		call AddUnitToAntisiege(KNIGHT,1,-1)
+		call AddUnitToAntimagic(RIFLEMAN,1,0)
+		call AddUnitToAntimagic(SPELL_BREAKER,3,-1)
+		call AddUnitToAntiunarmored(RIFLEMAN,6,0)
+		call AddUnitToAntiunarmored(HUMAN_DRAGON_HAWK,2,0)
+		call AddUnitToAntiunarmored(COPTER,1+GetUpgradeLevel(old_id[UPG_FLAK])+GetUpgradeLevel(old_id[UPG_BOMBS]),1-GetUpgradeLevel(old_id[UPG_BOMBS]))
+		call AddUnitToAntiunarmored(MORTAR,2,-1)
+		call AddUnitToAntilightarmor(RIFLEMAN,8,0)
+		call AddUnitToAntilightarmor(HUMAN_DRAGON_HAWK,6,0)
+		call AddUnitToAntilightarmor(GRYPHON,4,0)
+		call AddUnitToAntimediumarmor(KNIGHT,8,-1)
+		call AddUnitToAntimediumarmor(SPELL_BREAKER,3,-1)
+		//call AddUnitToAntimediumarmor(FOOTMAN,1,-1)
+		call AddUnitToAntiheavyarmor(GRYPHON,8,0)
+		call AddUnitToAntiheavyarmor(SORCERESS,3,0)
+		call AddUnitToAntiheavyarmor(PRIEST,2,0)
 		call DynamicBuildUnit(100, 40)
 		call DragonAndMercBuilder()
 	endif
