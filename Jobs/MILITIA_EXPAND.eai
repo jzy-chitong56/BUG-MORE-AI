@@ -22,9 +22,9 @@ function BuildMilitiaExpansion takes nothing returns boolean
   call RemoveUnitAM(u)
   set u = null
   if DistanceBetweenPoints_dd(Location(x, y), GetUnitLoc(not_taken_expansion)) <= race_max_expa_mine_distance then
+    call RecycleGuardPosition(militia_builder)
     call CreateDebugTag("Militia Expansion - build", 10, militia_builder, 3.00, 1.50)
     call IssuePointOrderById(militia_builder, old_id[racial_expansion], x, y)
-    call TQAddUnitJob(200, RESET_GUARD_POSITION, 80, militia_builder)
     if race_has_power_build then
       call FastBuildCheck()
     endif
@@ -119,6 +119,7 @@ local real d = 0
 		if FirstOfGroup(g) == null then
 			call GroupClear(g)
 			call GroupEnumUnitsOfPlayer(g, ai_player, null)
+			call GroupRemoveUnit(g, expansion_peon)
 			set g = SelectNumberOfId(g, 50, old_id[racial_peon])
 			set g = SelectByHidden(g, false)
 			set g = SelectByAlive(g, true)

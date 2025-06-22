@@ -1,4 +1,5 @@
 #IFDEF GLOBAL
+  boolean ExchangeAll = true  // Exchange resources to all AI, even if they not AMAI
 
 #ELSE
 function SetPlayerGold takes player p, integer i returns nothing
@@ -24,7 +25,7 @@ function DistributeGold takes integer value returns nothing
   local integer i = 0
   loop
     exitwhen i >= force_number
-    if GetPlayerSlotState(own_force[i]) == PLAYER_SLOT_STATE_PLAYING then
+    if GetPlayerSlotState(own_force[i]) == PLAYER_SLOT_STATE_PLAYING and (ExchangeAll or LoadBoolean(com, IS_AMAI, GetPlayerId(own_force[i]))) then
       call IncreasePlayerGold(own_force[i], p_amount)
       set amount = amount - p_amount
     endif
@@ -39,7 +40,7 @@ function DistributeWood takes integer value returns nothing
   local integer i = 0
   loop
     exitwhen i >= force_number
-    if GetPlayerSlotState(own_force[i]) == PLAYER_SLOT_STATE_PLAYING then
+    if GetPlayerSlotState(own_force[i]) == PLAYER_SLOT_STATE_PLAYING and (ExchangeAll or LoadBoolean(com, IS_AMAI, GetPlayerId(own_force[i]))) then
       call IncreasePlayerWood(own_force[i], p_amount)
       set amount = amount - p_amount
     endif

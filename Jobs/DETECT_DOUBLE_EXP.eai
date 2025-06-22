@@ -82,9 +82,7 @@ function CheckDoubleExpansionsClaimedInArea takes real tx, real ty, boolean isBu
               set double_expansion_allyhuman_present = true
             endif
           else
-            if double_expansion_target == null and not IsUnitHidden(u) then
-              set double_expansion_target = u
-            endif
+            set double_expansion_target = u
             set double_expansion_enemy_present = true
           endif
         endif
@@ -183,10 +181,10 @@ function CheckDoubleExpansion takes nothing returns nothing
               call SetPlayerState(ai_player, PLAYER_STATE_RESOURCE_LUMBER, GetPlayerState(ai_player, PLAYER_STATE_RESOURCE_LUMBER) + GetUnitWoodCost(id))
               call KillUnit(u)
             endif
+            set i = i - 1
           endif
         endif
       endif
-      set i = i - 1
     endif
     call GroupRemoveUnit(g,u)
   endloop
