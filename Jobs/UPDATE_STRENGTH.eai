@@ -50,6 +50,19 @@ else
 endif
 set ally_%1 = a%1
 #ENDINCLUDE
+// no include tower strength
+set Handicap = enemy_air + enemy_casters + enemy_piercing + enemy_normal + enemy_unarmored + enemy_lightarmor + enemy_mediumarmor + enemy_heavyarmor + enemy_siege + enemy_magic
+if Handicap > 0 then
+  set enemy_air_proportion = enemy_air / Handicap
+else
+  set enemy_air_proportion = 0
+endif
+set Handicap = ally_air + ally_casters + ally_piercing + ally_normal + ally_unarmored + ally_lightarmor + ally_mediumarmor + ally_heavyarmor + ally_siege + ally_magic
+if Handicap > 0 then
+  set ally_air_proportion = ally_air / Handicap
+else
+  set ally_air_proportion = 0
+endif
 set p = null
 endfunction
 

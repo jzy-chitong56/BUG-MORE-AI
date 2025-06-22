@@ -50,6 +50,7 @@ function TrackTown takes integer num returns boolean
   local real tx = 0
   local real ty = 0
   local integer p = town_owner[num]
+  local integer i = 1
   local player tp = Player(p)
   set town_value[num] = 0
   set town_count[num] = 0
@@ -58,6 +59,9 @@ function TrackTown takes integer num returns boolean
   loop
     set u = FirstOfGroup(g)
     exitwhen u == null
+    if ModuloInteger(i, 22) == 0 then
+      call Sleep(0.01)
+    endif
     if GetOwningPlayer(u) == tp and IsUnitType(u, UNIT_TYPE_STRUCTURE) and UnitAlive(u) and not IsUnitHidden(u) and not IsUnitInGroup(u, in_town_group) then
       call GroupAddUnit(in_town_group, u)
       set x = x + GetUnitX(u)  // Prevent loc exceeding map range
@@ -72,6 +76,7 @@ function TrackTown takes integer num returns boolean
       endif
     endif
     call GroupRemoveUnit(g, u)
+    set i = i + 1
   endloop
   call DestroyGroup(g)
   set g = null
@@ -144,18 +149,23 @@ function SeedNewTownsForPlayer takes integer p returns nothing
   local group g = CreateGroup()
   local group tg = CreateGroup()
   local unit u = null
+  local integer i = 1
   call GroupEnumUnitsOfPlayer(g, Player(p), null)
   loop
     set u = FirstOfGroup(g)
     exitwhen u == null
-    if UnitAlive(u) and not IsUnitHidden(u) and not IsUnitInGroup(u, in_town_group) then
+    if ModuloInteger(i, 40) == 0 then
+      call Sleep(0.01)
+    endif
+    if IsUnitType(u, UNIT_TYPE_STRUCTURE) and UnitAlive(u) and not IsUnitHidden(u) and not IsUnitInGroup(u, in_town_group) then
       if IsUnitType(u, UNIT_TYPE_TOWNHALL) or IsUnitGoldMine(u) then
         call SeedNewTownAtLoc(GetUnitLoc(u), p)
-      elseif IsUnitType(u, UNIT_TYPE_STRUCTURE) then
+      else
         call GroupAddUnit(tg, u)
       endif
     endif
     call GroupRemoveUnit(g, u)
+    set i = i + 1
   endloop
   loop
     set u = FirstOfGroup(tg)

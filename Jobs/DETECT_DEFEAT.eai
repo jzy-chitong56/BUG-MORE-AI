@@ -112,6 +112,7 @@ function KillYourself takes boolean end_ai returns nothing
           if UnitAlive(u) then
             if IsUnitHidden(u) then
               call RemoveUnitAM(u)
+            elseif GetResourceAmount(u) > 0 then  // mine
             elseif destroy_buildings_on_defeat or IsUnitType(u, UNIT_TYPE_HERO) then
               call KillUnit(u)
             else
@@ -153,6 +154,7 @@ function KillYourself takes boolean end_ai returns nothing
             if UnitAlive(u) then
               if IsUnitHidden(u) then
                 call RemoveUnitAM(u)
+              elseif GetResourceAmount(u) > 0 then  // mine
               elseif IsUnitType(u, UNIT_TYPE_HERO) or destroy_buildings_on_defeat then
                 call KillUnit(u)
               elseif sharedRacePlayer != null then
