@@ -2,7 +2,7 @@
 ECHO 编译 冰封王座 AMAI VS AMAI
 mkdir Scripts\
 ECHO =============================
-ECHO 编译重制版
+ECHO 编译战网版
 SET RESULTMAKEREF=0
 mkdir Scripts\REFORGED\
 mkdir Scripts\REFORGED\vsai\
@@ -217,21 +217,21 @@ ECHO =============================
 ECHO 输出编译结果
 ECHO _____________________________
 if "%RESULTMAKEREF%"=="1" (
-  ECHO 重制版编译失败，附件重制版不可用--请改天再来
   rmdir /s /q "Scripts\REFORGED"
-  echo 附件重制版不可用--请勿安装并等待新的在线编译附件 > Scripts\重制版脚本不可用.txt
+  ECHO 战网版编译失败，附件战网版不可用--请改天再来
+  echo 战网版不可用--请勿安装并等待新的在线编译附件 > Scripts\战网版脚本不可用.txt
 ) else (
-  ECHO 重制版编译成功，重制版附件可用--请按教程安装
-  echo 重制版附件可用--请按教程安装（代码已优化并失去阅读性）...仅支持1.33+，平衡性为战网最新正式版(2.02+) > Scripts\重制版脚本可用.txt
+  ECHO 战网版编译成功，战网版附件可用--请按教程安装
+  echo 战网版可用--请按教程安装（代码已优化并失去阅读性）...仅支持1.33+，平衡性为战网最新正式版(2.02+) > Scripts\战网版脚本可用.txt
 )
 ECHO _____________________________
 if "%RESULTMAKETFT%"=="1" (
-  ECHO 经典版编译失败，附件经典版不可用--请改天再来
   rmdir /s /q "Scripts\TFT"
-  echo 附件经典版不可用--请勿安装并等待新的在线编译附件 > Scripts\经典版脚本不可用.txt
+  ECHO 经典版编译失败，附件经典版不可用--请改天再来
+  echo 经典版不可用--请勿安装并等待新的在线编译附件 > Scripts\经典版脚本不可用.txt
 ) else (
   ECHO 经典版编译成功，经典版附件可用--请按教程安装
-  echo 经典版附件可用--请按教程安装（代码已优化并失去阅读性）...支持冰封王座1.24e+，平衡性为1.24e > Scripts\经典版脚本可用.txt
+  echo 经典版可用--请按教程安装（代码已优化并失去阅读性）...支持冰封王座1.24e+，平衡性为1.24e > Scripts\经典版脚本可用.txt
 )
 if "%RESULTMAKEREF%"=="1" (
   exit /b %RESULTMAKEREF%
