@@ -64,6 +64,7 @@ globals
     unit town_mine          = null
     unit array laboratory
     unit array herounit
+    unit shop = null
     location homeloc = GetStartLocationLoc(GetPlayerStartLocation(Player(GetAiPlayer())))
 endglobals
 
@@ -537,6 +538,80 @@ function set_vars takes nothing returns nothing
 endfunction
 
 //--------------------------------------------------------------------------------------------------
+//  buy_item
+//--------------------------------------------------------------------------------------------------
+function DistanceBetweenLoc_dk takes location locA, location locB returns real
+  local real x = GetLocationX(locB) - GetLocationX(locA)
+  local real y = GetLocationY(locB) - GetLocationY(locA)
+  call RemoveLocation(locA)
+  return SquareRoot(x * x + y * y)
+endfunction
+
+function SetShop takes nothing returns nothing
+    local group g = CreateGroup()
+    local unit u = null
+    call GroupEnumUnitsOfPlayer(g, ai_player, null)
+    loop
+        set u = FirstOfGroup(g)
+        exitwhen u == null
+        if GetUnitTypeId(u) == 'ovln' and UnitAlive(u) and not IsUnitHidden(u) then
+            set shop = u
+            exitwhen true
+        endif
+        call GroupRemoveUnit(g, u)
+    endloop
+    call DestroyGroup(g)
+    set g = null
+    set u = null
+endfunction
+
+function BuyItem takes integer item_id, boolean stack returns nothing
+    local integer i = 1
+    local integer c = 0
+    local integer sum = 0
+    local unit u = null
+    local item t = null
+    local location l = null
+    if GetGold() > 800 and not TownThreatened() and not CaptainInCombat(false) and shop != null and UnitAlive(shop) then
+        loop
+            exitwhen i > 4
+            if herounit[i] != null and UnitAlive(herounit[i]) then
+                loop
+                    exitwhen c > 5
+                    set t = UnitItemInSlot(herounit[i], c)
+                    if t == null then
+                        set sum = sum + 1
+                    elseif GetItemTypeId(t) == item_id and not stack then
+                        set sum = - 1
+                        set c = 5
+                    endif
+                    set c = c + 1
+                endloop
+                set c = 0
+                if sum > 0 then
+                    set u = herounit[i]
+                    set i = 4
+                endif
+                set sum = 0
+            endif
+            set i = i + 1
+        endloop
+        if u != null then
+            set l = GetUnitLoc(u)
+            if DistanceBetweenLoc_dk(GetUnitLoc(shop), l) < 350 then
+                call IssueTargetOrderById(shop, 'Aall', u)
+                call IssueTargetOrderById(shop, 'Aneu', u)
+                call IssueNeutralImmediateOrderById(ai_player, shop, item_id)
+            endif
+            call RemoveLocation(l)
+            set l = null
+            set u = null
+        endif
+        set t = null
+    endif
+endfunction
+
+//--------------------------------------------------------------------------------------------------
 //  do_upgrades
 //--------------------------------------------------------------------------------------------------
 function do_upgrades takes nothing returns nothing
@@ -892,6 +967,9 @@ function build_sequence takes nothing returns nothing
     if c_food_made > 100 and c_food_made - c_food_used < 4 then  // can build more food
         call SetBuildUnit( c_burrow + 1, BURROW )
     endif
+    if shop == null or not UnitAlive(shop) then
+        call SetShop()
+    endif
 endfunction
 
 //--------------------------------------------------------------------------------------------------
@@ -997,7 +1075,6 @@ function InitLaboratory takes nothing returns nothing
       endif
       call GroupRemoveUnit(g, u)
     endloop
-    set laboratory[i] = null
     call DestroyGroup(g)
     set g = null
 endfunction
