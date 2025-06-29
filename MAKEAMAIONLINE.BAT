@@ -91,7 +91,7 @@ perl -i -pe"s#(call DisplayToAllJobDebug)#//$1#g" Scripts\REFORGED\orc.ai
 perl -i -pe"s#(call DisplayToAllJobDebug)#//$1#g" Scripts\REFORGED\undead.ai
 if "%errorlevel%"=="1" SET RESULTMAKEREF=1
 ECHO _____________________________
-ECHO 优化代码以减小压缩包体积
+ECHO 优化代码
 perl Optimize.pl REFORGED\common.j Scripts\REFORGED\common.ai -l REFORGED\Races.txt Scripts\REFORGED\$2
 perl Optimize.pl -b Scripts\REFORGED\Blizzard.j
 pjass REFORGED\common.j Scripts\REFORGED\common.ai
@@ -106,7 +106,6 @@ pjass REFORGED\common.j Scripts\REFORGED\common.ai Scripts\REFORGED\undead.ai
 if "%errorlevel%"=="1" SET RESULTMAKEREF=1
 pjass REFORGED\common.j Scripts\REFORGED\Blizzard.j
 if "%errorlevel%"=="1" SET RESULTMAKEREF=1
-ECHO 重制版编译完成，编译结果在日志最后输出
 rmdir /s /q "Scripts/REFORGED/vsai"
 ECHO =============================
 ECHO 编译经典版
@@ -198,7 +197,7 @@ perl -i -pe"s#(call DisplayToAllJobDebug)#//$1#g" Scripts\TFT\orc.ai
 perl -i -pe"s#(call DisplayToAllJobDebug)#//$1#g" Scripts\TFT\undead.ai
 if "%errorlevel%"=="1" SET RESULTMAKETFT=1
 ECHO _____________________________
-ECHO 优化代码以减小压缩包体积
+ECHO 优化代码
 perl Optimize.pl TFT\common.j Scripts\TFT\common.ai -l TFT\Races.txt Scripts\TFT\$2
 perl Optimize.pl -b Scripts\TFT\Blizzard.j
 pjass TFT\common.j Scripts\TFT\common.ai
@@ -213,7 +212,6 @@ pjass TFT\common.j Scripts\TFT\common.ai Scripts\TFT\undead.ai
 if "%errorlevel%"=="1" SET RESULTMAKETFT=1
 pjass TFT\common.j Scripts\TFT\Blizzard.j
 if "%errorlevel%"=="1" SET RESULTMAKETFT=1
-ECHO 经典版编译完成，编译结果在日志最后输出
 rmdir /s /q "Scripts/TFT/vsai"
 ECHO =============================
 ECHO 输出编译结果
@@ -224,7 +222,7 @@ if "%RESULTMAKEREF%"=="1" (
   echo 附件重制版不可用--请勿安装并等待新的在线编译附件 > Scripts\重制版脚本不可用.txt
 ) else (
   ECHO 重制版编译成功，重制版附件可用--请按教程安装
-  echo 重制版附件可用--请按教程安装（为减少压缩包体积，代码已优化且失去阅读性）...仅支持1.33+，平衡性为战网最新正式版(2.02+) > Scripts\重制版脚本可用.txt
+  echo 重制版附件可用--请按教程安装（代码已优化并失去阅读性）...仅支持1.33+，平衡性为战网最新正式版(2.02+) > Scripts\重制版脚本可用.txt
 )
 ECHO _____________________________
 if "%RESULTMAKETFT%"=="1" (
@@ -233,7 +231,7 @@ if "%RESULTMAKETFT%"=="1" (
   echo 附件经典版不可用--请勿安装并等待新的在线编译附件 > Scripts\经典版脚本不可用.txt
 ) else (
   ECHO 经典版编译成功，经典版附件可用--请按教程安装
-  echo 经典版附件可用--请按教程安装（为减少压缩包体积，代码已优化且失去阅读性）...支持冰封王座1.24e+，平衡性为1.24e > Scripts\经典版脚本可用.txt
+  echo 经典版附件可用--请按教程安装（代码已优化并失去阅读性）...支持冰封王座1.24e+，平衡性为1.24e > Scripts\经典版脚本可用.txt
 )
 if "%RESULTMAKEREF%"=="1" (
   exit /b %RESULTMAKEREF%
