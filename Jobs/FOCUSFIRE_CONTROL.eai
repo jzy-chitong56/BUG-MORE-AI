@@ -5,10 +5,11 @@
   group micro_enemymelee_group = CreateGroup()
   location last_major_hero_loc = Location(0,0)
   location enemy_melee_loc = Location(0,0)
-  unit focus_fire_unit = null
+  unit array focus_fire_unit
+  integer focus_fire_unit_limit = 0
   unit deny_unit = null
   real bj_PI = 3.14159
-  real bj_RADTODEG = 180.0/bj_PI
+  real bj_RADTODEG = 180.0 / bj_PI
 #ELSE
 //============================================================================
 // Focus Fire Job
@@ -34,7 +35,7 @@ function IsUnitFacingUnit takes unit u, unit target returns boolean
   return isFacing
 endfunction
 
-function GroupMicroSystem takes group g, group meleeg, group temp_focus returns nothing
+function GroupMicroSystem takes group g, group meleeg, group temp_focus, group fg returns nothing
   local unit u = null
   local location unitloc = null
   local location l = null
@@ -47,7 +48,7 @@ function GroupMicroSystem takes group g, group meleeg, group temp_focus returns 
       set unitloc = GetUnitLoc(u)
       set copy = CopyGroup(meleeg,copy)
       set melee = GetNearestOfGroup(melee, copy, unitloc)
-      if melee != null and IsUnitFacingUnit(melee, u) and DistanceBetweenUnits(u, melee) < 200 and GetUnitMoveSpeed(melee) <= GetUnitMoveSpeed(u) and not IsUnitType(u, UNIT_TYPE_STRUCTURE) and (not IsUnitType(u, UNIT_TYPE_FLYING) or IsUnitType(melee, UNIT_TYPE_ATTACKS_FLYING)) and UnitAlive(melee) and not IsUnitInGroup(u, focus_fire_group) then // 220 is the smallest ranged unit in warcraft 3.
+      if melee != null and IsUnitFacingUnit(melee, u) and DistanceBetweenUnits(u, melee) < 200 and GetUnitMoveSpeed(melee) <= GetUnitMoveSpeed(u) and not IsUnitType(u, UNIT_TYPE_STRUCTURE) and (not IsUnitType(u, UNIT_TYPE_FLYING) or IsUnitType(melee, UNIT_TYPE_ATTACKS_FLYING)) and UnitAlive(melee) and not IsUnitInGroup(u, fg) then // 220 is the smallest ranged unit in warcraft 3.
         set l = GetSubtractionLoc_kd(unitloc, GetUnitLoc(melee))
         set l = GetProjectedLoc_dd(unitloc, l, 800)
         call RemoveGuardPosition(u)
@@ -129,7 +130,7 @@ function GroupOrderDeny_kd takes group g, group cg, unit target returns nothing
   set t = null
 endfunction
 
-function FocusGroupRemoveGuard takes group rg returns group
+function FocusGroupRemoveGuard takes group rg, group fg returns group
   local integer i = 0
   local unit u = null
   local group g = rg
@@ -138,7 +139,7 @@ function FocusGroupRemoveGuard takes group rg returns group
     set u = FirstOfGroup(g)
     exitwhen u == null or i >= 12  //group order only control 12 unit
     if UnitAlive(u) then
-      //if not IsUnitInGroup(u, focus_fire_group) then
+      //if not IsUnitInGroup(u, fg) then
       set i = i + 1
       call CreateDebugTag("FF", 10, u, 1.00, 0.80)
       call GroupAddUnit(rg, u)
@@ -156,7 +157,7 @@ function FocusGroupRemoveGuard takes group rg returns group
 endfunction
 
 // Already facing the unit so no need to focus fire in this case
-function FilterFocusFireGroupIfFacing takes group g, unit target returns nothing
+function FilterFocusFireGroupIfFacing takes group g, unit target, group fg returns nothing
 	local unit u = null
 	local group ug = null
 	set ug = CopyGroup(g,ug)
@@ -164,7 +165,7 @@ function FilterFocusFireGroupIfFacing takes group g, unit target returns nothing
 		set u = FirstOfGroup(ug)
 		exitwhen u == null
 		if IsUnitFacingUnit(u, target) then
-			call GroupRemoveUnit(focus_fire_group,u)
+			call GroupRemoveUnit(fg,u)
 		endif
 		call GroupRemoveUnit(ug,u)
 	endloop
@@ -189,10 +190,10 @@ function SelectByWindwalk takes group rg returns group
   return rg
 endfunction
 
-function FocusFire takes unit u returns nothing
+function FocusFire takes unit u, group fg returns nothing
   local group t = null
   local group temp_focus = null
-  if GetUnitState(u, UNIT_STATE_LIFE) < 1 then
+  if GetUnitState(u, UNIT_STATE_LIFE) < 1 or (not IsUnitType(u, UNIT_TYPE_HERO) and GetUnitState(u, UNIT_STATE_LIFE) > 100) or IsUnitInGroup(u, focus_fire_group) then
     return  //Insurance
   endif
   set t = CreateGroup()
@@ -228,9 +229,9 @@ function FocusFire takes unit u returns nothing
   set temp_focus = SelectByHidden(temp_focus, false)
   set temp_focus = SelectByAlive(temp_focus, true)
   if u != deny_unit then
-    call GroupRemoveGroupAM(focus_fire_group, temp_focus)  // Remove units that have already focus fired this iteration (intentionally wrong way round) , but use additional code , Very inefficient
+    call GroupRemoveGroupAM(fg, temp_focus)  // Remove units that have already focus fired this iteration (intentionally wrong way round) , but use additional code , Very inefficient
   endif
-  //set temp_focus = SelectByOrderOr2(focus_fire_group,OrderId("move"),OrderId("attack"),OrderId("stop"), true)
+  //set temp_focus = SelectByOrderOr2(fg,OrderId("move"),OrderId("attack"),OrderId("stop"), true)
   set temp_focus = SelectByOrder(temp_focus, OrderId("blizzard"), false)
   set temp_focus = SelectByOrder(temp_focus, OrderId("flamestrike"), false)
   set temp_focus = SelectByOrder(temp_focus, OrderId("massteleport"), false)
@@ -256,28 +257,28 @@ function FocusFire takes unit u returns nothing
   set temp_focus = SelectByUnitStandard(temp_focus, true)  //Reduce usage IsUnitInGroup
   if u != deny_unit then  //Insurance
     if FirstOfGroup(micro_enemymelee_group) != null then
-      call GroupMicroSystem(micro_ranged_group, micro_enemymelee_group, temp_focus)  // Move ranged units away from melee units, if moved here they will not focus fire
+      call GroupMicroSystem(micro_ranged_group, micro_enemymelee_group, temp_focus, fg)  // Move ranged units away from melee units, if moved here they will not focus fire
     endif
   endif
   call DestroyGroup(t)
   if FirstOfGroup(temp_focus) != null then  //final Insurance
-    if focus_fire_unit == null or focus_fire_unit != u then
-      if not IsUnitOwnedByPlayer(u, Player(PLAYERAGGRESSIVE)) then  // Dont windwalk for non-critical enemies
-        call GroupOrderFocusWindInstant_d(temp_focus, u)
-      endif
-      set focus_fire_unit = u
+    if not IsUnitOwnedByPlayer(u, Player(PLAYERAGGRESSIVE)) then  // Dont windwalk for non-critical enemies
+      call GroupOrderFocusWindInstant_d(temp_focus, u)
     endif
+    call GroupAddUnit(focus_fire_group, u)
+    set focus_fire_unit_limit = focus_fire_unit_limit + 1
+    set focus_fire_unit[focus_fire_unit_limit] = u
     call CreateDebugTag("FF: here:" + "GroupSize not 0", 10, u, 1.00, 0.80)
     if u == deny_unit and own_race == R_UNDEAD and GetUnitRace(u) == RACE_UNDEAD then
       call GroupOrderDeny_kd(temp_focus,CopyGroup(temp_focus,t), u)
     endif
-    set temp_focus = FocusGroupRemoveGuard(temp_focus)  // Not currently fully controlling focus fire
+    set temp_focus = FocusGroupRemoveGuard(temp_focus, fg)  // Not currently fully controlling focus fire
     if FirstOfGroup(temp_focus) != null then
       if GetUnitState(u, UNIT_STATE_LIFE) > 1 then
         call GroupTargetOrder(temp_focus, "attack", u)
       endif
       if u != deny_unit then
-        set focus_fire_group = GroupAddGroup(focus_fire_group, temp_focus)  // Finally add units to group to say they have focus fired
+        set fg = GroupAddGroup(fg, temp_focus)  // Finally add units to group to say they have focus fired
       endif
     endif
   endif
@@ -286,7 +287,7 @@ function FocusFire takes unit u returns nothing
   set t = null
 endfunction
 
-function FocusEnemyUnitsNearGroup takes group g returns nothing
+function FocusEnemyUnitsNearGroup takes group g, group fg returns nothing
   local unit u = null
   local real hero_min_health = 100000
   local unit hero_min_health_unit = null
@@ -374,25 +375,25 @@ function FocusEnemyUnitsNearGroup takes group g returns nothing
   endif
   if hero_min_health_unit != null and (hero_min_health < focus_fire_limit * range_strength or disabled_min_health_unit == hero_min_health_unit) then
     call SetTargetHeroes(true)
-    call FocusFire(hero_min_health_unit)
+    call FocusFire(hero_min_health_unit, fg)
   else
     call SetTargetHeroes(false)
     if special_unit != null then
-      call FocusFire(special_unit)
+      call FocusFire(special_unit, fg)
     elseif disabled_min_health_unit != null then
       if min_health_unit != null then
         if min_health * 3 < disabled_min_health then
-          call FocusFire(min_health_unit)
+          call FocusFire(min_health_unit, fg)
         else
-          call FocusFire(disabled_min_health_unit)
+          call FocusFire(disabled_min_health_unit, fg)
         endif
       else
-        call FocusFire(disabled_min_health_unit)
+        call FocusFire(disabled_min_health_unit, fg)
       endif
     elseif min_health_unit != null then
-      call FocusFire(min_health_unit)
+      call FocusFire(min_health_unit, fg)
     elseif building_min_health_unit != null then
-      call FocusFire(building_min_health_unit)
+      call FocusFire(building_min_health_unit, fg)
     endif
   endif
   set p = null
@@ -407,12 +408,22 @@ endfunction
 //============================================================================
 function FocusFireJob takes nothing returns nothing
   local group g = CreateGroup()
+  local group fg = CreateGroup()
   local integer i = 0
+  local integer c = 0
   local unit u = null
-
   call DisplayToAllJobDebug("FOCUSFIRE_CONTROL JOB START")
-
+  loop
+    exitwhen focus_fire_unit_limit <= 0
+    set u = focus_fire_unit[focus_fire_unit_limit]
+    if u != null and GetUnitState(u, UNIT_STATE_LIFE) >= 150 then
+      set c = 10  // enemy has healer, maybe handing over to native logic is better
+      exitwhen true
+    endif
+    set focus_fire_unit_limit = focus_fire_unit_limit - 1
+  endloop
   call GroupClear(focus_fire_group)
+  set focus_fire_unit_limit = 1
   loop
     set u = FirstOfGroup(windwalk_group)
     exitwhen u == null
@@ -425,7 +436,6 @@ function FocusFireJob takes nothing returns nothing
     call GroupRemoveUnit(windwalk_group, u)
   endloop
   call GroupClear(windwalk_group)
-
   if not isfleeing and (attack_running or town_threatened) then
     if major_hero == null or not UnitAlive(major_hero) or IsUnitInGroup(major_hero, unit_healing) then
       set major_hero = GetMajorHeroReplacement_k(major_hero,last_major_hero_loc)
@@ -433,23 +443,23 @@ function FocusFireJob takes nothing returns nothing
     if major_hero != null then
       call MoveLocation(last_major_hero_loc, GetUnitX(major_hero), GetUnitY(major_hero))
       call GroupEnumUnitsInRange(g,GetUnitX(major_hero),GetUnitY(major_hero),battle_radius,null)
-      call FocusEnemyUnitsNearGroup(g)
+      call FocusEnemyUnitsNearGroup(g, fg)
     endif
     if main_army >= 0 and army_loc[main_army] != null then
       call GroupEnumUnitsInRange(g, GetLocationX(army_loc[main_army]), GetLocationY(army_loc[main_army]), battle_radius, null)
-      call FocusEnemyUnitsNearGroup(g)
+      call FocusEnemyUnitsNearGroup(g, fg)
     endif
     loop
       exitwhen i >= army_num
-      if Player(army_owner[i]) == ai_player and main_army != i and army_loc[i] != null then
+      if army_loc[i] != null and Player(army_owner[i]) == ai_player and main_army != i then
         call GroupEnumUnitsInRange(g, GetLocationX(army_loc[i]), GetLocationY(army_loc[i]), battle_radius, null)
-        call FocusEnemyUnitsNearGroup(g)
+        call FocusEnemyUnitsNearGroup(g, fg)
       endif
       set i = i + 1
     endloop
     if deny_unit != null and UnitAlive(deny_unit) and not IsUnitLoaded(deny_unit) and GetUnitState(deny_unit, UNIT_STATE_LIFE) < 24 and (GetUnitState(deny_unit, UNIT_STATE_LIFE) / GetUnitState(deny_unit, UNIT_STATE_MAX_LIFE)) < 0.10 then
       call GroupClear(micro_enemymelee_group)
-      call FocusFire(deny_unit)
+      call FocusFire(deny_unit, fg)
       call GroupRemoveUnit(unit_rescueing, deny_unit)
       call GroupRemoveUnit(unit_harassing, deny_unit)
       call GroupRemoveUnit(unit_zepplin_move, deny_unit)
@@ -466,7 +476,9 @@ function FocusFireJob takes nothing returns nothing
   call SetTargetHeroes(difficulty != EASY)
   call DestroyGroup(g)
   set g = null
-  call TQAddJob(2 * sleep_multiplier, FOCUSFIRE_CONTROL, 0)
+  call DestroyGroup(fg)
+  set fg = null
+  call TQAddJob(2 * sleep_multiplier + c, FOCUSFIRE_CONTROL, 0)
 endfunction
 
 #ENDIF
