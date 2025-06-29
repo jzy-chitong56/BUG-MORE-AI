@@ -1,6 +1,6 @@
 @echo off
-where perl
-if "%errorlevel%"=="1" (
+perl --version >nul 2>&1
+if %errorlevel% neq 0 (
   echo Compilation AMAI %VER% error
   ECHO Please install Perl as a requirement to compile AMAI. Download : https://strawberryperl.com/
   exit /b 1

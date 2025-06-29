@@ -10796,42 +10796,38 @@ endfunction
 
 // Change unit attack mode , eliminating the time required for build and immediately allowing existing units to cope with strength imbalance
 // Original intention to control units that AI does not control , but use hard-coding
-function ExecuteAirDistribute takes group g, boolean anti returns nothing
-  local integer i = GetRandomInt(0, Max(TownCountDone(GARGOYLE),TownCountDone(DRUID_TALON)))
+// now just have air , If possible , please add , one strength one function
+function StrengthDynamicDistribute takes nothing returns nothing
+  local group g = CreateGroup()
+  local unit u = null
   local integer c = 0  // Allow random retention strength and accelerate cycle
   local integer id = 0
+  local integer i = TownCountDone(DRUID_TALON) + TownCountDone(GARGOYLE)
   local integer order = 852155
-  local unit u = null
+  local boolean anti = enemy_air_proportion > 0.65
   call Trace("Strength Dynamic Distribute - Air")
-  if anti == false then
-    set order = 852156
-  endif
-  loop
-    set u = FirstOfGroup(g)
-    exitwhen u == null or c >= i
-    set id = GetUnitTypeId(u)
-    if (id == 'edot' or id == 'edtm') and IsStandardUnit(u) and not IsUnitBuying(u) and IssueImmediateOrderById(u, order) then
-      set c = c + 1
-    elseif id == 'ugar' and AatpAbility and (GetUnitAbilityLevel(u, 'Batp') == 0) == anti and IsStandardUnit(u) and not IsUnitBuying(u) and IssueImmediateOrderById(u, 852677) then  // check 'ugar' Ability ,  prevent war3 is old ver or map is ROC
-      set c = c + 1
+  if i > 0 then
+    if anti then
+      set i = R2I(i * enemy_air_proportion)
+    else
+      set order = 852156
+      set i = R2I(i * (1 - enemy_air_proportion))
     endif
-    call GroupRemoveUnit(g, u)
-  endloop
-  set u = null
-endfunction
-
-function StrengthDynamicDistribute takes nothing returns nothing
-  local group cg = null
-  local group g = CreateGroup()
-  if TownCountDone(DRUID_TALON) > 0 or TownCountDone(GARGOYLE) > 0 then
-    call Trace("Strength Dynamic Distribute")
     call GroupEnumUnitsOfPlayer(g, ai_player, null)
-    set g = SelectByHidden(g, false)
-    set g = SelectByAlive(g, true)
-    set cg = CopyGroup(g, cg)
-    call ExecuteAirDistribute(cg, enemy_air_proportion > 0.65)  // now just have air , If possible , please add , one strength one function
-    call DestroyGroup(cg)
-    set cg = null
+    loop
+      set u = FirstOfGroup(g)
+      exitwhen u == null or c >= i
+      if UnitAlive(u) and not IsUnitHidden(u) then
+        set id = GetUnitTypeId(u)
+        if (id == 'edot' or id == 'edtm') and IsStandardUnit(u) and not IsUnitBuying(u) and IssueImmediateOrderById(u, order) then
+          set c = c + 1
+        elseif id == 'ugar' and AatpAbility and (GetUnitAbilityLevel(u, 'Batp') == 0) == anti and IsStandardUnit(u) and not IsUnitBuying(u) and IssueImmediateOrderById(u, 852677) then  // check 'ugar' Ability ,  prevent war3 is old ver or map is ROC
+          set c = c + 1
+        endif
+      endif
+      call GroupRemoveUnit(g, u)
+    endloop
+    set u = null
   endif
   call DestroyGroup(g)
   set g = null
