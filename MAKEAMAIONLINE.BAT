@@ -2,7 +2,7 @@
 ECHO 编译 冰封王座 AMAI VS AMAI
 mkdir Scripts\
 ECHO =============================
-ECHO 编译战网版
+ECHO 战网版
 SET RESULTMAKEREF=0
 mkdir Scripts\REFORGED\
 mkdir Scripts\REFORGED\vsai\
@@ -89,7 +89,6 @@ perl -i -pe"s#(call DisplayToAllJobDebug)#//$1#g" Scripts\REFORGED\elf.ai
 perl -i -pe"s#(call DisplayToAllJobDebug)#//$1#g" Scripts\REFORGED\human.ai
 perl -i -pe"s#(call DisplayToAllJobDebug)#//$1#g" Scripts\REFORGED\orc.ai
 perl -i -pe"s#(call DisplayToAllJobDebug)#//$1#g" Scripts\REFORGED\undead.ai
-if "%errorlevel%"=="1" SET RESULTMAKEREF=1
 ECHO _____________________________
 ECHO 优化代码
 perl Optimize.pl REFORGED\common.j Scripts\REFORGED\common.ai -l REFORGED\Races.txt Scripts\REFORGED\$2
@@ -108,7 +107,7 @@ pjass REFORGED\common.j Scripts\REFORGED\Blizzard.j
 if "%errorlevel%"=="1" SET RESULTMAKEREF=1
 rmdir /s /q "Scripts/REFORGED/vsai"
 ECHO =============================
-ECHO 编译经典版
+ECHO 经典版
 SET RESULTMAKETFT=0
 mkdir Scripts\TFT\
 mkdir Scripts\TFT\vsai\
@@ -195,7 +194,6 @@ perl -i -pe"s#(call DisplayToAllJobDebug)#//$1#g" Scripts\TFT\elf.ai
 perl -i -pe"s#(call DisplayToAllJobDebug)#//$1#g" Scripts\TFT\human.ai
 perl -i -pe"s#(call DisplayToAllJobDebug)#//$1#g" Scripts\TFT\orc.ai
 perl -i -pe"s#(call DisplayToAllJobDebug)#//$1#g" Scripts\TFT\undead.ai
-if "%errorlevel%"=="1" SET RESULTMAKETFT=1
 ECHO _____________________________
 ECHO 优化代码
 perl Optimize.pl TFT\common.j Scripts\TFT\common.ai -l TFT\Races.txt Scripts\TFT\$2
