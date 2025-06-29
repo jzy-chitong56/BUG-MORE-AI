@@ -5,7 +5,7 @@ ECHO =============================
 ECHO 编译重制版
 SET RESULTMAKEREF=0
 mkdir AMAI\REFORGED\
-mkdir AMAI\REFORGED\tmp\
+mkdir REFORGED\tmp\
 ECHO _____________________________
 ECHO 创建公共库
 perl ejass.pl common.eai REFORGED VER:REFORGED > AMAI\REFORGED\common.ai
@@ -110,7 +110,7 @@ ECHO =============================
 ECHO 编译经典版
 SET RESULTMAKETFT=0
 mkdir AMAI\TFT\
-mkdir AMAI\TFT\tmp\
+mkdir TFT\tmp\
 ECHO _____________________________
 ECHO 创建公共库
 perl ejass.pl common.eai TFT VER:TFT > AMAI\TFT\common.ai
