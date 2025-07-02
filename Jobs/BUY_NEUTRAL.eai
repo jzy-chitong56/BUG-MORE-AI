@@ -40,7 +40,7 @@ function BuyNeutral takes integer id returns nothing
   if not visible_place and neutral_sent[nn] != null and IsUnitType(neutral_sent[nn], UNIT_TYPE_STRUCTURE) then
     set neutral_sent[nn] = null
   endif
-  if neutral_sent[nn] == null or not UnitAlive(neutral_sent[nn]) then
+  if neutral_sent[nn] == null or not UnitAlive(neutral_sent[nn]) or GetOwningPlayer(neutral_sent[nn]) != ai_player then
     if neutral_sent[nn] != null then
       call GroupRemoveUnit(unit_buying_merc, neutral_sent[nn])
       set neutral_sent[nn] = null

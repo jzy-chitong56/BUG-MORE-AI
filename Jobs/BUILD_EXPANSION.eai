@@ -8,7 +8,7 @@ function BuildExpansionJob takes unit u, unit expansion returns nothing
 	local real d = 0
 	local real x = 0
 	local real y = 0
-	if u == null or not UnitAlive(u) then
+	if u == null or not UnitAlive(u) or GetOwningPlayer(u) != ai_player then
 		return
 	endif
 	if expansion == null or not UnitAlive(expansion) then

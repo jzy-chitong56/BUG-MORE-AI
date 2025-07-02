@@ -159,7 +159,7 @@ function HarassJob takes integer key, unit target returns nothing
       call CreateDebugTag("Harassing Opponent", 10, u, 3.00, 1.50)
     endif
     set healing = IsUnitInGroup(u, unit_healing)
-    if healing then // Another system moved unit to healing
+    if healing or GetOwningPlayer(u) != ai_player then // Another system moved unit to healing and Prevent being occupied
       call GroupRemoveUnit(harasser, u)
       call GroupRemoveUnit(unit_harassing, u)
       call RemoveUnitFromHashtable(additional_info, key, HARASS_UNITGROUP, u)

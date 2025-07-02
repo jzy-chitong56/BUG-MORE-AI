@@ -76,7 +76,7 @@ function FastBuildBuilding takes nothing returns nothing
   set g = GetNearestSubGroupOfGroup(g, unitloc, GetFastBuildPeasantNumber())
   call Trace("Fast Build Town Hall")
   call GroupTargetOrder(g, "repair", u)
-  call GroupRecycleGuardPositionDelay(g, 100)
+  call GroupRecycleGuardPositionDelay(g, 20)
   set town_hall_built = true
   call RemoveLocation(unitloc)
   set unitloc = null

@@ -51,7 +51,7 @@ function BuyNeutralHero takes integer id returns nothing
     set tavern = ResetBuyNeutralHero(nn, id)
     return
   endif
-  if neutral_sent[nn] == null or not UnitAlive(neutral_sent[nn]) or not IsStandardUnit(neutral_sent[nn]) then
+  if neutral_sent[nn] == null or not UnitAlive(neutral_sent[nn]) or GetOwningPlayer(neutral_sent[nn]) != ai_player or not IsStandardUnit(neutral_sent[nn]) then
     if neutral_sent[nn] != null then
       call GroupRemoveUnit(unit_buying_tavern, neutral_sent[nn])
     endif

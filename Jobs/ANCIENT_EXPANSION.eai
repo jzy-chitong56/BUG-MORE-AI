@@ -179,7 +179,7 @@ if ancient_exp_state == 0 then
     return
   endif
   if GetAncientCampStrength() <= 0 then
-    if ancient_exp_wisp == null or not UnitAlive(ancient_exp_wisp) or expansion_peon == ancient_exp_wisp then
+    if ancient_exp_wisp == null or not UnitAlive(ancient_exp_wisp) or GetOwningPlayer(ancient_exp_wisp) != ai_player or expansion_peon == ancient_exp_wisp then
       set ancient_exp_wisp = GetExpansionPeon()
       if ancient_exp_wisp == null or not UnitAlive(ancient_exp_wisp) or expansion_peon == ancient_exp_wisp then
         set ancient_exp_wisp = GetExpansionPeon2(ancient_exp_wisp)
@@ -270,7 +270,7 @@ elseif ancient_exp_state == 3 then
   endif
   call TQAddJob(8, ANCIENT_EXPANSION, 0)  //  keep move
 elseif ancient_exp_state == 4 then
-  if ancient_exp_wisp != null and UnitAlive(ancient_exp_wisp) then
+  if ancient_exp_wisp != null and UnitAlive(ancient_exp_wisp) and GetOwningPlayer(ancient_exp_wisp) == ai_player then
     //call RemoveGuardPosition(ancient_exp_wisp)
     if DistanceBetweenPoints_dd(GetUnitLoc(ancient_exp_wisp), GetUnitLoc(ancient_exp_mine)) < 1200 then
       call BuildAncient()

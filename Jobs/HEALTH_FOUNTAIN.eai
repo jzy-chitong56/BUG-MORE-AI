@@ -34,7 +34,7 @@ local boolean creepsawake = false
 
   call DisplayToAllJobDebug("HEALTH_FOUNTAIN Start")
 
-  if not UnitAlive(u) or u == null then
+  if u == null or not UnitAlive(u) or GetOwningPlayer(u) != ai_player then
     if u != null then
       call GroupRemoveUnit(unit_healing, u)
       call GroupRemoveUnit(unit_rescueing, u)
