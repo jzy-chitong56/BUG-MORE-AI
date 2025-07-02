@@ -1204,12 +1204,11 @@ function SetOtherHero takes nothing returns nothing
   endif
   call ShowUnit(u, false)
   call SetUnitOwner(u, Player(playerpassive), false)
-  set x = u
-  set u = CreateUnit(p, RandomHeroNum[c], GetUnitX(x), GetUnitY(x), bj_UNIT_FACING)
-  call KillUnit(x)  // Prevent the unit from continuing to exist
-  call RemoveUnit(x)
+  set x = CreateUnit(p, RandomHeroNum[c], GetUnitX(u), GetUnitY(u), bj_UNIT_FACING)
+  call KillUnit(u)  // Prevent the unit from continuing to exist
+  call RemoveUnit(u)
   if GetLocalPlayer() == p then
-    call PlaySoundOnUnitBJ(RandomHeroSound[c], 100, u)
+    call PlaySoundOnUnitBJ(RandomHeroSound[c], 100, x)
   endif
   set c = playermax
   set RandomHero_Max[i] = RandomHero_Max[i] + 1
@@ -1217,16 +1216,18 @@ function SetOtherHero takes nothing returns nothing
   if t == null then
     set l = GetUnitRallyPoint(GetTriggerUnit())
     if l != null then
-      call IssuePointOrderLocBJ(u, "move", l)
+      call IssuePointOrderLocBJ(x, "move", l)
       call RemoveLocation(l)
       set l = null
     endif
   endif
-  call SetPlayerTechMaxAllowed(p, 'HERO', 4)
   set u = null
   set t = null
   set x = null
   set p = null
+  if RandomHero_Max[i] == 2 then
+    call SetPlayerTechMaxAllowed(p, 'HERO', 4)
+  endif
   if RandomHero_Max[c] < 1 then
     call TriggerRemoveAction(Random_Hero, Random_Hero_Action)
     call DestroyTrigger(Random_Hero)
