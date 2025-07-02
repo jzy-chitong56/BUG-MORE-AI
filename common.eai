@@ -6473,7 +6473,7 @@ function MultipleMinefix takes nothing returns boolean
         set l = GetUnitLoc(u)
         call RemoveUnitAM(u)
         set u = null
-        if expansion_peon == null or not UnitAlive(expansion_peon) then
+        if expansion_peon == null or not UnitAlive(expansion_peon) or GetOwningPlayer(expansion_peon) != ai_player then
           set expansion_peon = GetExpansionPeon()
         endif
         if expansion_peon != null and UnitAlive(expansion_peon) and DistanceBetweenPoints_kd(l, GetUnitLoc(fixmine)) <= race_max_expa_mine_distance and GetGold() > GetUnitGoldCost(old_id[racial_expansion]) and GetWood() > GetUnitWoodCost(old_id[racial_expansion]) then
@@ -6487,7 +6487,7 @@ function MultipleMinefix takes nothing returns boolean
     endif
   elseif race_uses_mine_expansion then
     if fixmine != null and UnitAlive(fixmine) and (TownCount(racial_expansion) < 2 or (GetGold() > 1200 and TownCount(racial_expansion) < 3)) and Min(GetResourceAmount(fixmine) * 2, GetGold()) > GetUnitGoldCost(old_id[racial_expansion]) and GetWood() > GetUnitWoodCost(old_id[racial_expansion]) then
-      if expansion_peon == null or not UnitAlive(expansion_peon) then
+      if expansion_peon == null or not UnitAlive(expansion_peon) or GetOwningPlayer(expansion_peon) != ai_player then
         set expansion_peon = GetExpansionPeon()
       endif
       if expansion_peon != null and UnitAlive(expansion_peon) then
@@ -11690,7 +11690,7 @@ function StartExpansionAM takes integer qty, integer hall returns integer
   endif
 
   // call DisplayTextToPlayer(GetLocalPlayer(), 0, 0, "Expansion rescources sorted")
-  if expansion_peon == null or not UnitAlive(expansion_peon) then
+  if expansion_peon == null or not UnitAlive(expansion_peon) or GetOwningPlayer(expansion_peon) != ai_player then
     set expansion_peon = GetExpansionPeon()
     if expansion_peon == null or not UnitAlive(expansion_peon) then
       set expansion_peon = GetExpansionPeon2(expansion_peon)
@@ -11729,7 +11729,7 @@ function StartExpansionAM takes integer qty, integer hall returns integer
         call TQAddUnitJob(2, RESET_GUARD_POSITION, 50, expansion_peon)  //  Get TQLock have sleep , maybe this time unit will die
       endif
     endif
-    if UnitAlive(expansion_peon) then
+    if UnitAlive(expansion_peon) and GetOwningPlayer(expansion_peon) == ai_player then
       if race_uses_mine_expansion then
         call IssueTargetOrderById(expansion_peon, old_id[hall], current_expansion)
         call TQAddUnit2Job(2 * sleep_multiplier, BUILD_EXPANSION, 0, expansion_peon, current_expansion)
@@ -14124,14 +14124,15 @@ function Militia_Expansion takes integer m returns nothing
   call AddAbilityToGroup(CopyGroup(g,cg), race_militia_ability)
   call GroupImmediateOrder(g, race_militia_unitstring)
   call RemoveInjuries()
-  loop
-    exitwhen AreUnitsOfType(g, race_militia_id)
-    exitwhen t > 4
-    set t = t + 1
-  endloop
+  // loop
+  //   exitwhen AreUnitsOfType(g, race_militia_id)
+  //   exitwhen t > 4
+  //   set t = t + 1
+  // endloop
   call FormGroupAM(4)
   //call AddAssault(m, old_id[racial_militia])   // Lil problem with adding assaults. For some reasons
   //call AttackMoveKill(efoe)
+  set g = SelectById(g, race_militia_id, true)
   set g = SelectByAlive(g, true)
   call GroupPointOrder(g, "attack", GetUnitX(not_taken_expansion), GetUnitY(not_taken_expansion))
   set town_threat_break = false
