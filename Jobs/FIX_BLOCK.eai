@@ -268,7 +268,13 @@ function FixBlockJob takes nothing returns nothing
     call TQAddJob(i, FIX_BLOCK, 0)
     return
   elseif blockunit != null then
-    if DistanceBetweenPoints_dd(Location(blocklocx, blocklocy), GetUnitLoc(blockunit)) < 600 then
+    if GetOwningPlayer(blockunit) != ai_player then  //Prevent being occupied
+      call RemoveBlockPathUnit()
+      set blockunit = null
+      set blockunittemp = null
+      call TQAddJob(60, FIX_BLOCK, 0)
+      return
+    elseif DistanceBetweenPoints_dd(Location(blocklocx, blocklocy), GetUnitLoc(blockunit)) < 600 then
       call CreateDebugTag("fix block : unit block at here", 10, blockunit, 3.00, 1.50)
       call FindTree(blocklocx, blocklocy)
     elseif blockunittemp == null then
@@ -279,10 +285,14 @@ function FixBlockJob takes nothing returns nothing
     return
   endif
   if blockunittemp != null then
+    if GetOwningPlayer(blockunit) != ai_player then  //Prevent being occupied
+      call TQAddJob(60, FIX_BLOCK, 0)
+    else
+      call TryFixBlock(3, home_location, 1000)
+      call TQAddJob(1, FIX_BLOCK, 0)
+    endif
     set blockunit = null
     set blockunittemp = null
-    call TryFixBlock(3, home_location, 1000)
-    call TQAddJob(1, FIX_BLOCK, 0)  // tree must close
     return
   endif
   call RemoveBlockPathUnit()

@@ -1,7 +1,4 @@
 #IFDEF GLOBAL
-  location TRrecovery = null
-  unit sellbuild = null
-  unit sellpeon = null
 #ELSE
 function SelectByZiggurat takes group rg returns group
   local unit u = null
