@@ -241,7 +241,7 @@ function FixBlockJob takes nothing returns nothing
     return
   endif
   if blockpathunit != null then
-    if DistanceBetweenPoints_kd(home_location, GetUnitLoc(blockpathunit)) < front_base_distance then
+    if DistanceBetweenPoints_kd(home_location, GetUnitLoc(blockpathunit)) < 1400 then
       if GetUnitTypeId(blockpathunit) == 'ewsp' then
         set l = GetUnitLoc(blockpathunit)
         set i = GetUnitCurrentOrder(blockpathunit)
@@ -305,7 +305,7 @@ function FixBlockJob takes nothing returns nothing
   else
     set l = GetPlayerStartLocationLoc(ally_force[Max(0, GetRandomInt(0, c_ally_total - 1))])
   endif
-  if l == null or DistanceBetweenPoints(home_location, l) < front_base_distance then
+  if l == null or DistanceBetweenPoints(home_location, l) < 1600 then
     if l != null then
       call RemoveLocation(l)
       set l = null
@@ -313,7 +313,7 @@ function FixBlockJob takes nothing returns nothing
     set i = GetRandomInt(0, NEUTRAL_COUNT - 1)
     if nearest_neutral[i] != null then
       set l = GetUnitLoc(nearest_neutral[i])
-      if DistanceBetweenPoints(home_location, l) < front_base_distance then
+      if DistanceBetweenPoints(home_location, l) < 1600 then
         call RemoveLocation(l)
         set l = null
       endif
@@ -327,7 +327,7 @@ function FixBlockJob takes nothing returns nothing
     set l = null
   endif
   set t = nearest_neutral[NEUTRAL_TAVERN]
-  if t != null and DistanceBetweenPoints_kd(home_location, GetUnitLoc(t)) < front_base_distance + 200 then
+  if t != null and DistanceBetweenPoints_kd(home_location, GetUnitLoc(t)) < 1600 then
     loop
       exitwhen i > 3
       set u = hero_unit[i]
