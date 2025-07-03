@@ -39,7 +39,6 @@ endfunction
 
 function TrackArmy takes integer num returns boolean
   local group g = CreateGroup()
-  local group tg = CreateGroup()
   local unit u = FirstOfGroup(army_group[num])
   local unit tu = null
   local location l = null
@@ -53,42 +52,36 @@ function TrackArmy takes integer num returns boolean
   local player up = null
   set army_count[num] = 0
   set army_strength[num] = 0
-  if u != null then
-    // If tracking existing army select range from current position not historic position
-    call GroupEnumUnitsInRange(g, GetUnitX(u), GetUnitY(u), army_radius, null)
+  if u != null then  // If tracking existing army select range from current position not historic position
+    set tu = u
     loop
       if ModuloInteger(i, 32) == 0 then
         call Sleep(0.02)
       endif
-      if UnitAlive(u) then
+      if UnitAlive(u) and GetOwningPlayer(u) == ai_player and IsStandardUnit(u) and not IsUnitBuying(u) then
         set x = x + GetUnitX(u)
         set y = y + GetUnitY(u)
         set c = c + 1
         set s = s + GetUnitStrength(u)
-        call GroupAddUnit(tg, u)
         call GroupAddUnit(g, u)
+      else
+        call GroupRemoveUnit(in_army_group, u)
       endif
       call GroupRemoveUnit(army_group[num], u)
       set u = FirstOfGroup(army_group[num])
       exitwhen u == null
       set i = i + 1
     endloop
+    call DestroyGroup(army_group[num])
+    set army_group[num] = g
     set i = 1
-    loop
-      if ModuloInteger(i, 32) == 0 then
-        call Sleep(0.02)
-      endif
-      set u = FirstOfGroup(tg)
-      exitwhen u == null
-      call GroupAddUnit(army_group[num], u)
-      call GroupRemoveUnit(tg, u)
-      set i = i + 1
-    endloop
+    set g = CreateGroup()
+    call GroupEnumUnitsInRange(g, GetUnitX(tu), GetUnitY(tu), army_radius, null)
+    set tu = null
   else
     call GroupEnumUnitsInRangeOfLoc(g, army_loc[num], army_radius, null)
     call GroupClear(army_group[num])
   endif
-  set i = 1
   loop
     set u = FirstOfGroup(g)
     exitwhen u == null
@@ -96,7 +89,7 @@ function TrackArmy takes integer num returns boolean
       call Sleep(0.02)
     endif
     set up = GetOwningPlayer(u)
-    if up == ap and not IsUnitType(u, UNIT_TYPE_STRUCTURE) and not IsUnitType(u, UNIT_TYPE_PEON) and UnitAlive(u) and not IsUnitHidden(u) and (up != ai_player or (IsStandardUnit(u) and not IsUnitBuying(u))) and GetUnitCurrentOrder(u) != OrderId("harvest") and GetUnitCurrentOrder(u) != OrderId("resumeharvesting") and not IsUnitInGroup(u, tg) and not IsUnitInGroup(u, in_army_group) then // harvest check to ignore harvesting ghouls as they not an army
+    if up == ap and not IsUnitType(u, UNIT_TYPE_STRUCTURE) and not IsUnitType(u, UNIT_TYPE_PEON) and UnitAlive(u) and not IsUnitHidden(u) and (up != ai_player or (IsStandardUnit(u) and not IsUnitBuying(u))) and GetUnitCurrentOrder(u) != OrderId("harvest") and GetUnitCurrentOrder(u) != OrderId("resumeharvesting") and not IsUnitInGroup(u, in_army_group) then // harvest check to ignore harvesting ghouls as they not an army
       call GroupAddUnit(army_group[num], u)
       call GroupAddUnit(in_army_group, u)
       set x = x + GetUnitX(u)  // Prevent loc exceeding map range
@@ -113,10 +106,8 @@ function TrackArmy takes integer num returns boolean
     call GroupRemoveUnit(g, u)
     set i = i + 1
   endloop
-  call DestroyGroup(tg)
   call DestroyGroup(g)
   set g = null
-  set tg = null
   set ap = null
   set up = null
   call RemoveLocation(army_dir[num])
