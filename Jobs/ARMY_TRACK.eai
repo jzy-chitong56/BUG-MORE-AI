@@ -39,6 +39,7 @@ endfunction
 
 function TrackArmy takes integer num returns boolean
   local group g = CreateGroup()
+  local group tg = null
   local unit u = FirstOfGroup(army_group[num])
   local unit tu = null
   local location l = null
@@ -72,8 +73,10 @@ function TrackArmy takes integer num returns boolean
       exitwhen u == null
       set i = i + 1
     endloop
-    call DestroyGroup(army_group[num])
+    set tg = army_group[num]
     set army_group[num] = g
+    call DestroyGroup(tg)
+    set tg = null
     set i = 1
     set g = CreateGroup()
     call GroupEnumUnitsInRange(g, GetUnitX(tu), GetUnitY(tu), army_radius, null)

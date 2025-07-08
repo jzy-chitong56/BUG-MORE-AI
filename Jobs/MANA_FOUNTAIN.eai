@@ -27,7 +27,7 @@ function ManaFountainJob takes unit u, integer p returns nothing
   local real unitstrengt = 0
   local real x = 0
   local real y = 0
-  local unit fountain = GetManaFountainUnit()
+  local unit fountain = null
   local integer detectedenemies = 0
   local integer enemiesatfountain = 0
   local boolean creepsawake = false
@@ -36,16 +36,17 @@ function ManaFountainJob takes unit u, integer p returns nothing
   //if fountain == null then
     //set fountain = nearest_neutral[NEUTRAL_MANA_FOUNTAIN]
   //endif
-  if u == null or not UnitAlive(u) or GetOwningPlayer(u) != ai_player then
-    if u != null then
-      call GroupRemoveUnit(unit_healing, u)
-      call GroupRemoveUnit(unit_rescueing, u)
-      call GroupRemoveUnit(unit_harassing, u)
-      call GroupRemoveUnit(unit_zepplin_move, u)
-    endif
-    set fountain = null
+  if u == null then
     return
-  elseif fountain == null then
+  elseif not UnitAlive(u) or GetOwningPlayer(u) != ai_player then
+    call GroupRemoveUnit(unit_healing, u)
+    call GroupRemoveUnit(unit_rescueing, u)
+    call GroupRemoveUnit(unit_harassing, u)
+    call GroupRemoveUnit(unit_zepplin_move, u)
+    return
+  endif
+  set fountain = GetManaFountainUnit()
+  if fountain == null then
     call TQAddUnitJob(2, SEND_HOME, 0, u)
     return
   endif

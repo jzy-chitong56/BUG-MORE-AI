@@ -88,9 +88,9 @@ function CheckRallyPoint takes nothing returns nothing
   if rally_point == null and front_locs_computed then
     set i = Max(GetRandomInt(1, front_loc_num - 1),0)
     if front_loc[i] != null then
-      set rally_point = AIGetProjectedLoc(front_loc[i], home_location, -(front_base_distance*0.25), 0)
+      set rally_point = AIGetProjectedLoc(front_loc[i], home_location, -(front_base_distance*0.35), 0)
     elseif front_loc[0] != null and GetLocationX(front_loc[0]) != 0 and GetLocationY(front_loc[0]) != 0 then
-      set rally_point = AIGetProjectedLoc(front_loc[0], home_location, -1200, 0)
+      set rally_point = AIGetProjectedLoc(front_loc[0], home_location, -1400, 0)
     endif
   endif
   call GroupEnumUnitsOfPlayer(g, ai_player, null)

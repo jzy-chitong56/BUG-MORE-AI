@@ -193,7 +193,7 @@ function TeleportToLoc takes unit u, location l returns nothing
   set loc = null
 endfunction
 
-function ItemSingetp takes integer hn, integer loc, integer FountainID returns boolean
+function ItemSingetp takes integer hn, integer trans, integer FountainID returns boolean
   local boolean b = false
   local boolean g = false
   local real x = 0
@@ -202,16 +202,16 @@ function ItemSingetp takes integer hn, integer loc, integer FountainID returns b
   if GetUnitAbilityLevel(hero_unit[hn], 'AImt') > 0 then
     set t = GetItemOfTypeOnUnit(singe_tp_item, hero_unit[hn])
     if t != null then
-      if loc == 0 then  // teleport to battle
+      if trans == 0 then  // teleport to battle
         set x = GetUnitX(major_hero)
         set y = GetUnitY(major_hero)
         set g = true
       elseif enemy_density == 0 or (enemy_density < 0.08 and GetUnitState(hero_unit[hn], UNIT_STATE_LIFE) > GetUnitState(hero_unit[hn], UNIT_STATE_MAX_LIFE) * 0.4) then  // life too low cannot use singetp
-        if loc == 1 then
+        if trans == 1 then
           set x = GetLocationX(home_location)
           set y = GetLocationY(home_location)
           set g = true
-        elseif loc == 2 then
+        elseif trans == 2 then
           set x = GetUnitX(nearest_neutral[FountainID])
           set y = GetUnitY(nearest_neutral[FountainID])
           set g = true

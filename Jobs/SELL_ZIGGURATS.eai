@@ -27,7 +27,7 @@ function SelectByZiggurat takes group rg returns group
   return rg
 endfunction
 
-function CheckSellZiggurat takes unit u, group cg, integer c returns integer
+function CheckSellZiggurat takes unit u, group cg returns nothing
   local group g = CreateGroup()
   local unit z = null
   local integer i = 0
@@ -37,31 +37,23 @@ function CheckSellZiggurat takes unit u, group cg, integer c returns integer
     set z = FirstOfGroup(g)
     exitwhen z == null or i > 0
     if GetOwningPlayer(z) == ai_player and IsUnitType(z, UNIT_TYPE_STRUCTURE) and UnitAlive(z) and not IsUnitHidden(z) and not IsUnitInGroup(z, cg) then
-      if IsUnitType(z, UNIT_TYPE_TOWNHALL) then
-        if c < 2 then
-          set i = i + 1
-          set c = c - 1
-        endif
-      else
-        set i = i + 1
-      endif
+      set i = i + 1
     endif
     call GroupRemoveUnit(g, z)
   endloop
-  if i < 1 then
+  if i < 1 then  // around no other buildings
     call Unsummon(u)
   endif
   call DestroyGroup(g)
   set g = null
   set z = null
-  return c
 endfunction
 
 function CheckSellStructure takes group g returns nothing
   set g = SelectUnittype(g, UNIT_TYPE_STRUCTURE, true)
   set g = SelectUnittype(g, UNIT_TYPE_TOWNHALL, false)
   set g = SelectByIdOr(g, old_id[racial_lumber], old_id[racial_expansion], false)
-  set g = SelectByIdOr(g, old_id[racial_altar], old_id[racial_shop], false)
+  set g = SelectByIdOr(g, old_id[racial_shop], old_id[racial_altar], false)
   set g = SelectByAlive(g, true)
   set g = SelectByHidden(g, false)
   call Unsummon(FirstOfGroup(g))
@@ -71,20 +63,19 @@ function SellZigguratJob takes nothing returns nothing
   local group g = CreateGroup()
   local group cg = null
   local unit u = null
-  local integer c = GetUnitCount(old_id[racial_hall[tier]])
   call DisplayToAllJobDebug("SELL_ZIGGURATS JOB START")
   if not towerrush and GetGold() < 2000 then
     if GetGoldOwned() + GetGold() < 800 then  // if insufficient resources, buy more buildings , else ensure there is sufficient food available
       call GroupEnumUnitsOfPlayer(g, ai_player, null)
       call CheckSellStructure(g)
-    elseif TownCountDone(racial_farm) * GetFoodMade(old_id[racial_farm]) > Min(FoodUsed() + 10, ver_food_limit) then
+    elseif TownCountDone(racial_farm) * GetFoodMade(old_id[racial_farm]) + 20 > Min(FoodUsed(), ver_food_limit) then
       call GroupEnumUnitsOfPlayer(g, ai_player, null)
       set g = SelectByZiggurat(g)
       set cg = CopyGroup(g, cg)
       loop
         set u = FirstOfGroup(g)
         exitwhen u == null
-        set c = CheckSellZiggurat(u, cg, c)
+        call CheckSellZiggurat(u, cg)
         call GroupRemoveUnit(g, u)
       endloop
       call DestroyGroup(cg)

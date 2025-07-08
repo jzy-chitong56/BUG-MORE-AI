@@ -135,12 +135,11 @@ function SendUnitHomeJob takes unit u, integer p returns nothing
   else
     if DistanceBetweenPoints_dk(GetUnitLoc(u), exist_town[p]) >= 1800 then
       call SendHomeMoveUnitToLoc(u,exist_town[p])
-      if follow_zeppelin != null and UnitAlive(follow_zeppelin) and not IsUnitInGroup(follow_zeppelin, unit_rescueing) and not IsUnitType(u, UNIT_TYPE_FLYING) then
+      if not IsUnitType(u, UNIT_TYPE_FLYING) and follow_zeppelin != null and UnitAlive(follow_zeppelin) and not IsUnitInGroup(follow_zeppelin, unit_rescueing) then
         call CreateDebugTag("Zepplin Home", 10, u, 3.00, 1.50)
         call GroupAddUnit(unit_rescueing, follow_zeppelin)
         set g = CreateGroup()
         call GroupAddUnit(g, follow_zeppelin)
-        call GroupAddUnit(unit_healing, u)
         call TQAddGroupJob(0, ZEPPELIN_MOVE, ZTARGET_HOME, u, g)
         set nearshopunit = null
         set otherhero = null
