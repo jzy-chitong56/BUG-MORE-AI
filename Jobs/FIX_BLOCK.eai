@@ -75,7 +75,7 @@ function TryFixBlock takes integer fixmode, location l, real range returns nothi
   local integer i = 0
   local boolean array allyhero
   call GroupEnumUnitsInRangeOfLoc(g, l, range, null)
-  call GroupRemoveUnit(g,expansion_peon)
+  call GroupRemoveUnit(g, expansion_peon)
   call GroupRemoveUnit(g, blockpathunit)
   if fixmode == 0 then
     loop
@@ -89,11 +89,11 @@ function TryFixBlock takes integer fixmode, location l, real range returns nothi
             set utree = u
           endif
           set i = GetUnitTypeId(u)  // Prevent kill mine , altar , lumber , but include shop
-          if UnitAlive(u) and utemp == null and GetUnitCount(i) > 1 and i != old_id[racial_expansion] and i != old_id[racial_altar] and i != old_id[racial_lumber] then
+          if utemp == null and GetUnitCount(i) > 1 and i != old_id[racial_expansion] and i != old_id[racial_altar] and i != old_id[racial_lumber] then
             set utemp = u
           endif
         endif
-      elseif IsUnitType(u, UNIT_TYPE_HERO) and IsPlayerAlly(ai_player, p) and not allyhero[GetPlayerId(p)] and GetPlayerController(p) == MAP_CONTROL_COMPUTER then
+      elseif IsUnitType(u, UNIT_TYPE_HERO) and UnitAlive(u) and IsPlayerAlly(ai_player, p) and not allyhero[GetPlayerId(p)] and GetPlayerController(p) == MAP_CONTROL_COMPUTER then
         call CreateDebugTagLoc("fix block : ally hero block", 10, GetUnitX(u), GetUnitY(u), 3.00, 1.50)
         call GroupAddUnit(tg,u)
         set allyhero[GetPlayerId(p)] = true  //  case one loop let hero teleport too much
@@ -180,7 +180,7 @@ function TryFixBlock takes integer fixmode, location l, real range returns nothi
       call GroupRemoveUnit(g,u)
     endloop
   else
-    call GroupEnumUnitsInRangeOfLoc(tg, home_location, 1400, null)
+    call GroupEnumUnitsInRangeOfLoc(tg, home_location, 1200, null)
     loop
       set u = FirstOfGroup(g)
       exitwhen u == null
@@ -199,6 +199,7 @@ function TryFixBlock takes integer fixmode, location l, real range returns nothi
         else
           set blockunittemp = u
         endif
+        call CreateDebugTag("fix block : block unit move aside", 10, u, 3.00, 1.50)
         call IssuePointOrderLoc(u, "move", front_loc[0])
       endif
       call GroupRemoveUnit(tg,u)
@@ -267,32 +268,40 @@ function FixBlockJob takes nothing returns nothing
     endif
     call TQAddJob(i, FIX_BLOCK, 0)
     return
-  elseif blockunit != null then
+  endif
+  if blockunit != null then
     if GetOwningPlayer(blockunit) != ai_player then  //Prevent being occupied
       call RemoveBlockPathUnit()
-      set blockunit = null
+      set i = 60
       set blockunittemp = null
-      call TQAddJob(60, FIX_BLOCK, 0)
-      return
     elseif DistanceBetweenPoints_dd(Location(blocklocx, blocklocy), GetUnitLoc(blockunit)) < 600 then
       call CreateDebugTag("fix block : unit block at here", 10, blockunit, 3.00, 1.50)
       call FindTree(blocklocx, blocklocy)
-    elseif blockunittemp == null then
+      set blockunittemp = null
+      set i = 2
+    elseif blockunittemp != null and UnitAlive(blockunittemp) then  // next check block unit
+      call IssuePointOrderLoc(blockunittemp, "move", front_loc[0])
+      call CreateDebugTag("fix block : back unit block move aside", 10, blockunittemp, 3.00, 1.50)
+    else
+      set blockunittemp = null
       set i = 360
     endif
     set blockunit = null
     call TQAddJob(i, FIX_BLOCK, 0)  // tree must close
     return
-  endif
-  if blockunittemp != null then
-    if GetOwningPlayer(blockunit) != ai_player then  //Prevent being occupied
-      call TQAddJob(60, FIX_BLOCK, 0)
+  elseif blockunittemp != null then
+    if GetOwningPlayer(blockunittemp) != ai_player then  //Prevent being occupied
+      call RemoveBlockPathUnit()
+      set i = 60
+    elseif DistanceBetweenPoints_kd(home_location, GetUnitLoc(blockunittemp)) < 600 then
+      call CreateDebugTag("fix block : back unit block at here", 10, blockunittemp, 3.00, 1.50)
+      call FindTree(GetUnitX(blockunittemp), GetUnitY(blockunittemp))
+      set i = 2
     else
-      call TryFixBlock(3, home_location, 1000)
-      call TQAddJob(1, FIX_BLOCK, 0)
+      set i = 360
     endif
-    set blockunit = null
     set blockunittemp = null
+    call TQAddJob(i, FIX_BLOCK, 0)  // tree must close
     return
   endif
   call RemoveBlockPathUnit()

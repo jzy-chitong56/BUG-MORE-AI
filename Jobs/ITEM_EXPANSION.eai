@@ -149,9 +149,9 @@ function ItemExpansionJob takes nothing returns nothing
       if exp_item != null then
         //call SetItemDroppable(exp_item, true)  //Picking up by other players will disrupt balance
         call SetItemPawnable(exp_item, true)  //can selling
+        set exp_item = null
       endif
       call ItemExpansionReset(false)
-      set exp_item = null
       return
     elseif u != null then
       call Trace("Item expansion state 1 - Wait rush creep")
@@ -159,7 +159,6 @@ function ItemExpansionJob takes nothing returns nothing
     else
       call Trace("Item expansion state 1 - Expansion fail")
       call ItemExpansionReset(false)
-      set u = null
       return
     endif
   endif

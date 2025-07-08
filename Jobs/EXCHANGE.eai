@@ -11,7 +11,6 @@ function SetPlayerWood takes player p, integer i returns nothing
 endfunction
 
 function IncreasePlayerGold takes player p, integer i returns nothing
-//    call Trace(c2s(GetPlayerColor(p))+"gets gold: "+Int2Str(i))
   call SetPlayerGold(p, GetPlayerState(p,PLAYER_STATE_RESOURCE_GOLD) + i)
 endfunction
 
@@ -70,6 +69,10 @@ function ExchangeOnce takes nothing returns nothing
       call IncreasePlayerWood(ai_player, -amount)
       call DistributeWood(amount)
     endif
+  endif
+  if debugging > 0 then
+    call IncreasePlayerGold(ai_player, 200)
+    call IncreasePlayerWood(ai_player, 100)
   endif
 endfunction
 

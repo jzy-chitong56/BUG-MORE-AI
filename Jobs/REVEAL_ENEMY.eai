@@ -26,23 +26,25 @@ function CheckAllianceChange takes nothing returns boolean
   local integer c = Max(c_ally_total, c_enemy_total)
   local player p = null
   loop
-    exitwhen i >= c
     if i < c_ally_total then
       set p = ally_force[i]
-      if GetPlayerSlotState(p) == PLAYER_SLOT_STATE_PLAYING and not IsPlayerObserver(p) and not IsPlayerAlly(ai_player,p) then
-        set i = c + 2
+      if GetPlayerSlotState(p) == PLAYER_SLOT_STATE_PLAYING and not IsPlayerAlly(ai_player,p) then
+        set p = null
+        return true
       endif
     endif
     if i < c_enemy_total then
       set p = enemy_force[i]
-      if GetPlayerSlotState(p) == PLAYER_SLOT_STATE_PLAYING and not IsPlayerObserver(p) and not IsPlayerEnemy(ai_player,p) then
-        set i = c + 2
+      if GetPlayerSlotState(p) == PLAYER_SLOT_STATE_PLAYING and not IsPlayerEnemy(ai_player,p) then
+        set p = null
+        return true
       endif
     endif
     set i = i + 1
+    exitwhen i >= c
   endloop
   set p = null
-  return i > c
+  return false
 endfunction
 
 function RevealEnemy takes nothing returns nothing

@@ -193,7 +193,7 @@ endfunction
 function FocusFire takes unit u, group fg returns nothing
   local group t = null
   local group temp_focus = null
-  if GetUnitState(u, UNIT_STATE_LIFE) < 1 or (not IsUnitType(u, UNIT_TYPE_HERO) and GetUnitState(u, UNIT_STATE_LIFE) > 100) or IsUnitInGroup(u, focus_fire_group) then
+  if GetUnitState(u, UNIT_STATE_LIFE) < 1 or (not IsUnitType(u, UNIT_TYPE_HERO) and GetUnitState(u, UNIT_STATE_LIFE) > 100) then
     return  //Insurance
   endif
   set t = CreateGroup()
@@ -324,7 +324,7 @@ function FocusEnemyUnitsNearGroup takes group g, group fg returns nothing
     set unit_life = GetUnitState(u, UNIT_STATE_LIFE)
     if unit_life >= 1 and not IsUnitHidden(u) then
       set p = GetOwningPlayer(u)
-      if IsPlayerEnemy(p, ai_player) and IsUnitVisible(u, ai_player) then
+      if IsPlayerEnemy(p, ai_player) and IsUnitVisible(u, ai_player) and not IsUnitInGroup(u, focus_fire_group) then
         if IsUnitType(u, UNIT_TYPE_MELEE_ATTACKER) then
           set x = x + GetUnitX(u)  // Prevent loc exceeding map range
           set y = y + GetUnitY(u)
@@ -466,12 +466,13 @@ function FocusFireJob takes nothing returns nothing
       call GroupRemoveUnit(unit_buying_item, deny_unit)
       call GroupRemoveUnit(unit_buying_merc, deny_unit)
       call GroupRemoveUnit(unit_buying_tavern, deny_unit)
-      if UnitAlive(deny_unit) then
-        call GroupAddUnit(unit_healing, deny_unit)
-        call TQAddUnitJob(1, SEND_HOME, 0, deny_unit)  // maybe fail
-      endif
-      set deny_unit = null
+      call Sleep(0.1)
     endif
+    if UnitAlive(deny_unit) then
+      call GroupAddUnit(unit_healing, deny_unit)
+      call TQAddUnitJob(1, SEND_HOME, 0, deny_unit)  // maybe fail
+    endif
+    set deny_unit = null
   endif
   call SetTargetHeroes(difficulty != EASY)
   call DestroyGroup(g)
