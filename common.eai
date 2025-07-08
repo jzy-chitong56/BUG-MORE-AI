@@ -842,7 +842,6 @@ globals
     location array own_town_loc
     real array own_town_dist
     unit array own_town_mine
-    boolean home_have_mine = false
     integer first_town_mine = 0
     location array exist_town
     integer Forced_Harvest_total = 0
@@ -5372,7 +5371,7 @@ function GetUnitToBuy takes unit ru, unit buy_place returns unit
   loop
     set u = FirstOfGroup(g)
     exitwhen u == null
-    if not IsUnitType(u, UNIT_TYPE_STRUCTURE) and not IsUnitType(u, UNIT_TYPE_PEON) and not IsUnitType(u, UNIT_TYPE_SUMMONED) and GetUnitState(u, UNIT_STATE_LIFE) >= 1 and not IsUnitHidden(u) and not IsUnitLoaded(u) and not IsUnitIllusion(u) and not IsUnitBuying(u) and IsStandardUnit(u) then
+    if not IsUnitType(u, UNIT_TYPE_STRUCTURE) and not IsUnitType(u, UNIT_TYPE_PEON) and not IsUnitType(u, UNIT_TYPE_SUMMONED) and GetUnitTypeId(u) != 'ngir' and GetUnitState(u, UNIT_STATE_LIFE) >= 1 and not IsUnitHidden(u) and not IsUnitLoaded(u) and not IsUnitIllusion(u) and not IsUnitBuying(u) and IsStandardUnit(u) then
       set newdistance = DistanceBetweenUnits(buy_place, u)
       if newdistance < distance then
         set distance = newdistance
@@ -6540,7 +6539,7 @@ function BuildBRAtCreep takes nothing returns boolean
   return success
 endfunction
 
-function RebuildMine takes nothing returns nothing
+function RebuildMine takes integer i returns nothing
   local group g = CreateGroup()
   local unit u = null
   local unit t = null
@@ -6548,31 +6547,40 @@ function RebuildMine takes nothing returns nothing
   local unit p = null
   local location l = null
   local integer e = old_id[GOLD_MINE]
-  call Trace("ReBuild Home Mine")
-  call GroupEnumUnitsInRangeOfLoc(g, home_location, expansion_taken_radius, null)
+  call Trace("ReBuild Mine")
+  call GroupEnumUnitsInRangeOfLoc(g, own_town_loc[i], 1200, null)
+  call GroupRemoveUnit(g, expansion_peon)
+  call GroupRemoveUnit(g, not_taken_expansion)
   loop
     set u = FirstOfGroup(g)
     exitwhen u == null
     if UnitAlive(u) and not IsUnitHidden(u) then
       if GetResourceAmount(u) > 0 then
-        if GetOwningPlayer(u) == ai_player and GetUnitTypeId(u) != e then
-          set e = 0
-          exitwhen true  // no own_town_mine - shouldn't happen
+        if GetUnitTypeId(u) != e then
+          if GetOwningPlayer(u) == ai_player then
+            set e = 0
+            set m = null
+            exitwhen true  // no own_town_mine - shouldn't happen
+          endif
         else
-          set m = u
+          if GetOwningPlayer(u) == ai_player or GetOwningPlayer(u) == Player(PLAYERPASSIVE) then
+            set m = u
+          endif
         endif
-      elseif IsUnitType(u, UNIT_TYPE_TOWNHALL) and IsUnitType(u, UNIT_TYPE_ANCIENT) then
-        set t = u
-      elseif p == null and IsUnitType(u, UNIT_TYPE_PEON) then
-        set p = u
+      elseif GetOwningPlayer(u) == ai_player then
+        if IsUnitType(u, UNIT_TYPE_TOWNHALL) and IsUnitType(u, UNIT_TYPE_ANCIENT) then
+          set t = u
+        elseif p == null and IsUnitType(u, UNIT_TYPE_PEON) then
+          set p = u
+        endif
       endif
     endif
     call GroupRemoveUnit(g, u)
   endloop
   if m != null then
     if t != null then
-      call IssueImmediateOrder(t, "cancel")
-      call IssueTargetOrder(t, "entangle", m)
+      call IssueTargetOrder(t, "entangle", m)  // if updating , cannot entangle
+      call CreateDebugTag("ReBuild Mine - entangle", 10, t, 10.00, 8.00)
     else
       if p != null then
         if race_manual_loading then
@@ -6585,17 +6593,15 @@ function RebuildMine takes nothing returns nothing
         else
           call IssueTargetOrderById(p, old_id[racial_expansion], m)
         endif
-        call CreateDebugTag("ReBuild Home Mine", 10, p, 10.00, 8.00)
+        call CreateDebugTag("ReBuild Mine - build", 10, p, 10.00, 8.00)
       endif
     endif
-  elseif e > 0 then
-    set home_have_mine = false
+    set m = null
   endif
   call DestroyGroup(g)
   set g = null
   set u = null
   set t = null
-  set m = null
   set p = null
 endfunction
 
@@ -6675,7 +6681,7 @@ function MultipleMinefix takes nothing returns boolean
         endif
         if expansion_peon != null and UnitAlive(expansion_peon) and DistanceBetweenPoints_kd(l, GetUnitLoc(fixmine)) <= race_max_expa_mine_distance and GetGold() > GetUnitGoldCost(old_id[racial_expansion]) and GetWood() > GetUnitWoodCost(old_id[racial_expansion]) then
           call IssuePointOrderByIdLoc(expansion_peon, old_id[racial_expansion], l)  // this API only return false , cannot set b
-          call CreateDebugTag("Multiple Mine fix - expansion", 10, expansion_peon, 10.00, 8.00)
+          call CreateDebugTag("Multiple Mine fix - build expansion", 10, expansion_peon, 10.00, 8.00)
           set b = true
         endif
         call RemoveLocation(l)
@@ -6689,7 +6695,7 @@ function MultipleMinefix takes nothing returns boolean
       endif
       if expansion_peon != null and UnitAlive(expansion_peon) then
         call IssueTargetOrderById(expansion_peon, old_id[racial_expansion], fixmine)  // this API only return false , cannot set b
-        call CreateDebugTag("Multiple Mine fix - expansion", 10, expansion_peon, 10.00, 8.00)
+        call CreateDebugTag("Multiple Mine fix - build expansion", 10, expansion_peon, 10.00, 8.00)
         set b = true
       endif
     endif
@@ -6711,7 +6717,7 @@ function IsUnitGoldMine takes unit u returns boolean
     endif
     set i = i + 1
   endloop
-  return false
+  return GetResourceAmount(u) > 0
 endfunction
 
 function IsValidMineClaimed takes unit u returns boolean
@@ -7948,7 +7954,7 @@ function GetHealer takes unit u returns unit
     set u = FirstOfGroup(rg)
     exitwhen u == null
     set id = GetHealerId(GetUnitTypeId(u))
-    if id != -1 and not IsUnitLoaded(u) and UnitAlive(u) and GetUnitState(u, UNIT_STATE_MANA) >= healer_mana_cost[id] and ((healer_upg_id[id] == 0) or (GetUpgradeLevel(healer_upg_id[id]) >= healer_upg_level[id])) and IsStandardUnit(u) and not IsUnitBuying(u) then
+    if id != -1 and GetOwningPlayer(u) == ai_player and not IsUnitLoaded(u) and UnitAlive(u) and GetUnitState(u, UNIT_STATE_MANA) >= healer_mana_cost[id] and ((healer_upg_id[id] == 0) or (GetUpgradeLevel(healer_upg_id[id]) >= healer_upg_level[id])) and IsStandardUnit(u) and not IsUnitBuying(u) then
       call DestroyGroup(rg)
       set rg = null
       return u
@@ -9020,9 +9026,6 @@ function InitTownBuilt takes nothing returns nothing
   set exist_town[0] = home_location
   set own_town_dist[0] = 0
   set own_town_mine[0] = GetMineNearLoc(own_town_mine[0] ,home_location, 1500)
-  if race_manual_loading or race_uses_mine_expansion then
-    set home_have_mine = own_town_mine[0] != null  // elf and ud maybe can not get gold mine
-  endif
 endfunction
 
 //============================================================================
@@ -11415,18 +11418,17 @@ function BuildAtSpecialLoc takes integer unitid, integer town, integer bloc retu
   endif
   if u != null then
     if UnitAlive(u) and not neutral_guarded[i] and GetGoldOwned() > 600 and not IsVisibleToPlayer(GetUnitX(u), GetUnitY(u), ai_player) then
-      set l = GetUnitLoc(u)
-      set u = CreateUnitAtLoc(Player(PLAYERPASSIVE), old_id[unitid], l, 270.0)
-      set loc = GetUnitLoc(u)
-      call RemoveUnitAM(u)
-      if own_race == R_UNDEAD and not IsPointBlighted(GetLocationX(loc), GetLocationY(loc)) then  // can not build
-      elseif DistanceBetweenPoints(loc, l) < buy_distance then
-        call IssuePointOrderByIdLoc(peon, old_id[unitid], loc)
+      set spaceunit = CreateUnit(Player(PLAYERPASSIVE), old_id[unitid], GetUnitX(u), GetUnitY(u), 270.0)
+      set l = GetUnitLoc(spaceunit)
+      call RemoveUnitAM(spaceunit)
+      if own_race == R_UNDEAD and not IsPointBlighted(GetLocationX(l), GetLocationY(l)) then  // can not build
+      elseif DistanceBetweenPoints_kd(l, Location(GetUnitX(u), GetUnitY(u))) < buy_distance then
+        call IssuePointOrderByIdLoc(peon, old_id[unitid], l)
         call CreateDebugTag("build to neutral", 10, peon, 4.00, 2.00)
       endif
-      call RemoveLocation(loc)
       call RemoveLocation(l)
       set l = null
+      set spaceunit = null
     endif
     set peon = null
     set loc = null
@@ -12483,9 +12485,8 @@ if mines < 1 or gold_left < 2500 or exp_prepared then
   else
     call BuildExpa(TownCount(racial_expansion) + 1, racial_expansion, expa_prio)
   endif
-elseif minetimeready and attacking_aggression > 0 and mines > 1 and mines < 4 and not_taken_expansion != chaos_expansion then
-  if chaos_expansion != null and UnitAlive(chaos_expansion) and chaos_expansion != current_expansion and GetResourceAmount(chaos_expansion) >= GetUnitGoldCost(old_id[racial_expansion]) and not CheckExpansionTaken(chaos_expansion) then
-    if not chaos_expansion_run and GetLocationCreepStrength(GetUnitX(chaos_expansion), GetUnitY(chaos_expansion), expansion_radius) <= 0 then
+elseif minetimeready and attacking_aggression > 0 and mines > 1 and mines < 4 and not chaos_expansion_run and chaos_expansion != null and chaos_expansion != not_taken_expansion and chaos_expansion != current_expansion then
+  if UnitAlive(chaos_expansion) and GetResourceAmount(chaos_expansion) >= GetUnitGoldCost(old_id[racial_expansion]) and not CheckExpansionTaken(chaos_expansion) and GetLocationCreepStrength(GetUnitX(chaos_expansion), GetUnitY(chaos_expansion), expansion_radius) <= 0 then
       set u = GetExpansionPeon()
       if u != null and UnitAlive(u) and u != expansion_peon then
         set chaos_expansion_run = true
@@ -12495,10 +12496,11 @@ elseif minetimeready and attacking_aggression > 0 and mines > 1 and mines < 4 an
         call TQAddUnit2Job(2 * sleep_multiplier, BUILD_EXPANSION, 0, u, chaos_expansion)
       endif
       set u = null
-    endif
+  else
+    set chaos_expansion = null
   endif
 endif
-if chaos_expansion != null and (CheckExpansionTaken(chaos_expansion) or chaos_expansion == current_expansion or chaos_expansion == not_taken_expansion) then
+if chaos_expansion == null or (CheckExpansionTaken(chaos_expansion) or chaos_expansion == current_expansion or chaos_expansion == not_taken_expansion) then
   set chaos_expansion = expansion_list[Max(0, GetRandomInt(0, expansion_list_length - 1))]
   set chaos_expansion_run = false
   if chaos_expansion == current_expansion or chaos_expansion == not_taken_expansion then
@@ -12677,8 +12679,8 @@ function CheckTownBuilt takes nothing returns nothing
     endif
     if own_town_mine[i] != null and UnitAlive(own_town_mine[i]) then
       call CreateDebugTag("own town mine : " + Int2Str(i), 5, own_town_mine[i], 1.50, 1.50)
-    elseif home_have_mine and first_town_mine < 1 and own_town_dist[i] < 1300 then
-      call RebuildMine()
+    elseif own_town_loc[i] != null and own_town_mine[i] == null and (race_manual_loading or (first_town_mine < 1 and race_uses_mine_expansion and own_town_dist[i] < 1300)) then
+      call RebuildMine(i)
     endif
     set i = i + 1
   endloop
@@ -12781,7 +12783,7 @@ function OneBuildLoopAM takes nothing returns nothing
     set total_wood   = GetWood() - wood_buffer
     set total_food   = ver_food_limit - FoodUsed()
 
-    call CheckUpkeepAllowed(ver_food_limit - total_food)
+    call CheckUpkeepAllowed(ver_food_limit - Max(0, total_food))
 
     set blocked_gold = 0
     set blocked_wood = 0
@@ -12983,8 +12985,8 @@ function AttackGroupAddUnknown takes nothing returns nothing
   call GroupEnumUnitsOfPlayer(g, ai_player, null)
   loop
     exitwhen i >= attack_length or FirstOfGroup(g) == null
-    set g = SelectById(g, old_id[attack_units[i]], false)
-    set i = i + 1
+    set g = SelectByIdOr(g, old_id[attack_units[i]], old_id[attack_units[i + 1]], false)
+    set i = i + 2
   endloop
   loop
     set u = FirstOfGroup(g)
@@ -13936,7 +13938,7 @@ function GetRangePenalty takes unit target, player p returns real
         return DistanceBetweenPoints_kd(home_location, GetPlayerStartLocationLoc(GetOwningPlayer(target)))
       endif
     endif
-    return 100000.0
+    return 1000.0
   endif
   return DistanceBetweenUnits(major_hero, target) / i
 endfunction
@@ -14301,6 +14303,7 @@ function Militia_Expansion takes integer m returns nothing
   endif
   set cg = CreateGroup()
   call GroupEnumUnitsInRange(cg, GetUnitX(not_taken_expansion), GetUnitY(not_taken_expansion), 1300, null)
+  call GroupRemoveUnit(cg, not_taken_expansion)
   loop
     set u = FirstOfGroup(cg)
     exitwhen u == null
@@ -14339,7 +14342,7 @@ function Militia_Expansion takes integer m returns nothing
   //call AttackMoveKill(efoe)
   set g = SelectById(g, race_militia_id, true)
   set g = SelectByAlive(g, true)
-  call GroupPointOrder(g, "attack", GetUnitX(not_taken_expansion), GetUnitY(not_taken_expansion))
+  call GroupPointOrder(g, "attack", GetUnitX(efoe), GetUnitY(efoe))
   set town_threat_break = false
   //set captain_flee = false
   //call SetCaptainHome(ATTACK_CAPTAIN, GetUnitX(efoe), GetUnitY(efoe)) //
@@ -14352,6 +14355,7 @@ function Militia_Expansion takes integer m returns nothing
   //  call SetTargetHeroes(false)
   //  call TQAddJob(2 * sleep_multiplier, RETREAT_CONTROL, 0)
   //endif
+  call ClearCaptainTargets()
   call AttackMoveKill(efoe)
   call SleepUntilTargetDeadAM(efoe, true, false)
   call SleepInCombatAM(false)
@@ -14384,6 +14388,7 @@ function SleepUntilTownDefended takes integer ai_strength returns nothing
   //set own_strength = ai_strength
   call Trace("==Sleep Defend Town==" )
   if not b and not CaptainRetreating() then
+    call ClearCaptainTargets()
     call CaptainGoHome()
   endif
   // Attack logic still overridden by allies, so commented out - just return to home location 
@@ -15240,6 +15245,7 @@ function universal_attack_sequence takes nothing returns nothing
 
   if go_home then
     call Trace("UNIVERSAL ATTACK: Going home" )
+    call ClearCaptainTargets()
     call CaptainGoHome()
   endif
   set break_attack = false
