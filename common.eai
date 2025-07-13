@@ -6354,6 +6354,7 @@ function RebuildMine takes integer i returns nothing
   call GroupEnumUnitsInRangeOfLoc(g, own_town_loc[i], 1200, null)
   call GroupRemoveUnit(g, expansion_peon)
   call GroupRemoveUnit(g, not_taken_expansion)
+  call GroupRemoveUnit(g, ancient_exp_unit)
   loop
     set u = FirstOfGroup(g)
     exitwhen u == null
@@ -7212,31 +7213,23 @@ endfunction
 
 //============================================================================
 function GetExpFoe takes unit nearunit returns unit
-  local location l = null
+  local location l = GetUnitLoc(current_expansion)
   local group g = CreateGroup()
   local real nearest = 10000000
   local real tempnear = 0
   local integer i = 0
-  local integer c = 0
   local unit u = null
   if current_expansion_iswater then
     set g = ReturnLivingUnitsOfHashtable(water_expansion_creeps, current_expansion_creeps, 0, g)
   else
     set g = ReturnLivingUnitsOfHashtable(expansion_creeps, current_expansion_creeps, 0, g)
   endif
-  if BlzGroupGetSize(g) <= 0 then
-    //call Trace("GetExpFoe: No creeps in current expansion")
-    call DestroyGroup(g)
-    set g = null
-    return null
-  endif
   set nearunit = null
-  set l = GetUnitLoc(current_expansion)
   loop
     set u = FirstOfGroup(g)
     exitwhen u == null
     set tempnear = DistanceBetweenPoints_dk(GetUnitLoc(u), l)
-    set c = c + 1
+    set i = i + 1
     if tempnear < nearest then
       set nearunit = u
       set nearest = tempnear
@@ -7247,6 +7240,9 @@ function GetExpFoe takes unit nearunit returns unit
   set l = null
   call DestroyGroup(g)
   set g = null
+  //if i <= 0 then
+    //call Trace("GetExpFoe: No creeps in current expansion")
+  //endif
   //if nearunit != null then
     //call Trace("GetExpFoe: Have a foe")
   //endif
@@ -10671,7 +10667,6 @@ endfunction
 
 function AddHarassUnittype takes group g, group harasser, integer qty, integer uid, integer key returns group
   local group cg = null
-  local group tg = CreateGroup()
   local unit u = null
   local real player_sum = 0
   local integer i = 0
@@ -11193,7 +11188,7 @@ function BuildAtSpecialLoc takes integer unitid, integer town, integer bloc retu
   local unit peon = GetExpansionPeon()
   local location loc = GetBuildLocation(bloc)
   local real d = 0
-  local integer i = 0
+  local integer i = -1
   if peon == null or not UnitAlive(peon) then
     set peon = GetExpansionPeon2(peon)	// In case we can't get the expansion peon
   endif
@@ -11211,19 +11206,20 @@ function BuildAtSpecialLoc takes integer unitid, integer town, integer bloc retu
     set u = nearest_neutral[NEUTRAL_DRAGON_ROOST]
     set i = NEUTRAL_DRAGON_ROOST
   endif
-  if u != null then
-    if UnitAlive(u) and not neutral_guarded[i] and GetGoldOwned() > 600 and not IsVisibleToPlayer(GetUnitX(u), GetUnitY(u), ai_player) then
-      set spaceunit = CreateUnit(Player(PLAYER_NEUTRAL_PASSIVE), old_id[unitid], GetUnitX(u), GetUnitY(u), 270.0)
-      set l = GetUnitLoc(spaceunit)
-      call RemoveUnitAM(spaceunit)
-      if own_race == R_UNDEAD and not IsPointBlighted(GetLocationX(l), GetLocationY(l)) then  // can not build
-      elseif DistanceBetweenPoints_kd(l, Location(GetUnitX(u), GetUnitY(u))) < buy_distance then
-        call IssuePointOrderByIdLoc(peon, old_id[unitid], l)
-        call CreateDebugTag("build to neutral", 10, peon, 4.00, 2.00)
+  if i >= 0 then
+    if u != null and UnitAlive(u) and not neutral_guarded[i] and GetGoldOwned() > 600 and not IsVisibleToPlayer(GetUnitX(u), GetUnitY(u), ai_player) then
+      if own_race != R_UNDEAD or IsPointBlighted(GetLocationX(l), GetLocationY(l)) then  // can build
+        set spaceunit = CreateUnit(Player(PLAYER_NEUTRAL_PASSIVE), old_id[unitid], GetUnitX(u), GetUnitY(u), 270.0)
+        set l = GetUnitLoc(spaceunit)
+        call RemoveUnitAM(spaceunit)
+        if DistanceBetweenPoints_kd(l, GetUnitLoc(u)) < buy_distance then
+          call IssuePointOrderByIdLoc(peon, old_id[unitid], l)
+          call CreateDebugTag("build to neutral", 10, peon, 4.00, 2.00)
+        endif
+        call RemoveLocation(l)
+        set l = null
+        set spaceunit = null
       endif
-      call RemoveLocation(l)
-      set l = null
-      set spaceunit = null
     endif
     set peon = null
     set loc = null
@@ -11652,11 +11648,12 @@ function StartExpansionAM takes integer qty, integer hall returns integer
   // call DisplayTextToPlayer(GetLocalPlayer(), 0, 0, "Expansion Taken Checked")
 
   // call DisplayTextToPlayer(GetLocalPlayer(), 0, 0, "Expansion choosen")
-  set gold_cost = GetUnitGoldCost2(hall)
-  set wood_cost = GetUnitWoodCost2(hall)
   if item_expanding and not item_job_running then
     set gold_cost = gold_price[race_item_expansion_item_id]
     set wood_cost = wood_price[race_item_expansion_item_id]
+  else
+    set gold_cost = GetUnitGoldCost2(hall)
+    set wood_cost = GetUnitWoodCost2(hall)
   endif
 
   set total_gold = total_gold - gold_cost
@@ -12025,9 +12022,9 @@ function ShredderBuilder takes nothing returns nothing
   local real gdivw = g / w
   if neutral_available[NEUTRAL_OBSERVATORY] and gdivw > 4 and g - w > 500 and w < 550 and g > GetUnitGoldCost2(neutral_shredder) and w > GetUnitWoodCost2(neutral_shredder) and ai_time - available_time[neutral_shredder] >= -1 then
     if (race_has_ghouls) then
-      call BuildUnit(1, neutral_shredder, Max(ghoul_prio - 4,1))
+      call BuildUnit(1, neutral_shredder, ghoul_prio - 4)
     else
-      call BuildUnit(1, neutral_shredder, Max(peon_prio - 10,1))
+      call BuildUnit(1, neutral_shredder, peon_prio - 10)
     endif
   endif
 endfunction
@@ -12347,11 +12344,11 @@ function LocalizeOldTown takes integer num returns boolean
   call DestroyGroup(g)
   set g = null
   if u == null then
-    call RemoveLocation(own_town_loc[num])
-    set own_town_loc[num] = null
     if own_town_mine[num] != null and DistanceBetweenPoints_dk(GetUnitLoc(own_town_mine[num]), own_town_loc[num]) < town_radius then
       set own_town_mine[num] = null
     endif
+    call RemoveLocation(own_town_loc[num])
+    set own_town_loc[num] = null
     set own_town_dist[num] = 0
     return false
   endif
@@ -12392,9 +12389,10 @@ function LocalizeNewTown takes integer num returns boolean
     call GroupRemoveUnit(g,own_town_mine[e])
     set e = e + 1
   endloop
-  set e = old_id[racial_expansion]
   if race_manual_loading then
     set e = old_id[race_manual_loading_mine]
+  else
+    set e = old_id[racial_expansion]
   endif
   loop
     set u = FirstOfGroup(g)
@@ -12402,14 +12400,8 @@ function LocalizeNewTown takes integer num returns boolean
     if UnitAlive(u) and not IsUnitHidden(u) then
       set h = IsUnitType(u, UNIT_TYPE_TOWNHALL)
       if (h or GetUnitTypeId(u) == e) and CheckUnitNewTown(u) then
-        if m == null and own_town_mine[num] == null then
-          if b and not h then
-            set m = u
-          elseif h then
-            set l = GetUnitLoc(u)
-            set m = GetMineNearLoc(m, l, 1200)
-            call RemoveLocation(l)
-          endif
+        if m == null and own_town_mine[num] == null and b and not h then
+          set m = u
         endif
         if h and t == null then
           set t = u
@@ -12435,10 +12427,11 @@ function LocalizeNewTown takes integer num returns boolean
   endif
   set own_town_loc[num] = GetUnitLoc(t)
   if own_town_mine[num] == null then
-    set own_town_mine[num] = GetMineNearLoc(own_town_mine[num], own_town_loc[num], 1500)
-  endif
-  if own_town_mine[num] == null then
-    set own_town_mine[num] = m
+    if m != null then
+      set own_town_mine[num] = m
+    else
+      set own_town_mine[num] = GetMineNearLoc(own_town_mine[num], own_town_loc[num], 1500)
+    endif
   endif
   set own_town_dist[num] = DistanceBetweenPoints(home_location, own_town_loc[num])
   if debugging > 0 then
@@ -12463,9 +12456,6 @@ function CheckTownBuilt takes nothing returns nothing
       if TownCountEx(racial_expansion, true, i) > 0 or t > 0 then
         set town_built[i] = LocalizeNewTown(i)
       endif
-      if town_built[i] then
-        set t = t - 1
-      endif
     else
       set town_built[i] = LocalizeOldTown(i)
     endif
@@ -12476,6 +12466,9 @@ function CheckTownBuilt takes nothing returns nothing
       call CreateDebugTag("own town mine : " + Int2Str(i), 5, own_town_mine[i], 1.50, 1.50)
     elseif own_town_loc[i] != null and own_town_mine[i] == null and (race_manual_loading or (first_town_mine < 1 and race_uses_mine_expansion and own_town_dist[i] < 1300)) then
       call RebuildMine(i)
+    endif
+    if town_built[i] then
+      set t = t - 1
     endif
     set i = i + 1
   endloop
@@ -12578,7 +12571,7 @@ function OneBuildLoopAM takes nothing returns nothing
     set total_wood   = GetWood() - wood_buffer
     set total_food   = ver_food_limit - FoodUsed()
 
-    call CheckUpkeepAllowed(ver_food_limit - Max(0, total_food))
+    call CheckUpkeepAllowed(ver_food_limit - Max(0, total_food))  // Prevent negative numbers
 
     set blocked_gold = 0
     set blocked_wood = 0
@@ -12893,6 +12886,8 @@ function EnableRetreatControl takes nothing returns nothing
     set retreat_controlled = true
     call SetGroupsFlee(false)
     call SetTargetHeroes(false)
+    call MoveLocation(enemy_loc, 0, 0)
+    call MoveLocation(ally_loc, 0, 0)
     call TQAddJob(2 * sleep_multiplier, RETREAT_CONTROL, 0)
   endif
 endfunction
@@ -13100,10 +13095,11 @@ endfunction
 
 function CommonSleepUntilTargetDeadAM takes unit target, boolean iscreeping, boolean reform, boolean ally_override returns nothing
   local real dist = 0
+  local real dist_hero = -1
   local integer attack_length_counter = 0
   local integer combat_length_counter = 0
   local unit ally_target = null
-  //local group g = null
+  local group g = null
   local string a = Int2Str(ALLIANCE_TARGET)
   local boolean b = ally_override and c_ally_total > 0
   local location l = null
@@ -13155,7 +13151,7 @@ function CommonSleepUntilTargetDeadAM takes unit target, boolean iscreeping, boo
       //call Trace("Units, Creeps: " + Int2Str(GetLocationNonCreepStrength(unitx, unity, battle_radius)) + "," + Int2Str(GetLocationCreepStrength(unitx, unity, 500)))
       //	exitwhen GetLocationNonCreepStrength(unitx, unity, battle_radius) <= 0 and not UnitAlive(target) and GetLocationCreepStrength(unitx, unity, 500) <= 0
     //endif
-    set dist = DistanceBetweenPoints(ally_loc, l)
+    set dist = DistanceBetweenPoints_kd(ally_loc, GetUnitLoc(target))
     if b and dist > 1300 and dist < 2500 and CheckAttackWait(target) then
       set lastcaptainx = GetLocationX(ally_loc)
       set lastcaptainy = GetLocationY(ally_loc)
@@ -13193,7 +13189,6 @@ function CommonSleepUntilTargetDeadAM takes unit target, boolean iscreeping, boo
         call CreateDebugTag("Reform until target dead", 10, target, 1.00, 0.80)
       endif
     endif
-
     call StaggerSleep(1 * sleep_multiplier, (1 * sleep_multiplier) + 2)
 
     if desperation_assault and attack_length_counter > attack_reform_length * 10 then
@@ -14179,12 +14174,15 @@ endfunction
 function SleepUntilTownDefended takes integer ai_strength returns nothing
   //local integer defense_length_counter = 0
   local integer enemy_army = -1
-  local boolean b = CaptainIsHome()
   //set own_strength = ai_strength
   call Trace("==Sleep Defend Town==" )
-  if not b and not CaptainRetreating() then
+  if not CaptainIsHome() then
     call ClearCaptainTargets()
-    call CaptainGoHome()
+    if teleporting then
+      call CaptainGoHome()
+    else
+      call TeleportCaptain(GetLocationX(captain_home), GetLocationY(captain_home))
+    endif
   endif
   // Attack logic still overridden by allies, so commented out - just return to home location 
   //call FormGroupAM(0)
