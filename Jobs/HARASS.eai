@@ -32,19 +32,24 @@ endfunction
 
 function GetHarassExpansionTarget takes unit ru, unit u returns unit
   local group g = CreateGroup()
+  local group tg = null
   local location unitloc = GetUnitLoc(u)
   local player p = GetNearestEnemyToLoc_k(unitloc)
   local location baseloc = null
   if p != null then
+    set tg = CreateGroup()
     set baseloc = GetPlayerStartLocationLoc(p)
     call GroupEnumUnitsOfPlayer(g, p, null)
+    call GroupEnumUnitsInRangeOfLoc(tg, baseloc, 1400, null)
+    call BlzGroupRemoveGroupFast(tg, g)
     set g = SelectUnittype(g, UNIT_TYPE_TOWNHALL, true)
     set g = SelectByAlive(g, true)
     set g = SelectByHidden(g, false)
-    set g = SelectByLocation(g, baseloc, 1000, false)
     set ru = GetNearestOfGroup(ru, g, unitloc)
     call RemoveLocation(baseloc)
     set baseloc = null
+    call DestroyGroup(tg)
+    set tg = null
   endif
   call RemoveLocation(unitloc)
   call DestroyGroup(g)
@@ -74,12 +79,12 @@ function GetHarassMainHallTarget takes unit ru, unit u returns unit
   local location baseloc = null
   if p != null then
     set baseloc = GetPlayerStartLocationLoc(p)
-    call GroupEnumUnitsOfPlayer(g, p, null)
+    call GroupEnumUnitsInRangeOfLoc(g, baseloc, 1400, null)
     set g = SelectUnittype(g, UNIT_TYPE_TOWNHALL, true)
+    set g = SelectByPlayer(g, p, true)
     set g = SelectByAlive(g, true)
     set g = SelectByHidden(g, false)
-    set g = SelectByLocation(g, baseloc, 1000, true)
-    set ru = GetNearestOfGroup(ru, g, unitloc)
+    set ru = FirstOfGroup(g)
     call RemoveLocation(baseloc)
     set baseloc = null
   endif
