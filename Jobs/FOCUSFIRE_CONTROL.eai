@@ -300,7 +300,7 @@ function FocusEnemyUnitsNearGroup takes group g, group fg returns nothing
   local unit special_unit = null
   local real range_strength = 0
   local integer enemy_count = 0
-  local integer i = 0
+  local integer i = 1
   local real unit_life = 0
   local real x = 0
   local real y = 0
@@ -318,8 +318,8 @@ function FocusEnemyUnitsNearGroup takes group g, group fg returns nothing
   loop
     set u = FirstOfGroup(g)
     exitwhen u == null
-    if (ModuloInteger(i, 200) == 0) then
-      call Sleep(0.1)
+    if (ModuloInteger(i, 42) == 0) then
+      call Sleep(0.02)
     endif
     set unit_life = GetUnitState(u, UNIT_STATE_LIFE)
     if unit_life >= 1 and not IsUnitHidden(u) then

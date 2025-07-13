@@ -36,15 +36,15 @@ function GetDensities takes location l, player p, real r returns nothing
   local location ul = null
   local location loc = null
   local player up = null
-  local integer i = 0
+  local integer i = 1
   set enemy_density = 0
   set ally_density = 0
   call GroupEnumUnitsInRangeOfLoc(g, l, r, null)
   loop
     set u = FirstOfGroup(g)
     exitwhen u == null
-    if ModuloInteger(i, 200) == 0 then
-      call Sleep(0.1)
+    if ModuloInteger(i, 42) == 0 then
+      call Sleep(0.02)
     endif
     if UnitAlive(u) and not IsUnitHidden(u) then
       set ul = GetUnitLoc(u)
@@ -97,11 +97,13 @@ function GetDensities takes location l, player p, real r returns nothing
   set up = null
 endfunction
 
-function GoHomeIfMainHero takes unit u, real x, real y returns nothing
-  if main_army >= 0 and army_group[main_army] != null and IsUnitInGroup(u, army_group[main_army]) then
-    call ClearCaptainTargets() // Retreat attack captain.
+function GoHomeIfMainHero takes unit u, real x, real y, boolean knowlocation returns nothing
+  if (main_army >= 0 and army_group[main_army] != null and IsUnitInGroup(u, army_group[main_army])) or not knowlocation then
+    call ClearCaptainTargets() // Retreat captain attack.
     //call CaptainGoHome()
-    call TeleportCaptain(x, y)
+    if knowlocation then
+      call TeleportCaptain(x, y)
+    endif
     set break_attack = attack_running
     set isfleeing = true
     set attack_running = false
@@ -124,7 +126,7 @@ function TeleportHome takes integer hn returns nothing
       set dy = GetLocationY(home_location)
     endif
   endif
-  call GoHomeIfMainHero(hero_unit[hn], dx, dy)
+  call GoHomeIfMainHero(hero_unit[hn], dx, dy, true)
   call UnitUseItemPoint(hero_unit[hn], GetItemOfTypeOnUnit(tp_item, hero_unit[hn]), dx + GetRandomInt(300,500) * ISign(), dy + GetRandomInt(300,500) * ISign())
   set teleporting = true
   // if teleportloc != null then
@@ -185,7 +187,7 @@ function TeleportToLoc takes unit u, location l returns nothing
     return
   endif
   set loc = GetTeleportLandPoint(l)
-  call GoHomeIfMainHero(u, GetLocationX(loc), GetLocationY(loc))
+  call GoHomeIfMainHero(u, GetLocationX(loc), GetLocationY(loc), true)
   set teleporting = true
   call UnitUseItemPoint(u, GetItemOfTypeOnUnit(tp_item, u), GetLocationX(loc), GetLocationY(loc))
   call TQAddUnitJob(0.5, TELEPORT, 0, u)
@@ -416,19 +418,23 @@ function MicroHeroJob takes integer hn returns nothing
       call TQAddJob(4, MICRO_HERO, hn)
       return
     endif
-    set current_order = GetUnitCurrentOrder(hero_unit[hn])
-    if (not teleporting and (current_order >= 852008 and current_order <= 852013)) or current_order == OrderId("massteleport") then
-      if (current_order != OrderId("massteleport") and GetItemTypeId(UnitItemInSlot(hero_unit[hn], current_order - 852008)) == old_id[tp_item]) or (current_order == OrderId("massteleport") and GetUnitAbilityLevel(hero_unit[hn], 'AHmt') > 0) then
+    if not teleporting then  // unknown teleport location
+      set current_order = GetUnitCurrentOrder(hero_unit[hn])
+      if current_order >= 852008 and current_order <= 852013 and GetItemTypeId(UnitItemInSlot(hero_unit[hn], current_order - 852008)) == old_id[tp_item] then
         call CreateDebugTag("HERO: Already teleporting", 10, hero_unit[hn], 4.00, 2.00)
-        if current_order != OrderId("massteleport") then  // can not konw teleport to where
-          call GoHomeIfMainHero(hero_unit[hn], GetLocationX(home_location), GetLocationY(home_location))
-        endif
-        // if not teleporting and teleportloc != null then // unknown destination as was triggered by hardcoded logic
-        //   call RemoveLocation(teleportloc)
-        //   set teleportloc = null
-        // endif
+        call GoHomeIfMainHero(hero_unit[hn], 0, 0, false)
         set teleporting = true
         call TQAddUnitJob(0.5, TELEPORT, 0, hero_unit[hn])
+        call TQAddJob(4, MICRO_HERO, hn)
+        return
+      endif
+      if current_order == OrderId("massteleport") then
+        call CreateDebugTag("HERO: signe or AHmt teleport", 10, hero_unit[hn], 4.00, 2.00)
+        if current_order < 852008 or current_order > 852013 then
+          call GoHomeIfMainHero(hero_unit[hn], 0, 0, false)
+          set teleporting = true
+          call TQAddUnitJob(0.5, TELEPORT, 0, hero_unit[hn])
+        endif
         call TQAddJob(4, MICRO_HERO, hn)
         return
       endif
