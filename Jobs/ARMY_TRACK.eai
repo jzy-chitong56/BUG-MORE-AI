@@ -321,9 +321,7 @@ function UpdateSpecificTownThreat takes integer num returns nothing
       endif
     elseif IsPlayerAlly(pt, ai_player) then
       if most_threatened_town == -1 or town_threat[most_threatened_town] < town_threat[num] then
-        if town_can_tp[num] == true then
-          set most_threatened_town = num
-        endif
+        set most_threatened_town = num
       endif
       // call DisplayToAll("Town threatened "+Int2Str(num)+" Threat: "+Int2Str(R2I(town_threat[num])))
       // call PingMinimapEx(GetLocationX(town_loc[num]), GetLocationY(town_loc[num]), 4, 255, 0, 0, true)
@@ -387,7 +385,7 @@ function UpdateTownThreat takes nothing returns nothing
     if most_threatened_player_town >= 0 and town_threat[most_threatened_player_town] > 0 then
       call Trace("PlayerThreatenedTownThreat: " + Real2Str(town_threat[most_threatened_player_town]) + " AcceptedThreatLevel: " + Real2Str(accepted_threat_level))
     endif
-    if most_threatened_player_town >= 0 and town_threat[most_threatened_player_town] > accepted_threat_level and town_threat[most_threatened_player_town] <= playerthreat then //and town_threat[most_threatened_town] > (I2R(c_ally_total + 1) / c_enemy_total) * town_threat[most_threatened_enemy_town] then
+    if most_threatened_player_town >= 0 and town_threat[most_threatened_player_town] > accepted_threat_level then //and town_threat[most_threatened_town] > (I2R(c_ally_total + 1) / c_enemy_total) * town_threat[most_threatened_enemy_town] then
       set town_threatened = true
       set town_threat_count = 0
       set most_threatened_town = most_threatened_player_town
@@ -399,7 +397,7 @@ function UpdateTownThreat takes nothing returns nothing
       endif
       set captain_home = town_loc[most_threatened_player_town]
       set captain_tp = town_can_tp[most_threatened_player_town]
-    elseif most_threatened_town >= 0 and town_threat[most_threatened_town] > accepted_threat_level * 1.05 and town_threat[most_threatened_town] <= playerthreat then
+    elseif most_threatened_town >= 0 and town_threat[most_threatened_town] > accepted_threat_level * 1.05 then
       set town_threatened = true
       set town_threat_count = 0
       set enemy_army = town_threat_army[most_threatened_town]

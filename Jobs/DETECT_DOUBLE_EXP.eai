@@ -46,6 +46,7 @@ endfunction
 function CheckDoubleExpansionsClaimedInArea takes real tx, real ty, boolean isBuildCommand returns boolean
   local group g = CreateGroup()
   local unit u = null
+  local unit exp = null
   local player p = null
   local integer minecount = 0
   local integer claimedMines = 0
@@ -64,8 +65,8 @@ function CheckDoubleExpansionsClaimedInArea takes real tx, real ty, boolean isBu
     set p = GetOwningPlayer(u)
     if p != Player(PLAYERAGGRESSIVE) and UnitAlive(u) then
       if IsPlayerEnemy(p, ai_player) and IsUnitType(u, UNIT_TYPE_STRUCTURE) then
-        if double_expansion_target == null and not IsUnitHidden(u) then
-          set double_expansion_target = u
+        if exp == null and not IsUnitHidden(u) then
+          set exp = u
         endif
         set double_expansion_enemy_present = true
       endif
@@ -82,7 +83,9 @@ function CheckDoubleExpansionsClaimedInArea takes real tx, real ty, boolean isBu
               set double_expansion_allyhuman_present = true
             endif
           else
-            set double_expansion_target = u
+            if double_expansion_target == null and not IsUnitHidden(u) then
+              set double_expansion_target = u
+            endif
             set double_expansion_enemy_present = true
           endif
         endif
@@ -93,6 +96,10 @@ function CheckDoubleExpansionsClaimedInArea takes real tx, real ty, boolean isBu
     endif
     call GroupRemoveUnit(g,u)
   endloop
+  if double_expansion_target == null then
+    set double_expansion_target = exp
+  endif
+  set exp = null
   call DestroyGroup(g)
   set g = null
   set p = null
