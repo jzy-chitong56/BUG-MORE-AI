@@ -283,6 +283,7 @@ endfunction
 
 function SkillArraysfix takes nothing returns integer
     local integer level = GetHeroLevelAI()
+    local integer id = GetHeroId()
     if level > max_hero_level then
         set max_hero_level = level
     endif
@@ -311,13 +312,13 @@ function SkillArraysfix takes nothing returns integer
     if herounit[4] != null and UnitAlive(herounit[4]) then
         call SelectHeroSkill(herounit[4], skills4[level])
     endif
-    if GetHeroId() == hero_id then
+    if id == hero_id then
         return skills1[level]
-    elseif GetHeroId() == hero_id2 then
+    elseif id == hero_id2 then
         return skills2[level]
-    elseif GetHeroId() == hero_id3 then
+    elseif id == hero_id3 then
         return skills3[level]
-    elseif GetHeroId() == hero_id4 then
+    elseif id == hero_id4 then
         return skills4[level]
     endif
     return 0
@@ -466,11 +467,11 @@ function init_vars takes nothing returns nothing
         set hunter_code = BERSERKER
     endif
 
-    set b_hero1_done        = GetUnitCountDone(hero_id) >= 1
-    set b_hero2_done        = GetUnitCountDone(hero_id2) >= 1
-    set b_hero3_done        = GetUnitCountDone(hero_id3) >= 1
-    set b_hero4_done        = GetUnitCountDone(hero_id4) >= 1
-    set b_ensnare           = GetUpgradeLevel(UPG_ORC_ENSNARE) >= 1
+    set b_hero1_done        = b_hero1_done or GetUnitCountDone(hero_id) >= 1
+    set b_hero2_done        = b_hero2_done or GetUnitCountDone(hero_id2) >= 1
+    set b_hero3_done        = b_hero3_done or GetUnitCountDone(hero_id3) >= 1
+    set b_hero4_done        = b_hero4_done or GetUnitCountDone(hero_id4) >= 1
+    set b_ensnare           = b_ensnare or GetUpgradeLevel(UPG_ORC_ENSNARE) > 0
 
     set c_altar_done        = GetUnitCountDone(ORC_ALTAR)
     set c_barracks_done     = GetUnitCountDone(ORC_BARRACKS)
@@ -522,7 +523,7 @@ function init_vars takes nothing returns nothing
     set c_food_made         = GetUnitCountDone(GREAT_HALL) * GetFoodMade(GREAT_HALL) + GetUnitCountDone(STRONGHOLD) * GetFoodMade(STRONGHOLD) + GetUnitCountDone(FORTRESS) * GetFoodMade(FORTRESS) + c_burrow_done * GetFoodMade(BURROW)
     set c_food_used         = FoodUsed()
 
-    if basic_opening and (b_hero2_done or (MeleeDifficulty() == MELEE_NEWBIE and c_stronghold_done >= 1)) then
+    if basic_opening and c_stronghold_done > 0 then
         set basic_opening = false
     endif
 endfunction
@@ -774,7 +775,7 @@ function build_sequence takes nothing returns nothing
         call SetBuildUnit(  6, GRUNT            )
         call SetBuildUpgr(  1, UPG_ORC_SPIKES   )
 
-        if MeleeDifficulty() != MELEE_NEWBIE then
+        if c_stronghold_done > 0 and MeleeDifficulty() != MELEE_NEWBIE then
             call SetBuildUnit(  1, hero_id2     )
         endif
 
@@ -820,18 +821,18 @@ function build_sequence takes nothing returns nothing
         call SetBuildNext( 15, PEON )
     endif
 
+    // get enough burrows to handle current food demand
+    //
+    if c_food_used + 6 >= c_food_made then
+        call SetBuildUnit(  c_burrow_done + 1, BURROW )
+    endif
+
     // if we have low gold in our mines then we need to expand
     //
     if c_gold_owned < 2000 then
         call BasicExpansion( c_mines < 2, GREAT_HALL )
         call GuardSecondary( 1, 1, BURROW )
         call GuardSecondary( 1, 2, ORC_WATCH_TOWER )
-    endif
-
-    // get enough burrows to handle current food demand
-    //
-    if c_food_used + 5 >= c_food_made then
-        call SetBuildUnit(  c_burrow_done + 1, BURROW )
     endif
 
     // always rebuild heroes for defense
@@ -857,12 +858,29 @@ function build_sequence takes nothing returns nothing
 
     // minimum melee defense
     //
+    if GetUnitCount(GREAT_HALL) < 1 then
+        call SetBuildUnit( 1, GREAT_HALL )
+    endif
+    if GetUnitCount(STRONGHOLD) < 1 and GetUnitCountDone(GREAT_HALL) > 0 then
+        call SetBuildUnit( 1, STRONGHOLD )
+    endif
+    call SetBuildUnit( 1, ORC_BARRACKS  )
+    call SetBuildUnit( 1, FORGE         )
+    call SetBuildUnit( 1, VOODOO_LOUNGE )
+    if c_stronghold_done > 0 then
+        call SetBuildUnit( 1, LODGE         )
+        call SetBuildUnit( 1, BESTIARY      )
+    endif
+    if b_hero2_done and GetUnitCountDone(STRONGHOLD) > 0 and GetUnitCount(FORTRESS) < 1 then
+      call SetBuildUnit( 1, FORTRESS      )
+    endif
+    if GetUnitCountDone(FORTRESS) > 1 then
+        call SetBuildUnit( 1, TOTEM         )
+    endif
     if c_totem_done >= 1 then
         call SetBuildUnit( 2, TAUREN        )
     elseif c_barracks_done > 0 then
         call SetBuildUnit( 3, GRUNT         )
-    else
-        call SetBuildUnit( 1, ORC_BARRACKS  )
     endif
 
     // minimum ranged/air defense and siege units
@@ -892,21 +910,11 @@ function build_sequence takes nothing returns nothing
     //
     if c_gold > 1000 then
 
-        if MeleeDifficulty() != MELEE_NEWBIE then
-            call GuardSecondary( 1, 1, BURROW           )
-            call GuardSecondary( 1, 1, ORC_WATCH_TOWER  )
-            call GuardSecondary( 1, 2, BURROW           )
-            call GuardSecondary( 1, 2, ORC_WATCH_TOWER  )
-        endif
+        call GuardSecondary( 1, 1, ORC_WATCH_TOWER  )
+        call GuardSecondary( 1, 1, BURROW           )
+        call GuardSecondary( 1, 2, ORC_WATCH_TOWER  )
 
-        call SetBuildUnit( 1, ORC_BARRACKS  )
-        call SetBuildUnit( 1, FORGE         )
-        call SetBuildUnit( 1, VOODOO_LOUNGE )
-        call SetBuildUnit( 1, STRONGHOLD    )
-        call SetBuildUnit( 1, LODGE         )
-        call SetBuildUnit( 1, BESTIARY      )
-        call SetBuildUnit( 1, FORTRESS      )
-        call SetBuildUnit( 1, TOTEM         )
+        //call SetBuildUnit( 1, STRONGHOLD    )
 
         call do_upgrades()
 
@@ -920,11 +928,10 @@ function build_sequence takes nothing returns nothing
     elseif c_food_used >= UPKEEP_TIER1 then
         call do_upgrades()
     endif
-
     call BasicExpansion( c_mines < 2, GREAT_HALL )
     call GuardSecondary( 1, 1, BURROW )
     call GuardSecondary( 1, 2, ORC_WATCH_TOWER )
-
+    call MeleeTownHall(  1, VOODOO_LOUNGE    )
     if c_food_used >= UPKEEP_TIER2 - 10 and c_gold < 2000 then
         return
     endif
@@ -967,7 +974,7 @@ function build_sequence takes nothing returns nothing
     if c_food_made > 100 and c_food_made - c_food_used < 4 then  // can build more food
         call SetBuildUnit( c_burrow + 1, BURROW )
     endif
-    if shop == null or not UnitAlive(shop) then
+    if c_voodoo_done > 0 and (shop == null or not UnitAlive(shop)) then
         call SetShop()
     endif
 endfunction
