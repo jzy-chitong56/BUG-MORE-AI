@@ -8,14 +8,15 @@ function ZeppelinFollowJob takes nothing returns nothing
   local unit u = null
   local location heroloc = null
   call DisplayToAllJobDebug("ZEPPELIN_FOLLOW Start")
-  if GetUnitCountDone(old_id[neutral_zeppelin]) > 0 then
+  if GetUnitCountDone(old_id[neutral_zeppelin]) + GetUnitCountDone('uarb') > 0 then
     set g = CreateGroup()
     call GroupEnumUnitsOfPlayer(g, ai_player, null)
     call GroupRemoveUnit(g, follow_zeppelin)
     call GroupRemoveUnit(g, build_zeppelin)
-    set g = SelectById(g, old_id[neutral_zeppelin], true)
+    set g = SelectByIdOr(g, old_id[neutral_zeppelin], 'uarb', true)
     //set g = SelectByOrderOr(g, 0, order_attack, true)
     set g = SelectByAlive(g, true)
+    set g = SelectByHidden(g, false)
     set g = SelectByUnitStandard(g, true)
     set g = SelectByUnitFree(g, true)
     set cg = CopyGroup(g, cg)

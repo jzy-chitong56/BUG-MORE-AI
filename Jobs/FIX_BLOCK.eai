@@ -250,7 +250,7 @@ function FixBlockJob takes nothing returns nothing
         if i == OrderId("harvest") then
           call TryFixBlock(1, l, 1200)
         else
-          call TryFixBlock(0, l, 550)
+          call TryFixBlock(0, l, 600)
         endif
         call TryFixBlock(3, home_location, 1000)
         call RemoveLocation(l)
@@ -349,6 +349,14 @@ function FixBlockJob takes nothing returns nothing
     endloop
     set u = null
   endif
+  set i = 0
+  loop
+    exitwhen i >= max_towns
+    if own_town_loc[i] != null and own_town_dist[i] > 1300 then
+      call TryFixBlock(0, own_town_loc[i], 600)
+    endif
+    set i = i + 1
+  endloop
   set t = null
   call TQAddJob(5, FIX_BLOCK, 0)
 endfunction
