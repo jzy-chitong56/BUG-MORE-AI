@@ -282,6 +282,7 @@ endfunction
 
 function SkillArraysfix takes nothing returns integer
     local integer level = GetHeroLevelAI()
+    local integer id = GetHeroId()
     if level > max_hero_level then
         set max_hero_level = level
     endif
@@ -310,13 +311,13 @@ function SkillArraysfix takes nothing returns integer
     if herounit[4] != null and UnitAlive(herounit[4]) then
         call SelectHeroSkill(herounit[4], skills4[level])
     endif
-    if GetHeroId() == hero_id then
+    if id == hero_id then
         return skills1[level]
-    elseif GetHeroId() == hero_id2 then
+    elseif id == hero_id2 then
         return skills2[level]
-    elseif GetHeroId() == hero_id3 then
+    elseif id == hero_id3 then
         return skills3[level]
-    elseif GetHeroId() == hero_id4 then
+    elseif id == hero_id4 then
         return skills4[level]
     endif
     return 0
@@ -473,10 +474,10 @@ endfunction
 function init_vars takes nothing returns nothing
 
     set b_acid_breath       = GetUpgradeLevel(UPG_CHIM_ACID) >= 1
-    set b_hero1_done        = GetUnitCountDone(hero_id) > 0
-    set b_hero2_done        = GetUnitCountDone(hero_id2) > 0
-    set b_hero3_done        = GetUnitCountDone(hero_id3) > 0
-    set b_hero4_done        = GetUnitCountDone(hero_id4) > 0
+    set b_hero1_done        = b_hero1_done or GetUnitCountDone(hero_id) > 0
+    set b_hero2_done        = b_hero2_done or GetUnitCountDone(hero_id2) > 0
+    set b_hero3_done        = b_hero3_done or GetUnitCountDone(hero_id3) > 0
+    set b_hero4_done        = b_hero4_done or GetUnitCountDone(hero_id4) > 0
     set c_altar_done        = GetUnitCountDone(ELF_ALTAR)
     set c_archer            = GetUnitCount(ARCHER)
     set c_archer_done       = GetUnitCountDone(ARCHER)
@@ -527,7 +528,7 @@ function init_vars takes nothing returns nothing
 
     if basic_opening then
 
-        if b_hero2_done or (MeleeDifficulty() == MELEE_NEWBIE and c_moon_well_done >= 4) then
+        if c_tree_ages_done > 0 then
             set basic_opening = false
         endif
 
@@ -813,17 +814,11 @@ function build_sequence takes nothing returns nothing
         call SetBuildUpgr(  1, UPG_MOON_ARMOR   )
         call SetBuildUnit(  4, MOON_WELL        )
 
-        if MeleeDifficulty() != MELEE_NEWBIE then
+        if c_tree_ages_done > 0 and MeleeDifficulty() != MELEE_NEWBIE then
             call SetBuildUnit(  1, hero_id2     )
         endif
 
         return
-    endif
-
-    if c_tree_life < 1 and c_wisp_done > 0 then
-        call MeleeTownHall( 0, TREE_LIFE )
-        call MeleeTownHall( 1, TREE_LIFE )
-        call MeleeTownHall( 2, TREE_LIFE )
     endif
 
     if c_tree_life_done > 0 then 
@@ -846,6 +841,18 @@ function build_sequence takes nothing returns nothing
         call SetBuildNext( 15, WISP )
     endif
 
+    if c_tree_life < 1 and c_wisp_done > 0 then
+        call MeleeTownHall( 0, TREE_LIFE )
+        call MeleeTownHall( 1, TREE_LIFE )
+        call MeleeTownHall( 2, TREE_LIFE )
+    endif
+
+    // get enough moon wells to cover food need
+    //
+    if c_food_used + 6 > c_food_made then
+        call SetBuildUnit( c_moon_well_done + 1, MOON_WELL )
+    endif
+
     // having enough gold is the highest priority
     //
     if c_gold_owned < 2000 then
@@ -853,12 +860,6 @@ function build_sequence takes nothing returns nothing
         call GuardSecondary( 1, 1, ANCIENT_PROTECT )
         call GuardSecondary( 1, 2, ANCIENT_PROTECT )
         call GuardSecondary( 1, 1, MOON_WELL )
-    endif
-
-    // get enough moon wells to cover food need
-    //
-    if c_food_used + 7 > c_food_made then
-        call SetBuildUnit( c_moon_well_done + 1, MOON_WELL )
     endif
 
     // recover heroes for basic defense
@@ -881,7 +882,25 @@ function build_sequence takes nothing returns nothing
     else
         call SetBuildUnit( 1, ELF_ALTAR )
     endif
-
+    if GetUnitCount(TREE_LIFE) < 1 then
+        call SetBuildUnit( 1, TREE_LIFE   )
+    endif
+    if GetUnitCountDone(TREE_LIFE) > 0 and GetUnitCount(TREE_AGES) < 1 then
+        call SetBuildUnit( 1, TREE_AGES   )
+    endif
+    call SetBuildUnit( 1, ANCIENT_WAR   )
+    call SetBuildUnit( 1, HUNTERS_HALL  )
+    call SetBuildUnit( 1, DEN_OF_WONDERS )
+    if c_tree_ages_done > 0 then
+        call SetBuildUnit( 1, ANCIENT_LORE  )
+        call SetBuildUnit( 1, ANCIENT_WIND  )
+    endif
+    if b_hero2_done and GetUnitCountDone(TREE_AGES) > 0 and GetUnitCount(TREE_ETERNITY) < 1 then
+        call SetBuildUnit( 1, TREE_ETERNITY )
+    endif
+    if GetUnitCountDone(TREE_ETERNITY) > 0 then
+        call SetBuildUnit(  1, CHIMAERA_ROOST   )
+    endif
     // the primary melee force is the mountain giant
     //
     set primary_melee = c_lore_done >= 1 and c_wonders_done >= 1 and c_tree_ages_done >= 1
@@ -891,7 +910,6 @@ function build_sequence takes nothing returns nothing
     // the backup melee force is the huntress
     //
     else
-        call SetBuildUnit( 1, ANCIENT_WAR   )
         if c_hunt_hall_done > 0 and c_war_done > 0 then
             call SetBuildNext( 3, HUNTRESS      )
         endif
@@ -905,7 +923,6 @@ function build_sequence takes nothing returns nothing
     // the backup ranged force is the archer
     //
     else
-        call SetBuildUnit( 1, ANCIENT_WAR   )
         call SetBuildUnit( 3, ARCHER        )
     endif
 
@@ -925,15 +942,6 @@ function build_sequence takes nothing returns nothing
         call GuardSecondary( 1, 2, ANCIENT_PROTECT )
         call GuardSecondary( 1, 2, MOON_WELL )
 
-        call SetBuildUnit(  1, ANCIENT_WAR      )
-        call SetBuildUnit(  1, HUNTERS_HALL     )
-        call SetBuildUnit(  1, TREE_AGES        )
-        call SetBuildUnit(  1, DEN_OF_WONDERS   )
-        call SetBuildUnit(  1, ANCIENT_LORE     )
-        call SetBuildUnit(  1, TREE_ETERNITY    )
-        call SetBuildUnit(  1, ANCIENT_WIND     )
-        call SetBuildUnit(  1, CHIMAERA_ROOST   )
-
         call do_upgrades()
 
         if c_gold > 2000 then
@@ -946,12 +954,11 @@ function build_sequence takes nothing returns nothing
     elseif c_food_used >= UPKEEP_TIER1 then
         call do_upgrades()
     endif
-
     call BasicExpansion( c_mines < 2, TREE_LIFE )
     call GuardSecondary( 1, 1, ANCIENT_PROTECT )
     call GuardSecondary( 1, 2, ANCIENT_PROTECT )
     call GuardSecondary( 1, 2, MOON_WELL )
-
+    call MeleeTownHall( 1, DEN_OF_WONDERS )
     if c_food_used >= UPKEEP_TIER2 - 10 and c_gold < 2000 then
         return
     endif
@@ -1001,7 +1008,7 @@ function build_sequence takes nothing returns nothing
     if c_food_made > 100 and c_food_made - c_food_used < 4 then  // can build more food
         call SetBuildUnit( c_moon_well + 1, MOON_WELL )
     endif
-    if shop == null or not UnitAlive(shop) then
+    if c_wonders_done > 0 and (shop == null or not UnitAlive(shop)) then
         call SetShop()
     endif
 endfunction
