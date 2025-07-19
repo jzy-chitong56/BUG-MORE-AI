@@ -1,4 +1,4 @@
- //==================================================================================================
+//==================================================================================================
 //  $Id: common.ai,v 1.68 2003/05/12 02:34:18 bfitch Exp $    (the base blizzard version 1.19 - 1.20c)
 //
 //  AMAI (Advanced Melee AI) common.ai by Strategy Master
@@ -662,6 +662,8 @@ globals
 
     unit follow_zeppelin = null
     boolean zeppelin_following = false
+    string zeppelin_name = "goblinzeppelin"
+    string airbarge_name = "airbarge"
 
     boolean array neutral_available
     unit array nearest_neutral
@@ -5243,22 +5245,32 @@ endfunction
 //==========================================================================
 // (AMAI)	GetUnusedZeppelin
 //==========================================================================
-function GetUnusedZeppelinNearUnit takes unit ru, unit nu returns unit
+function GetUnusedZeppelin takes string s, unit ru, location l returns unit
   local group g = CreateGroup()
-  local location unitloc = GetUnitLoc(nu)
-
-  call GroupEnumUnitsOfType(g, "goblinzeppelin", null)
+  call GroupEnumUnitsOfType(g, s, null)
   set g = SelectByPlayer(g, ai_player, true)
   set g = SelectByAlive(g, true)
   set g = SelectByHidden(g, false)
   set g = SelectByOrderOr(g, 0, order_cancel, true)
   set g = SelectByUnitFree(g, true)
   set g = SelectByUnitStandard(g, true)
-  set ru = GetNearestOfGroup(ru, g, unitloc)
+  set ru = GetNearestOfGroup(ru, g, l)
   call DestroyGroup(g)
   set g = null
-  call RemoveLocation(unitloc)
-  set unitloc = null
+  return ru
+endfunction
+
+function GetUnusedZeppelinNearUnit takes unit ru, unit nu returns unit
+  local location l = GetUnitLoc(nu)
+  set ru = null
+  if GetUnitCountDone(old_id[neutral_zeppelin]) > 0 then
+    set ru = GetUnusedZeppelin(zeppelin_name, ru, l)
+  endif
+  if ru == null and GetUnitCountDone('uarb') > 0 then
+    set ru = GetUnusedZeppelin(airbarge_name, ru, l)
+  endif
+  call RemoveLocation(l)
+  set l = null
   return ru
 endfunction
 
@@ -6526,7 +6538,7 @@ endfunction
 
 function IsValidMineClaimed takes unit u returns boolean
   local integer id = GetUnitTypeId(u)
-  return GetOwningPlayer(u) != Player(PLAYER_NEUTRAL_PASSIVE) and (not race_manual_loading or id != old_id[race_manual_loading_mine]) and (not race_uses_mine_expansion or not IsUnitIdType(id, UNIT_TYPE_TOWNHALL))
+  return GetOwningPlayer(u) != Player(PLAYER_NEUTRAL_PASSIVE) and (not race_manual_loading or id != old_id[race_manual_loading_mine]) and (not race_uses_mine_expansion or IsUnitIdType(id, UNIT_TYPE_TOWNHALL))
 endfunction
 
 //============================================================================
@@ -13099,7 +13111,10 @@ function CommonSleepUntilTargetDeadAM takes unit target, boolean iscreeping, boo
   local integer attack_length_counter = 0
   local integer combat_length_counter = 0
   local unit ally_target = null
+  local unit utemp = null
+  local unit u = null
   local group g = null
+  local player p = null
   local string a = Int2Str(ALLIANCE_TARGET)
   local boolean b = ally_override and c_ally_total > 0
   local location l = null
@@ -13107,6 +13122,8 @@ function CommonSleepUntilTargetDeadAM takes unit target, boolean iscreeping, boo
     set a = null
     return
   endif
+  set g = CreateGroup()
+  set utemp = target
   set l = GetUnitLoc(target)
   set lastcaptainx = GetUnitX(target)
   set lastcaptainy = GetUnitY(target)
@@ -13151,8 +13168,56 @@ function CommonSleepUntilTargetDeadAM takes unit target, boolean iscreeping, boo
       //call Trace("Units, Creeps: " + Int2Str(GetLocationNonCreepStrength(unitx, unity, battle_radius)) + "," + Int2Str(GetLocationCreepStrength(unitx, unity, 500)))
       //	exitwhen GetLocationNonCreepStrength(unitx, unity, battle_radius) <= 0 and not UnitAlive(target) and GetLocationCreepStrength(unitx, unity, 500) <= 0
     //endif
-    set dist = DistanceBetweenPoints_kd(ally_loc, GetUnitLoc(target))
-    if b and dist > 1300 and dist < 2500 and CheckAttackWait(target) then
+    if utemp == null or not UnitAlive(utemp) or IsUnitInvisibleAM(utemp, ai_player) or IsPlayerAlly(ai_player, GetOwningPlayer(utemp)) then
+      set utemp = target
+    endif
+    if CaptainInCombat(true) and target == utemp and main_army >= 0 and army_group[main_army] != null then
+      if hero_unit[1] != null and UnitAlive(hero_unit[1]) and IsStandardUnit(hero_unit[1]) and not IsUnitBuying(hero_unit[1]) and IsUnitInGroup(hero_unit[1], army_group[main_army]) then
+        set dist_hero = DistanceBetweenPoints_dk(GetUnitLoc(hero_unit[1]), l)
+        set u = hero_unit[1]
+      endif
+      if hero_unit[2] != null and UnitAlive(hero_unit[2]) and IsStandardUnit(hero_unit[2]) and not IsUnitBuying(hero_unit[2]) and IsUnitInGroup(hero_unit[2], army_group[main_army]) then
+        set dist = DistanceBetweenPoints_dk(GetUnitLoc(hero_unit[2]), l)
+        if dist_hero < dist then
+          set dist_hero = dist
+          set u = hero_unit[2]
+        endif
+      endif
+      if hero_unit[3] != null and UnitAlive(hero_unit[3]) and IsStandardUnit(hero_unit[3]) and not IsUnitBuying(hero_unit[3]) and IsUnitInGroup(hero_unit[3], army_group[main_army]) then
+        set dist = DistanceBetweenPoints_dk(GetUnitLoc(hero_unit[3]), l)
+        if dist_hero < dist then
+          set dist_hero = dist
+          set u = hero_unit[3]
+        endif
+      endif
+      if dist_hero >= 0 and dist_hero < 1300 and DistanceBetweenPoints_dk(GetUnitLoc(u), l) > 2800 then
+        call GroupEnumUnitsInRange(g, GetUnitX(u), GetUnitY(u), battle_radius,null)
+        loop
+          set u = FirstOfGroup(g)
+          exitwhen u == null
+          if UnitAlive(u) and not IsUnitHidden(u) then
+            set p = GetOwningPlayer(u)
+            if IsPlayerEnemy(ai_player, p) and p != Player(PLAYER_NEUTRAL_AGGRESSIVE) and p != Player(PLAYER_AMAI_NEUTRAL_VICTIM) and not IsUnitInvisibleAM(u, ai_player) then
+              if IsUnitType(u, UNIT_TYPE_PEON) or IsUnitType(u, UNIT_TYPE_STRUCTURE) or IsUnitType(u, UNIT_TYPE_SUMMONED) then
+                if utemp == null then
+                  set utemp = u  // not priority
+                endif
+              else
+                set utemp = u
+                call GroupClear(g)
+              endif
+            endif
+          endif
+          call GroupRemoveUnit(g, u)
+        endloop
+      endif
+      if utemp != null then
+        call CreateDebugTagLoc("Reform get utemp", 10, GetUnitX(utemp), GetUnitY(utemp) - 300, 1.00, 0.80)
+      endif
+      set dist_hero = -1  // reset
+    endif
+    set dist = DistanceBetweenPoints_kd(ally_loc, GetUnitLoc(utemp))
+    if b and dist > 1300 and dist < 2500 and CheckAttackWait(utemp) then
       set lastcaptainx = GetLocationX(ally_loc)
       set lastcaptainy = GetLocationY(ally_loc)
       //call SetCaptainHome(, lastcaptainx, lastcaptainy)
@@ -13167,29 +13232,33 @@ function CommonSleepUntilTargetDeadAM takes unit target, boolean iscreeping, boo
       // We now control ally, only certain attack operations will let AMAI join around a shared ally target
       if b and ally_target != null and UnitAlive(ally_target) and DistanceBetweenPoints_dk(GetUnitLoc(ally_target), l) < 2500 then
         set target = ally_target
+        if utemp == target then
+          set utemp = ally_target
+        endif
         call RemoveLocation(l)
         set l = GetUnitLoc(target)
       endif
-      set lastcaptainx = GetUnitX(target)
-      set lastcaptainy = GetUnitY(target)
+      set lastcaptainx = GetUnitX(utemp)
+      set lastcaptainy = GetUnitY(utemp)
       if true or CaptainAtGoal() or (attack_length_counter == 0 and not CaptainInCombat(true)) or CaptainInCombat(true) or ally_override or c_ally_total == 0 then
-        call AttackMoveKill(target) // use attack length counter to do an ocassional attack move incase enemies nearby
+        call AttackMoveKill(utemp) // use attack length counter to do an ocassional attack move incase enemies nearby
       elseif (c_ally_total > 0 and not ally_override) then // CURRENTLY DISABLED AS FIGHTS WITH ABOVE, NEED NEW COMBAT ATTACK MOVE FUNCTION
-        call CaptainAttack(GetUnitX(target), GetUnitY(target)) // Override hardcoded logic from attackmovekill which will help allies, but this is not an attack move operation
+        call CaptainAttack(GetUnitX(utemp), GetUnitY(utemp)) // Override hardcoded logic from attackmovekill which will help allies, but this is not an attack move operation
       endif
       // Below is old style alliance but this overrides all hardcoded attacks whether you want it to or not
-      //if (GetAllianceTarget() == target) then
-      //  call AttackMoveKill(target)
+      //if (GetAllianceTarget() == utemp) then
+      //  call AttackMoveKill(utemp)
       //else
       //  call AttackMoveXY(R2I(lastcaptainx), R2I(lastcaptainy)) // Override and ignore the alliance target
       //endif
-      if (c_ally_total > 0 and ally_target == target) then
-        call CreateDebugTag("Reform until ally dead", 10, target, 1.00, 0.80)
+      if (c_ally_total > 0 and ally_target == utemp) then
+        call CreateDebugTag("Reform until ally dead", 10, utemp, 1.00, 0.80)
       else
-        call CreateDebugTag("Reform until target dead", 10, target, 1.00, 0.80)
+        call CreateDebugTag("Reform until target dead", 10, utemp, 1.00, 0.80)
       endif
+      call CreateDebugTagLoc("Reform target to utemp :" + Real2Str(DistanceBetweenPoints_dk(GetUnitLoc(utemp), l)), 10, GetUnitX(utemp), GetUnitY(utemp) + 300, 1.00, 0.80)
     endif
-    call StaggerSleep(1 * sleep_multiplier, (1 * sleep_multiplier) + 2)
+    call StaggerSleep(1 * sleep_multiplier, (1 * sleep_multiplier) + 3)
 
     if desperation_assault and attack_length_counter > attack_reform_length * 10 then
       call DesperationAssault()
@@ -13219,7 +13288,11 @@ function CommonSleepUntilTargetDeadAM takes unit target, boolean iscreeping, boo
       endif
     endif
   endloop
-  //set g = null
+  call DestroyGroup(g)
+  set g = null
+  set p = null
+  set utemp = null
+  set u = null
   call RemoveLocation(l)
   set l = null
   set a = null
@@ -13296,7 +13369,7 @@ endfunction
 
 function ClearAllianceTarget takes unit old returns nothing
   local string t = Int2Str(ALLIANCE_TARGET)
-  if old != null and GetHandleId(old) == GetStoredInteger(amaiCache, t, "0") then
+  if old == null or GetHandleId(old) == GetStoredInteger(amaiCache, t, "0") then
     call FlushStoredInteger(amaiCache, t, "0")
     call SetAllianceTarget(null)
   endif
@@ -14466,11 +14539,13 @@ if not creeping_only then	// Do the normal attack sequence
   // defend expansion from other expansion
   //
   if IsTargetGood(double_expansion_target, 10) then
+    set common = double_expansion_target  // Prevent changing of JOB
     call Trace("Double Expansion Attack")
-    call SetAllianceTargetIfLeadAndChat(double_expansion_target, C_Ally)
+    call SetAllianceTargetIfLeadAndChat(common, C_Ally)
     call FromGroupAndGhoulsAM(3)
-    call AttackMoveKillAAM(double_expansion_target, false)
-    call ClearAllianceTarget(double_expansion_target)
+    call AttackMoveKillAAM(common, false)
+    call ClearAllianceTarget(common)
+    set common = null
     return
   endif
 
