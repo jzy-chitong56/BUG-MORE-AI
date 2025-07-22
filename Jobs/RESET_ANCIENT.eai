@@ -1,7 +1,4 @@
 #IFDEF GLOBAL
-// real lastancientx = -1
-// real lastancienty = -1
-// integer retry = 0
 #ELSE
 function ResetAncient takes unit u, integer mode returns nothing
   local unit buildu = null
@@ -22,14 +19,16 @@ function ResetAncient takes unit u, integer mode returns nothing
         set mode = -3
       endif
     elseif mode == -3 then
-      if DistanceBetweenPoints_kd(home_location, GetUnitLoc(u)) < 800 then
+      set buildx = DistanceBetweenPoints_kd(home_location, GetUnitLoc(u))
+      if buildx < 800 or buildx > 1600 then
         set buildu = CreatePathingUnitFull(buildu, Player(PLAYERPASSIVE), GetUnitTypeId(u), GetUnitX(u), GetUnitY(u))
         set mode = -4
       else
         set buildu = CreatePathingUnitFull(buildu, Player(PLAYERPASSIVE), GetUnitTypeId(u), GetLocationX(home_location) + ISign() * GetRandomReal(850, 1250), GetLocationY(home_location) + ISign() * GetRandomReal(850, 1250))
       endif
     elseif mode >= 0 then
-      if DistanceBetweenPoints_kd(front_loc[mode], GetUnitLoc(u)) < 350 then
+      set buildx = DistanceBetweenPoints_kd(front_loc[mode], GetUnitLoc(u))
+      if buildx < 360 or buildx > 1600 then
         set buildu = CreatePathingUnitFull(buildu, Player(PLAYERPASSIVE), GetUnitTypeId(u), GetUnitX(u), GetUnitY(u))
         set mode = -4
       else
