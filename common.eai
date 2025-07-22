@@ -5340,13 +5340,14 @@ endfunction
 //==========================================================================
 function UnitAliveInGroup takes group rg returns boolean
   local unit u = null
-  local group g = null
-  set g = CopyGroup(rg, g)
+  local group g = rg
+  set rg = CreateGroup()
   loop
     set u = FirstOfGroup(g)
     exitwhen u == null
-    if not UnitAlive(u) then
-      call GroupRemoveUnit(rg, u)
+    if UnitAlive(u) then
+      call GroupAddUnit(rg, u)
+    else
       call GroupRemoveUnit(unit_harassing, u)
     endif
     call GroupRemoveUnit(g, u)
@@ -5362,6 +5363,7 @@ endfunction
 function GetUnitToBuy takes unit ru, unit buy_place returns unit
   local group g = CreateGroup()
   local unit u = null
+  local unit hu = null
   local real distance = 10000
   local real newdistance = 0
   set ru = null
@@ -5379,11 +5381,18 @@ function GetUnitToBuy takes unit ru, unit buy_place returns unit
         set distance = newdistance
         set ru = u
       endif
+      if not IsUnitIdType(u, UNIT_TYPE_HERO) then
+        set tu = u  // not take hero
+      endif
     endif
     call GroupRemoveUnit(g, u)
   endloop
   call DestroyGroup(g)
   set g = null
+  if tu != null and ru != null and IsUnitType(ru, UNIT_TYPE_HERO) then
+    set ru = tu
+  endif
+  set tu = null
   if ru == null then
     set ru = GetExpansionPeon()
     if ru == null or not UnitAlive(ru) then
@@ -6571,13 +6580,15 @@ function RebuildMine takes integer i returns nothing
       if GetResourceAmount(u) > 0 then
         if GetUnitTypeId(u) != e then
           if GetOwningPlayer(u) == ai_player then
-            set e = 0
             set m = null
             exitwhen true  // no own_town_mine - shouldn't happen
           endif
         else
           if GetOwningPlayer(u) == ai_player or GetOwningPlayer(u) == Player(PLAYERPASSIVE) then
             set m = u
+          else
+            set m = null
+            exitwhen true  // other player
           endif
         endif
       elseif GetOwningPlayer(u) == ai_player then
@@ -6586,6 +6597,14 @@ function RebuildMine takes integer i returns nothing
         elseif p == null and IsUnitType(u, UNIT_TYPE_PEON) then
           set p = u
         endif
+      elseif IsPlayerEnemy(GetOwningPlayer(u), ai_player) then
+        if IsUnitType(u, UNIT_TYPE_STRUCTURE) then
+          set m = null
+          exitwhen true
+        endif
+      elseif IsUnitType(u, UNIT_TYPE_TOWNHALL) then
+        set m = null
+        exitwhen true  // ally player
       endif
     endif
     call GroupRemoveUnit(g, u)
@@ -7393,7 +7412,7 @@ function ChooseExpansion takes nothing returns nothing
     endif
     set i = i + 1
   endloop
-  if TownCountDone(neutral_zeppelin) > 1 then  //first taken normal mine // Only do water expansions when more than 1 zepplin as can move units more easily
+  if TownCountDone(neutral_zeppelin) + GetUnitCountDone('uarb') > 1 then  //first taken normal mine // Only do water expansions when more than 1 zepplin as can move units more easily
     set i = 0
     loop
       exitwhen i >= water_expansion_list_length
@@ -9499,9 +9518,6 @@ function InitAMAI takes nothing returns nothing
   if own_town_mine[0] != null then
     set mine_loc = GetUnitLoc(own_town_mine[0])
   endif
-  if GetPlayerRace(ai_player) == RACE_NIGHTELF then
-    set race_max_expa_mine_distance = 448
-  endif
   set firstattackhp = c_enemy_user_total > 0 and (c_ally_total + c_enemy_total >= 10 or mapSize > 3 or (mapSize < 3 and c_enemy_user_total < 3))  // player too much or big map , first attack HumanPlayer
 //    call DebugSequenceStart("DebugRun")
 
@@ -10329,7 +10345,7 @@ function SetBuildAllAMCore takes integer t, integer qty, integer unitid, integer
     if GetItemNumber(unitid) >= qty then
       return false
     endif
-  elseif TownCountTown(unitid, town) >= qty or (buy_type[unitid] > BT_RACIAL_ITEM and not neutral_available[GetNeutralNumber(unitid)]) then
+  elseif (needed3[unitid] != UPGRADED and TownCountTown(unitid, town) >= qty) or (buy_type[unitid] > BT_RACIAL_ITEM and not neutral_available[GetNeutralNumber(unitid)]) then
     return false
   endif
   call GetBuildLock()
@@ -10455,7 +10471,7 @@ endfunction
 //============================================================================
 function BuildUnit takes integer qty, integer unitid, integer prio returns nothing
   local integer i = BLOC_STD
-  if buy_type[unitid] == BT_BUILDING and not IsRacialHallId(unitid, 1) and GetRacialBuildHallLV(unitid) > 1 then
+  if buy_type[unitid] == BT_BUILDING and needed3[unitid] != UPGRADED and not IsRacialHallId(unitid, 1) and GetRacialBuildHallLV(unitid) > 1 then
     if minebuild then
       set i = BLOC_MINE
     elseif not homebuild and not shredderbuild then
@@ -10862,7 +10878,8 @@ function InitHarass takes nothing returns nothing
   else
     call FlushParentHashtable(harass_groups)
     set harass_groups = InitHashtable()
-    call GroupRecycleHarrassPositionInstant(unit_harassing)
+    call GroupRemoveGuardPositionInstant(unit_harassing)
+    call GroupClear(unit_harassing)
   endif
   //call Trace("InitHarassEnd")
   set distraction_group = 0
@@ -11095,7 +11112,7 @@ endfunction
 //============================================================================
 
 function HasExpanded takes nothing returns boolean
-  return TownWithMine() >= 1 or GetMinesOwned() > 1 or TownCountDone(racial_expansion) > 1
+  return TownWithMine() > 0 or GetMinesOwned() > 1 or (race_manual_loading and TownCountDone(race_manual_loading_mine) > 1) or (not race_manual_loading and TownCountDone(racial_expansion) > 1)
 endfunction
 
 function GuardSecondaryAM takes integer townid, integer qty, integer unitid, integer prio returns nothing
@@ -11106,17 +11123,20 @@ endfunction
 
 function DefendTownsEx takes boolean only_done, boolean at_front, integer qty, integer unitid, integer prio returns nothing
   local integer twm = TownWithMine()
-  local integer i = twm
+  local integer i = Max(twm, 0)
+  local integer num = qty
   //call Trace("DefendTownsEx TownWithMine:" + Int2Str(twm))
   if not at_front then
     set twm = Max(twm, 1) // Home town is town 0 and exclude if at_front is not set
-  else
-    set twm = Max(twm, 0)
   endif
   set i = twm
+  set twm = twm + 2
+  if needed3[unitid] != UPGRADED then
+    set num = qty * Max(TownCountEx(racial_expansion, false, -1),1)
+  endif
   loop
-    exitwhen i > twm + 2
-    if TownHasMine(i) and TownCountEx(racial_expansion,only_done,i) > 0 and TownCountEx(unitid, only_done, -1) < qty * Max(TownCountEx(racial_expansion, false, -1),1) then
+    exitwhen i > twm
+    if TownHasMine(i) and TownCountEx(racial_expansion,only_done,i) > 0 and TownCountEx(unitid, false, i) < num then
       if i <= 0 and at_front then
         call BuildFront(qty, unitid, prio)
       else
@@ -12634,7 +12654,7 @@ function LocalizeNewTown takes integer num returns boolean
   if own_town_loc[num] != null then
     call RemoveLocation(own_town_loc[num])
   endif
-  if t == null then
+  if t == null and m == null then
 //    call DisplayToAll("Debug: New town not found")
     set own_town_loc[num] = null
     // set own_town_mine[num] = null  // As harvest naturally fades away
@@ -12642,7 +12662,11 @@ function LocalizeNewTown takes integer num returns boolean
     set m = null
     return false
   endif
-  set own_town_loc[num] = GetUnitLoc(t)
+  if t != null then
+    set own_town_loc[num] = GetUnitLoc(t)
+  else
+    set own_town_loc[num] = GetUnitLoc(m)  // ud fix
+  endif
   if own_town_mine[num] == null then
     if m != null then
       set own_town_mine[num] = m
@@ -12999,7 +13023,7 @@ function AttackGroupAddUnknown takes nothing returns nothing
     if not IsUnitType(u, UNIT_TYPE_PEON) and not IsUnitType(u, UNIT_TYPE_STRUCTURE) and not IsUnitType(u, UNIT_TYPE_SUMMONED) and not IsUnitType(u, UNIT_TYPE_SAPPER) and (IsUnitType(u, UNIT_TYPE_ATTACKS_FLYING) or IsUnitType(u, UNIT_TYPE_ATTACKS_GROUND)) and UnitAlive(u) and not IsUnitHidden(u) then
       set i = GetUnitTypeId(u)
       if i != 'ngir' then
-        call AddAssault(60,i)  //other hero and unit , like other race and custom
+        call SetMeleeGroupAM(i)  //other hero and unit , like other race and custom
       endif
     endif
     call GroupRemoveUnit(g, u)
@@ -13395,14 +13419,14 @@ function CommonSleepUntilTargetDeadAM takes unit target, boolean iscreeping, boo
           set u = hero_unit[3]
         endif
       endif
-      if dist_hero >= 0 and dist_hero < 1300 and DistanceBetweenPoints_dk(GetUnitLoc(u), l) > 2800 then
+      if dist_hero > 2800 and dist_hero < 6000 then
         call GroupEnumUnitsInRange(g, GetUnitX(u), GetUnitY(u), battle_radius,null)
         loop
           set u = FirstOfGroup(g)
           exitwhen u == null
           if UnitAlive(u) and not IsUnitHidden(u) then
             set p = GetOwningPlayer(u)
-            if IsPlayerEnemy(ai_player, p) and p != Player(PLAYERAGGRESSIVE) and p != Player(PLAYERVICTIM) and not IsUnitInvisibleAM(u, ai_player) then
+            if IsPlayerEnemy(ai_player, p) and GetPlayerId(p) < PLAYERAGGRESSIVE and not IsUnitInvisibleAM(u, ai_player) then
               if IsUnitType(u, UNIT_TYPE_PEON) or IsUnitType(u, UNIT_TYPE_STRUCTURE) or IsUnitType(u, UNIT_TYPE_SUMMONED) then
                 if utemp == null then
                   set utemp = u  // not priority
@@ -14799,6 +14823,7 @@ if not creeping_only then	// Do the normal attack sequence
         set common = null
         return
       endif
+      set common = null
     endif
   endif
 
