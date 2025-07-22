@@ -24,10 +24,8 @@ function GetMoonWell takes unit u, player p, integer id returns unit
 endfunction
 
 function HeadtoMoonWell takes unit u, integer p returns nothing
-  local real dist = 0
-  local real enemystrength = 0
-  set dist = DistanceBetweenUnits(u, nearest_moon_well)
-  set enemystrength = GetLocationNonCreepStrength(GetUnitX(u), GetUnitY(u), 800)
+  local real dist = DistanceBetweenUnits(u, nearest_moon_well)
+  local real enemystrength = GetLocationNonCreepStrength(GetUnitX(u), GetUnitY(u), 800)
   if dist >= 1000 and enemystrength > 0 and CheckBlinkAbility(u) then
     call IssuePointOrder(u, "blink", GetUnitX(nearest_moon_well), GetUnitY(nearest_moon_well))
     call IssuePointOrder(u, "smart", GetUnitX(nearest_moon_well), GetUnitY(nearest_moon_well))
@@ -62,19 +60,20 @@ function MoonWellJob takes unit u, integer p returns nothing
         if dist >= 1000 then
           if GetUnitAbilityLevel(u, 'Ashm') > 0 and (GetFloatGameState(GAME_STATE_TIME_OF_DAY) >= 18 or GetFloatGameState(GAME_STATE_TIME_OF_DAY) < 6) and not IsUnitType(u, UNIT_TYPE_HERO) then
             call IssueImmediateOrder(u, "ambush")
-          elseif CheckBlinkAbility(u) then
-            call IssuePointOrder(u, "blink", GetLocationX(home_location), GetLocationY(home_location))
+          else
+            if CheckBlinkAbility(u) then
+              call IssuePointOrder(u, "blink", GetLocationX(home_location), GetLocationY(home_location))
+            endif
             call IssuePointOrder(u, "move", GetLocationX(home_location), GetLocationY(home_location))
           endif
-        elseif dist < 1000 then
+        else
           call RecycleGuardPosition(u)  //  get some free
           call IssuePointOrder(u, "move", GetLocationX(home_location), GetLocationY(home_location))
         endif
-        call TQAddUnitJob(2, SEND_HOME, 0, u)  // 0 is home_location
       else
         call IssuePointOrder(u, "move", GetLocationX(home_location), GetLocationY(home_location))
-        call TQAddUnitJob(2, SEND_HOME, 0, u)  // 0 is home_location
       endif
+      call TQAddUnitJob(2, SEND_HOME, 0, u)  // 0 is home_location
     else
       call HeadtoMoonWell(u, p)
     endif

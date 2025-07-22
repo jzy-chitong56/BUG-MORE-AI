@@ -134,7 +134,6 @@ function HarassJob takes integer key, unit target returns nothing
   local integer timedelay = LoadInteger(additional_info, key, WINDWALK_COUNT) // Delay count so windwalkers show themselves after a period of waiting
   local boolean allair = true
   local integer enemycount = 0
-  local boolean healing = false
   call DisplayToAllJobDebug("HARASS JOB START")
   set harasser = ReturnLivingUnitsOfHashtable(additional_info, key, HARASS_UNITGROUP, harasser)
   loop
@@ -145,8 +144,7 @@ function HarassJob takes integer key, unit target returns nothing
     else
       call CreateDebugTag("Harassing Opponent", 10, u, 3.00, 1.50)
     endif
-    set healing = IsUnitInGroup(u, unit_healing)
-    if healing or GetOwningPlayer(u) != ai_player then // Another system moved unit to healing and Prevent being occupied
+    if IsUnitInGroup(u, unit_healing) or GetOwningPlayer(u) != ai_player then // Another system moved unit to healing and Prevent being occupied
       call GroupRemoveUnit(unit_harassing, u)
       call RemoveUnitFromHashtable(additional_info, key, HARASS_UNITGROUP, u)
     elseif GetUnitState(u, UNIT_STATE_LIFE) <= RMax(flee_health_percentage * GetUnitState(u, UNIT_STATE_MAX_LIFE), flee_minimum_health) and not IsUnitType(u, UNIT_TYPE_HERO) then // Not used on heroes as micro hero is in control of that

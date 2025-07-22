@@ -13,18 +13,19 @@
 #ELSE
 
 function TreeAvoid takes nothing returns nothing
-  local group g = null
+  local group g = CreateGroup()
   local unit u = null
-  set g = CopyGroup(ancient_exp_group, g)  //  Prevent blocking ancient_exp_unit
   loop
-    set u = FirstOfGroup(g)
+    set u = FirstOfGroup(ancient_exp_group)
     exitwhen u == null
-    if UnitAlive(u) then
+    if UnitAlive(u) then  //  Prevent blocking ancient_exp_unit
+      call GroupAddUnit(g, u)
       call IssuePointOrder(u, "move", GetLocationX(ancient_exp_tree) + ISign() * GetRandomInt(700, 1000), GetLocationY(ancient_exp_tree) + ISign() * GetRandomInt(-1000, -700))
     endif
-    call GroupRemoveUnit(g, u)
+    call GroupRemoveUnit(ancient_exp_group, u)
   endloop
-  call DestroyGroup(g)
+  call DestroyGroup(ancient_exp_group)
+  set ancient_exp_group = g
   set g = null
 endfunction
 
@@ -131,9 +132,9 @@ endfunction
 function GetAncientCampStrength takes nothing returns real
   if ancient_exp_creep != null and UnitAlive(ancient_exp_creep) then
     // Sum creeps and any enemy structures
-    return GetLocationEnemyStrength(GetUnitX(ancient_exp_creep), GetUnitY(ancient_exp_creep), creep_battle_radius, true)
+    return GetLocationEnemyStrength(GetUnitX(ancient_exp_creep), GetUnitY(ancient_exp_creep), creep_battle_radius, false)
   else
-    return GetLocationEnemyStrength(GetUnitX(ancient_exp_mine), GetUnitY(ancient_exp_mine), expansion_radius, true)
+    return GetLocationEnemyStrength(GetUnitX(ancient_exp_mine), GetUnitY(ancient_exp_mine), expansion_radius, false)
   endif
 endfunction
 

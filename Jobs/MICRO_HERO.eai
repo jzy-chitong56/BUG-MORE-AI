@@ -103,10 +103,10 @@ function GoHomeIfMainHero takes unit u, real x, real y, boolean knowlocation ret
     //call CaptainGoHome()
     if knowlocation then
       call TeleportCaptain(x, y)
+      set break_attack = attack_running
+      set isfleeing = true
+      set attack_running = false
     endif
-    set break_attack = attack_running
-    set isfleeing = true
-    set attack_running = false
   endif
 endfunction
 
@@ -272,7 +272,7 @@ function ExecuteSaveHero takes integer hn, integer a, unit healer returns nothin
   local location loc = null
   local integer hFountainID = GetHealthFountainID()
   local integer mFountainID = GetManaFountainID()
-
+  local integer i = 0
   if a != ACTION_DO_NOTHING and a != ACTION_TP then
     if GetUnitAbilityLevel(hero_unit[hn], 'AOwk') > 0 or GetUnitAbilityLevel(hero_unit[hn], 'ANwk') > 0 then
       if not IsUnitInvisible(hero_unit[hn], Player(PLAYER_NEUTRAL_AGGRESSIVE)) then
@@ -319,27 +319,35 @@ function ExecuteSaveHero takes integer hn, integer a, unit healer returns nothin
   if a == ACTION_FOUNTAIN then
     call CreateDebugTag("HERO: Going to Fountain", 10, hero_unit[hn], 4.00, 2.00)
     call GroupAddUnit(unit_healing, hero_unit[hn])
-    call ItemSingetp(hn,2,hFountainID)
-    call TQAddUnitJob(2, HEALTH_FOUNTAIN, 80, hero_unit[hn])
+    if ItemSingetp(hn,2,hFountainID) then
+      set i = 3
+    endif
+    call TQAddUnitJob(i, HEALTH_FOUNTAIN, 80, hero_unit[hn])
   elseif a == ACTION_MANA_FOUNTAIN then
     call CreateDebugTag("HERO: Going to Mana Fountain", 10, hero_unit[hn], 4.00, 2.00)
     call GroupAddUnit(unit_healing, hero_unit[hn])
-    call ItemSingetp(hn,2,mFountainID)
-    call TQAddUnitJob(2, MANA_FOUNTAIN, 80, hero_unit[hn])
+    if ItemSingetp(hn,2,mFountainID) then
+      set i = 3
+    endif
+    call TQAddUnitJob(i, MANA_FOUNTAIN, 80, hero_unit[hn])
   elseif a == ACTION_GO_HOME then
     //call UnitGoHome(hero_unit[hn])
     call CreateDebugTag("HERO: Going Home", 10, hero_unit[hn], 4.00, 2.00)
     call GroupAddUnit(unit_healing, hero_unit[hn])
-    call ItemSingetp(hn,1,0)
-    call TQAddUnitJob(2, SEND_HOME, 0, hero_unit[hn])
+    if ItemSingetp(hn,1,0) then
+      set i = 3
+    endif
+    call TQAddUnitJob(i, SEND_HOME, 0, hero_unit[hn])
   elseif a == ACTION_ZEPPELIN_HOME then
     call CreateDebugTag("HERO: Zeppelin Home", 10, hero_unit[hn], 4.00, 2.00)
     call GroupAddUnit(unit_rescueing, follow_zeppelin)
     set g = CreateGroup()
     call GroupAddUnit(g, follow_zeppelin)
     call GroupAddUnit(unit_healing, hero_unit[hn])
-    call ItemSingetp(hn,1,0)
-    call TQAddGroupJob(2, ZEPPELIN_MOVE, ZTARGET_HOME, hero_unit[hn], g)
+    if ItemSingetp(hn,1,0) then
+      set i = 3
+    endif
+    call TQAddGroupJob(i, ZEPPELIN_MOVE, ZTARGET_HOME, hero_unit[hn], g)
     set g = null
   elseif a == ACTION_ZEPPELIN_FOUNTAIN then
     call CreateDebugTag("HERO: Zepplin to fountain", 10, hero_unit[hn], 4.00, 2.00)
@@ -347,8 +355,10 @@ function ExecuteSaveHero takes integer hn, integer a, unit healer returns nothin
     set g = CreateGroup()
     call GroupAddUnit(g, follow_zeppelin)
     call GroupAddUnit(unit_healing, hero_unit[hn])
-    call ItemSingetp(hn,2,hFountainID)
-    call TQAddGroupJob(2, ZEPPELIN_MOVE, ZTARGET_FOUNTAIN, hero_unit[hn], g)
+    if ItemSingetp(hn,2,hFountainID) then
+      set i = 3
+    endif
+    call TQAddGroupJob(i, ZEPPELIN_MOVE, ZTARGET_FOUNTAIN, hero_unit[hn], g)
     set g = null
   elseif a == ACTION_TP and not teleporting then
     call CreateDebugTag("Hero: Town Portalling", 10, hero_unit[hn], 4.00, 2.00)
@@ -356,8 +366,10 @@ function ExecuteSaveHero takes integer hn, integer a, unit healer returns nothin
   elseif a == ACTION_MOONWELLS then
     call CreateDebugTag("HERO: Going to Moonwells", 10, hero_unit[hn], 4.00, 2.00)
     call GroupAddUnit(unit_healing,hero_unit[hn])
-    call ItemSingetp(hn,1,0)
-    call TQAddUnitJob(2, MOON_WELL_CONTROL, 80, hero_unit[hn])
+    if ItemSingetp(hn,1,0) then
+      set i = 3
+    endif
+    call TQAddUnitJob(i, MOON_WELL_CONTROL, 80, hero_unit[hn])
   endif
 endfunction
 
@@ -435,14 +447,14 @@ function MicroHeroJob takes integer hn returns nothing
           set teleporting = true
           call TQAddUnitJob(0.5, TELEPORT, 0, hero_unit[hn])
         endif
-        call TQAddJob(4, MICRO_HERO, hn)
+        call TQAddJob(2, MICRO_HERO, hn)
         return
       endif
     endif
     if not healing and not attack_running and not retreat_controlled and not town_threatened and not TownThreatened() and not teleporting and major_hero != null and UnitAlive(major_hero) then
       if ItemSingetp(hn,0,0) then
         call TQAddUnitJob(2, RESET_GUARD_POSITION, 0, hero_unit[hn])
-        call TQAddJob(4, MICRO_HERO, hn)
+        call TQAddJob(2, MICRO_HERO, hn)
         return
       endif
     endif
