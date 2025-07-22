@@ -29,8 +29,8 @@ jobs:
       uses: TheDoctor0/zip-release@0.7.6
       with:
         filename: amai汉化特别版三系免编译脚本.zip
-        path: D:/a/AMAI-CN/AMAI-CN/Scripts
-        directory: D:/a/AMAI-CN/AMAI-CN/Scripts
+        path: D:/a/BUG-MORE-AI/BUG-MORE-AI/Scripts
+        directory: D:/a/BUG-MORE-AI/BUG-MORE-AI/Scripts
     - name: 上传压缩包
       uses: actions/upload-artifact@v4
       with:
