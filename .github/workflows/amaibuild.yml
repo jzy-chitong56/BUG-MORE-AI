@@ -45,3 +45,5 @@ jobs:
           ./Scripts/bug_more_ai_经典版免编译脚本.zip
     - name: 下载压缩包
       uses: actions/download-artifact@v4
+      with:
+        merge-multiple: true
