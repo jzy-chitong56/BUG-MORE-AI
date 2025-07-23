@@ -37,17 +37,22 @@ jobs:
         filename: bug_more_ai_经典版免编译脚本.zip
         path: D:/a/BUG-MORE-AI/BUG-MORE-AI/Scripts/TFT
         directory: D:/a/BUG-MORE-AI/BUG-MORE-AI/Scripts
-    - name: 上传压缩包
+    - name: 上传战网版压缩包
       uses: actions/upload-artifact@v4
       with:
-        path: |
-          ./Scripts/bug_more_ai_战网版免编译脚本.zip
+        name: bug_more_ai_战网版免编译脚本
+        path: ./Scripts/bug_more_ai_战网版免编译脚本.zip
           ./Scripts/bug_more_ai_经典版免编译脚本.zip
+    - name: 上传经典版压缩包
+      uses: actions/upload-artifact@v4
+      with:
+        name: bug_more_ai_经典版免编译脚本
+        path: ./Scripts/bug_more_ai_经典版免编译脚本.zip
     - name: 下载战网版压缩包
       uses: actions/download-artifact@v4
       with:
-        name: bug_more_ai_战网版免编译脚本.zip
+        name: bug_more_ai_战网版免编译脚本
     - name: 下载经典版压缩包
       uses: actions/download-artifact@v4
       with:
-        name: bug_more_ai_经典版免编译脚本.zip
+        name: bug_more_ai_经典版免编译脚本
