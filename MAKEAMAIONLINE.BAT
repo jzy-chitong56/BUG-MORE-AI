@@ -6,6 +6,7 @@ ECHO 战网版
 SET RESULTMAKEREF=0
 mkdir Scripts\REFORGED\
 mkdir Scripts\REFORGED\vsai\
+mkdir Scripts\REFORGED\ZIP\
 mkdir REFORGED\tmp\
 ECHO _____________________________
 ECHO 创建公共库
@@ -111,6 +112,7 @@ ECHO 经典版
 SET RESULTMAKETFT=0
 mkdir Scripts\TFT\
 mkdir Scripts\TFT\vsai\
+mkdir Scripts\TFT\ZIP\
 mkdir TFT\tmp\
 ECHO _____________________________
 ECHO 创建公共库
