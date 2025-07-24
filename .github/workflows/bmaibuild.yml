@@ -8,7 +8,7 @@ on:
       - 'common.eai'
       - 'races.eai'
       - 'custom_common.eai'
-      - '.github/workflows/amaibuild.yml'
+      - '.github/workflows/bmaibuild.yml'
 jobs:
   amai:
     runs-on: windows-2022
@@ -30,20 +30,20 @@ jobs:
       with:
         filename: bug_more_ai_战网版免编译脚本.zip
         path: D:/a/BUG-MORE-AI/BUG-MORE-AI/Scripts/REFORGED
-        directory: D:/a/BUG-MORE-AI/BUG-MORE-AI/Scripts
+        directory: D:/a/BUG-MORE-AI/BUG-MORE-AI/ZIP/REFORGED
     - name: 打包经典版脚本
       uses: TheDoctor0/zip-release@0.7.6
       with:
         filename: bug_more_ai_经典版免编译脚本.zip
         path: D:/a/BUG-MORE-AI/BUG-MORE-AI/Scripts/TFT
-        directory: D:/a/BUG-MORE-AI/BUG-MORE-AI/Scripts
+        directory: D:/a/BUG-MORE-AI/BUG-MORE-AI/ZIP/TFT
     - name: 上传战网版脚本压缩包
       uses: actions/upload-artifact@v4
       with:
         name: bug_more_ai_战网版免编译脚本
-        path: ./Scripts/bug_more_ai_战网版免编译脚本.zip
+        path: ./ZIP/REFORGED
     - name: 上传经典版脚本压缩包
       uses: actions/upload-artifact@v4
       with:
         name: bug_more_ai_经典版免编译脚本
-        path: ./Scripts/bug_more_ai_经典版免编译脚本.zip
+        path: ./ZIP/TFT
