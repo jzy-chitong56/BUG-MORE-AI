@@ -178,11 +178,11 @@ function global_build_sequence takes nothing returns nothing
       call AddUnitToAntimagic(ARCHER,1,0)
       call AddUnitToAntiunarmored(DRYAD,7,0)
       call AddUnitToAntiunarmored(ARCHER,3,0)
-      call AddUnitToAntiunarmored(HIPPO_RIDER,3,0)
+      //call AddUnitToAntiunarmored(HIPPO_RIDER,3,0)
       call AddUnitToAntiunarmored(BALLISTA,1,-1)
       call AddUnitToAntilightarmor(DRYAD,4,0)
       call AddUnitToAntilightarmor(ARCHER,3,0)
-      call AddUnitToAntilightarmor(HIPPO_RIDER,2,0)
+      //call AddUnitToAntilightarmor(HIPPO_RIDER,2,0)
       call AddUnitToAntilightarmor(DRUID_TALON,1,0)
       call AddUnitToAntimediumarmor(DRUID_CLAW,4,-1)
       call AddUnitToAntimediumarmor(HUNTRESS,3,-1)
@@ -214,12 +214,12 @@ function global_build_sequence takes nothing returns nothing
       call AddUnitToAntimagic(ARCHER,1,0)
       call AddUnitToAntiunarmored(DRYAD,4,0)
       call AddUnitToAntiunarmored(ARCHER,1,0)
-      call AddUnitToAntiunarmored(HIPPO_RIDER,1,0)
+      //call AddUnitToAntiunarmored(HIPPO_RIDER,1,0)
       call AddUnitToAntiunarmored(BALLISTA,1,-1)
       call AddUnitToAntilightarmor(DRYAD,7,0)
       call AddUnitToAntilightarmor(DRUID_TALON,1,0)
       call AddUnitToAntilightarmor(ARCHER,1,0)
-      call AddUnitToAntilightarmor(HIPPO_RIDER,2,0)
+      //call AddUnitToAntilightarmor(HIPPO_RIDER,2,0)
       call AddUnitToAntilightarmor(CHIMAERA,4,-1)
       call AddUnitToAntimediumarmor(DRUID_CLAW,8,-1)
       call AddUnitToAntimediumarmor(HUNTRESS,1,-1)
@@ -376,7 +376,7 @@ if tier == 3 then
       call BuildUnit(4, DRUID_TALON, 64)
       call BuildUnit(2, CHIMAERA, 62)
       call BuildUnit(1, HIPPO, 35)
-      call BuildUnit(1, HIPPO_RIDER, 30)
+      //call BuildUnit(1, HIPPO_RIDER, 30)
 
       call BuildUnit(1, hero[1], 80)
       call BuildUnit(1, hero[2], 64)
@@ -424,7 +424,7 @@ elseif tier == 2 then
       call BuildUnit(2, BALLISTA, 42)
       call BuildUnit(2, DRUID_TALON, 48)
       call BuildUnit(1, HIPPO, 35)
-      call BuildUnit(1, HIPPO_RIDER, 30)
+      //call BuildUnit(1, HIPPO_RIDER, 30)
       call BuildUnit(1, TREE_ETERNITY, 45)
       call BuildUnit(1, hero[1], 80)
       call BuildUnit(1, hero[2], 70)
@@ -819,12 +819,12 @@ function init_strategy_Hippo takes nothing returns nothing
 endfunction
 function build_sequence_Hippo takes nothing returns nothing
 if tier == 3 then
-      call BuildUnit(12, HIPPO_RIDER, 70)
+      //call BuildUnit(12, HIPPO_RIDER, 70)
       call BuildUnit(16, ARCHER, 50)
-      if (10 - TownCountDone(HIPPO_RIDER)) > 0 then
-        call BuildUnit((10 - TownCountDone(HIPPO_RIDER)), HIPPO, 30)
-      elseif TownCountDone(HIPPO) < 4 then
-        call BuildUnit(2, HIPPO, 40)
+      if TownCountDone(HIPPO_RIDER) > 4 then
+        call BuildUnit(2, HIPPO, 30)
+      else
+        call BuildUnit(4, HIPPO, 40)
       endif
       call BuildUnit(1, hero[1], 80)
       call BuildUnit(1, hero[2], 60)
@@ -867,12 +867,12 @@ if tier == 3 then
 
 elseif tier == 2 then
 
-      call BuildUnit(8, HIPPO_RIDER, 70)
+      //call BuildUnit(8, HIPPO_RIDER, 70)
       call BuildUnit(12, ARCHER, 50)
-      if (6 - TownCountDone(HIPPO_RIDER)) > 0 then
-        call BuildUnit((6 - TownCountDone(HIPPO_RIDER)), HIPPO, 30)
-      elseif TownCountDone(HIPPO) < 4 then
-        call BuildUnit(2, HIPPO, 40)
+      if TownCountDone(HIPPO_RIDER) > 3 then
+        call BuildUnit(2, HIPPO, 30)
+      else
+        call BuildUnit(4, HIPPO, 40)
       endif
       call BuildUnit(1, TREE_ETERNITY, 50)
       call BuildUnit(1, hero[1], 80)
@@ -1269,7 +1269,7 @@ function build_sequence_HippoChim takes nothing returns nothing
 if tier == 3 then
 
       call BuildUnit(4, FAERIE_DRAGON, 50)
-      call BuildUnit(10, HIPPO_RIDER, 70)
+      //call BuildUnit(10, HIPPO_RIDER, 70)
       call BuildUnit(12, ARCHER, 50)
       if TownCountDone(HIPPO_RIDER) > 2 then
         call BuildUnit(2, HIPPO, 30)
@@ -1319,12 +1319,12 @@ if tier == 3 then
 elseif tier == 2 then
 
       call BuildUnit(4, FAERIE_DRAGON, 40)
-      call BuildUnit(6, HIPPO_RIDER, 70)
+      //call BuildUnit(6, HIPPO_RIDER, 70)
       call BuildUnit(6, ARCHER, 50)
-      if (4 - TownCountDone(HIPPO_RIDER)) > 0 then
-        call BuildUnit((4 - TownCountDone(HIPPO_RIDER)), HIPPO, 30)
-      elseif TownCountDone(HIPPO) < 4 then
-        call BuildUnit(2, HIPPO, 40)
+      if TownCountDone(HIPPO_RIDER) > 2 then
+        call BuildUnit(2, HIPPO, 30)
+      else
+        call BuildUnit(4, HIPPO, 40)
       endif
       call BuildUnit(1, TREE_ETERNITY, 55)
       call BuildUnit(1, hero[1], 80)
