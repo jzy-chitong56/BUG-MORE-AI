@@ -1271,10 +1271,10 @@ if tier == 3 then
       call BuildUnit(4, FAERIE_DRAGON, 50)
       call BuildUnit(10, HIPPO_RIDER, 70)
       call BuildUnit(12, ARCHER, 50)
-      if (8 - TownCountDone(HIPPO_RIDER)) > 0 then
-        call BuildUnit((8 - TownCountDone(HIPPO_RIDER)), HIPPO, 30)
-      elseif TownCountDone(HIPPO) < 4 then
-        call BuildUnit(2, HIPPO, 40)
+      if TownCountDone(HIPPO_RIDER) > 2 then
+        call BuildUnit(2, HIPPO, 30)
+      else
+        call BuildUnit(4, HIPPO, 40)
       endif
       call BuildUnit(5, CHIMAERA, 46)
       call BuildUnit(1, hero[1], 80)
