@@ -10738,17 +10738,16 @@ endfunction
 
 #INCLUDETABLE <$VER$\Strengths.txt>
 function AddUnitToAnti%1 takes integer u, integer percent, integer attack_mode returns nothing
-	// attack_mode: -1 just melee, 0 both, 1 just air
-	if enemy_air_proportion > 0.8 then
-		if attack_mode == -1 then
-			return
+	if percent > 0 then  // attack_mode: -1 just melee, 0 both, 1 just air
+		if enemy_air_proportion > 0.8 then
+			if attack_mode == -1 then
+				return
+			endif
+		elseif enemy_air_proportion < 0.2 then
+			if attack_mode == 1 then
+				return
+			endif
 		endif
-	elseif enemy_air_proportion < 0.2 then
-		if attack_mode == 1 then
-			return
-		endif
-	endif
-	if percent > 0 then
 		set dyanti_%1[totalanti_%1]= u
 		set dychance_%1[totalanti_%1]= percent
 		set totalanti_%1 = totalanti_%1 + 1
@@ -10819,45 +10818,6 @@ function DynamicStrategySelector takes nothing returns nothing
 	set strength_count = strength_count + 1
 	#ENDINCLUDE
 
-endfunction
-
-// Change unit attack mode , eliminating the time required for build and immediately allowing existing units to cope with strength imbalance
-// Original intention to control units that AI does not control , but use hard-coding
-// now just have air , If possible , please add , one strength one function
-function StrengthDynamicDistribute takes nothing returns nothing
-  local group g = CreateGroup()
-  local unit u = null
-  local integer c = 0  // Allow random retention strength and accelerate cycle
-  local integer id = 0
-  local integer i = TownCountDone(DRUID_TALON) + TownCountDone(GARGOYLE)
-  local integer order = 852155
-  local boolean anti = enemy_air_proportion > 0.65
-  call Trace("Strength Dynamic Distribute - Air")
-  if i > 0 then
-    if anti then
-      set i = R2I(i * enemy_air_proportion)
-    else
-      set order = 852156
-      set i = R2I(i * (1 - enemy_air_proportion))
-    endif
-    call GroupEnumUnitsOfPlayer(g, ai_player, null)
-    loop
-      set u = FirstOfGroup(g)
-      exitwhen u == null or c >= i
-      if UnitAlive(u) and not IsUnitHidden(u) then
-        set id = GetUnitTypeId(u)
-        if (id == 'edot' or id == 'edtm') and IsStandardUnit(u) and not IsUnitBuying(u) and IssueImmediateOrderById(u, order) then
-          set c = c + 1
-        elseif id == 'ugar' and AatpAbility and (GetUnitAbilityLevel(u, 'Batp') == 0) == anti and IsStandardUnit(u) and not IsUnitBuying(u) and IssueImmediateOrderById(u, 852677) then  // check 'ugar' Ability ,  prevent war3 is old ver or map is ROC
-          set c = c + 1
-        endif
-      endif
-      call GroupRemoveUnit(g, u)
-    endloop
-    set u = null
-  endif
-  call DestroyGroup(g)
-  set g = null
 endfunction
 
 //============================================================================
@@ -12569,12 +12529,13 @@ endfunction
 function LocalizeOldTown takes integer num returns boolean
   local group g = CreateGroup()
   local unit u = null
+  local integer id = old_id[racial_expansion]
   call GroupEnumUnitsInRangeOfLoc(g, own_town_loc[num], 1200, null)
   loop
     set u = FirstOfGroup(g)
     exitwhen u == null
     if IsUnitType(u, UNIT_TYPE_STRUCTURE) and GetOwningPlayer(u) == ai_player and UnitAlive(u) and not IsUnitHidden(u) then
-      exitwhen GetTownUnitCount(GetUnitTypeId(u), num, true) > 0 or IsUnitType(u, UNIT_TYPE_TOWNHALL)
+      exitwhen GetTownUnitCount(GetUnitTypeId(u), num, true) > 0 or IsUnitType(u, UNIT_TYPE_TOWNHALL) or GetUnitTypeId(u) == id
     endif
     call GroupRemoveUnit(g,u)
   endloop
@@ -12637,12 +12598,12 @@ function LocalizeNewTown takes integer num returns boolean
     if UnitAlive(u) and not IsUnitHidden(u) then
       set h = IsUnitType(u, UNIT_TYPE_TOWNHALL)
       if (h or GetUnitTypeId(u) == e) and CheckUnitNewTown(u) then
-        if m == null and own_town_mine[num] == null and b and not h then
-          set m = u
-        endif
-        if h and t == null then
+        if h then
           set t = u
-          exitwhen m != null
+          exitwhen true
+        elseif b then
+          set m = u
+          exitwhen true
         endif
       endif
     endif
@@ -12659,14 +12620,12 @@ function LocalizeNewTown takes integer num returns boolean
     set own_town_loc[num] = null
     // set own_town_mine[num] = null  // As harvest naturally fades away
     set own_town_dist[num] = 0
-    set m = null
     return false
   endif
-  if t != null then
-    set own_town_loc[num] = GetUnitLoc(t)
-  else
-    set own_town_loc[num] = GetUnitLoc(m)  // ud fix
+  if t == null then
+    set t = m  // ud fix
   endif
+  set own_town_loc[num] = GetUnitLoc(t)
   if own_town_mine[num] == null then
     if m != null then
       set own_town_mine[num] = m
@@ -12968,7 +12927,7 @@ endfunction
 //============================================================================
 function ConversionsAM takes integer desire, integer unitid returns nothing
 #INCLUDETABLE <$VER$\UnitConversions.txt> #EFR
-  if unitid == %1 then
+  if unitid == %1 and %4 then
     call MergeUnits(desire,o%2,o%3,o%1)
   endif
 #ENDINCLUDE
@@ -13028,6 +12987,47 @@ function AttackGroupAddUnknown takes nothing returns nothing
     endif
     call GroupRemoveUnit(g, u)
   endloop
+  call DestroyGroup(g)
+  set g = null
+endfunction
+
+// Change unit attack mode , eliminating the time required for build and immediately allowing existing units to cope with strength imbalance
+// Original intention to control units that AI does not control , but use hard-coding
+// now just have air , If possible , please add , one strength one function
+function AttackDynamicDistribute takes nothing returns nothing
+  local group g = CreateGroup()
+  local unit u = null
+  local integer c = 0  // Allow random retention strength and accelerate cycle
+  local integer id = 0
+  local integer i = TownCountDone(DRUID_TALON) + TownCountDone(GARGOYLE)
+  local integer order = 852155
+  local boolean anti = enemy_air_proportion > 0.65
+  call Trace("Attack Dynamic Distribute - Air")
+  if i > 0 then
+    if anti then
+      set i = R2I(i * enemy_air_proportion)
+    else
+      set order = 852156
+      set i = R2I(i * (1 - enemy_air_proportion))
+    endif
+    call GroupEnumUnitsOfPlayer(g, ai_player, null)
+    loop
+      set u = FirstOfGroup(g)
+      exitwhen u == null or c >= i
+      if UnitAlive(u) and not IsUnitHidden(u) then
+        set id = GetUnitTypeId(u)
+        if (id == 'edot' or id == 'edtm') and IsStandardUnit(u) and not IsUnitBuying(u) and IssueImmediateOrderById(u, order) then
+          set c = c + 1
+        elseif id == 'ugar' and AatpAbility and (GetUnitAbilityLevel(u, 'Batp') == 0) == anti and IsStandardUnit(u) and not IsUnitBuying(u) and IssueImmediateOrderById(u, 852677) then  // check 'ugar' Ability ,  prevent war3 is old ver or map is ROC
+          set c = c + 1
+        elseif id == 'ehpr' and anti and not IsUnitBuying(u) and IssueImmediateOrderById(u, 852509) then
+          set c = c + 1
+        endif
+      endif
+      call GroupRemoveUnit(g, u)
+    endloop
+    set u = null
+  endif
   call DestroyGroup(g)
   set g = null
 endfunction

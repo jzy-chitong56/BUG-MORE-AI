@@ -526,7 +526,7 @@ function setup_force takes boolean inj returns nothing
 #ENDINCLUDE
   call AttackGroupAddNeutrals()
   call AttackGroupAddUnknown()
-
+  call AttackDynamicDistribute()
 endfunction
 
 //============================================================================
@@ -904,7 +904,6 @@ function build_sequence_all takes nothing returns nothing
     call build_sequence()
     if set_counter == true then
       call DynamicStrategySelector()
-      call StrengthDynamicDistribute()
       set set_counter = false
     endif
     call Sleep(3 * sleep_multiplier)

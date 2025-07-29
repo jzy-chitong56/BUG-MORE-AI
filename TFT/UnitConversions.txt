@@ -1,2 +1,2 @@
-Name in AI	Merge from 1	Merge from 2
-HIPPO_RIDER	ARCHER	HIPPO
+Name in AI	Merge from 1	Merge from 2	Merge Condition
+HIPPO_RIDER	ARCHER	HIPPO	enemy_air_proportion < 0.65
