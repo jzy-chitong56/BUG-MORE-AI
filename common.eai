@@ -12999,7 +12999,7 @@ function AttackDynamicDistribute takes nothing returns nothing
   local unit u = null
   local integer c = 0  // Allow random retention strength and accelerate cycle
   local integer id = 0
-  local integer i = TownCountDone(DRUID_TALON) + TownCountDone(GARGOYLE)
+  local integer i = TownCountDone(DRUID_TALON) + TownCountDone(GARGOYLE) + TownCountDone(HIPPO_RIDER)
   local integer order = 852155
   local boolean anti = enemy_air_proportion > 0.65
   call Trace("Attack Dynamic Distribute - Air")
