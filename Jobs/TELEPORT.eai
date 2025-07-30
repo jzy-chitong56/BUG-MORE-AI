@@ -12,8 +12,13 @@ function TeleportJob takes unit hu returns nothing
     set teleporting = false
     return
   endif
-  set current_order = GetUnitCurrentOrder(hu)
-  if (current_order < 852008 or current_order > 852013) and current_order != OrderId("massteleport") then // No longer teleporting
+  set current_order = GetUnitCurrentOrder(hu)  // check teleporting
+  if current_order >= 852008 and current_order <= 852013 then
+    if GetItemTypeId(UnitItemInSlot(hu, current_order - 852008)) != old_id[tp_item] then
+      set teleporting = false
+      return
+    endif
+  elseif current_order != OrderId("massteleport") then
     set teleporting = false
     return
   endif

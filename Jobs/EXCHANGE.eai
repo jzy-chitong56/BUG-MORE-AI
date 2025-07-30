@@ -51,6 +51,10 @@ endfunction
 function ExchangeOnce takes nothing returns nothing
   local integer amount = 0
   local integer fix = Max(0, (difficulty - 2))  // Correction double income
+  if debugging > 0 then
+    call IncreasePlayerGold(ai_player, 200)
+    call IncreasePlayerWood(ai_player, 100)
+  endif
   if force_number <= 0 or GetGoldOwned() < 1000 then
     return
   endif
@@ -69,10 +73,6 @@ function ExchangeOnce takes nothing returns nothing
       call IncreasePlayerWood(ai_player, -amount)
       call DistributeWood(amount)
     endif
-  endif
-  if debugging > 0 then
-    call IncreasePlayerGold(ai_player, 200)
-    call IncreasePlayerWood(ai_player, 100)
   endif
 endfunction
 
