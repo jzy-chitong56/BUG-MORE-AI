@@ -6,9 +6,6 @@ function ResetAncient takes unit u, integer mode returns nothing
   local real buildy = 0
   if u == null or not UnitAlive(u) then
     return
-  elseif mode == -4 then
-    call RecycleGuardPosition(u)
-    return  // Root done as not moved
   elseif GetUnitCurrentOrder(u) != OrderId("root") then
     if mode == -2 then  // root home , priority front loc
       set mode = Max(GetRandomInt(0, front_loc_num - 1),0)
@@ -44,6 +41,10 @@ function ResetAncient takes unit u, integer mode returns nothing
     call IssuePointOrder( u, "root", buildx, buildy)
     set buildu = null
   endif
-  call TQAddUnitJob(10, RESET_ANCIENT, mode, u)  // if moving then not rooted
+  if mode == -4 then  // Root done as not moved
+    call RecycleGuardPosition(u)
+  else
+    call TQAddUnitJob(4, RESET_ANCIENT, mode, u)
+  endif
 endfunction
 #ENDIF
