@@ -14793,10 +14793,12 @@ endfunction
 //============================================================================
 // (AMAI) HealArmy
 //============================================================================
-function UnRobogoblin takes unit u returns nothing
+function UnRobogoblin takes unit u, real sum returns real
   if u != null and UnitAlive(u) and GetUnitTypeId(u) == 'Nrob' and GetUnitState(u, UNIT_STATE_LIFE) < GetUnitState(u, UNIT_STATE_MAX_LIFE) * 0.8 and not IsUnitBuying(u) then
     call IssueImmediateOrder(u, "unrobogoblin")  // let hero can use all healing item
+    set sum = sum - 0.5  // fix
   endif
+  return sum
 endfunction
 
 function GetArmyHealthState takes nothing returns real
@@ -14850,9 +14852,9 @@ function GetArmyHealthState takes nothing returns real
   endloop
   call DestroyGroup(g)
   set g = null
-  call UnRobogoblin(hero_unit[1])
-  call UnRobogoblin(hero_unit[2])
-  call UnRobogoblin(hero_unit[3])
+  set health_sum = UnRobogoblin(hero_unit[1], health_sum)
+  set health_sum = UnRobogoblin(hero_unit[2], health_sum)
+  set health_sum = UnRobogoblin(hero_unit[3], health_sum)
   if nearest_neutral[hFountainID] == null or not neutral_available[hFountainID] or not race_use_fountain then
     set fountain_available = false
   else
@@ -14930,7 +14932,7 @@ function ApplyHealingItem takes unit u, item heal_item returns nothing
   if b then
     call GroupPointOrder(small_healing_group, "move", x, y)
   endif
-  call Sleep(4)
+  call Sleep(3)
   call GroupEnumUnitsInRange(g, x, y, 1300, null)
   if b then
     loop
@@ -14938,7 +14940,7 @@ function ApplyHealingItem takes unit u, item heal_item returns nothing
       exitwhen target == null or not UnitAlive(u) or not UnitHasItem(u, heal_item)
       if UnitAlive(target) and IsUnitInGroup(target, g) then
         call UnitUseItemTarget(u, heal_item, target)
-        call Sleep(3)
+        call Sleep(2)
       endif
       call GroupRemoveUnit(urgent, target)
     endloop
@@ -15005,6 +15007,7 @@ function HealArmy takes nothing returns nothing
     if ward_cast then
       set sleepLength = 6
     else
+      set sleepLength = 2
       set mh_item = GetMassHealingItem()
       if mh_item > 0 then
         set mass_healed = true
@@ -15039,10 +15042,8 @@ function HealArmy takes nothing returns nothing
               set sleepLength = 10
               call ApplyHealingItem(u, mh_i)
             endif
-            if hs <= healthTrigger then
-            else
-              set sleepLength = 2
-            endif
+          elseif hs <= healthTrigger then
+            set sleepLength = 6
           endif
         else
           call StartEmergencyItem(1, mh_item)
