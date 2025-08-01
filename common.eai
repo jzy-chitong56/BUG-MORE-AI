@@ -12966,7 +12966,7 @@ function AttackGroupAddNeutrals takes nothing returns nothing
   endloop
 endfunction
 
-function RemoveHero takes group g nothing returns nothing
+function RemoveHero takes group g returns nothing
   if hero_unit[1] != null then
     call GroupRemoveUnit(g, hero_unit[1])
   endif
