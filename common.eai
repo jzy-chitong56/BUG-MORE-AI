@@ -10825,6 +10825,7 @@ endfunction
 //============================================================================
 function InitHarass takes nothing returns nothing
   local integer i = 0
+  local group g = null
   set resetharass = true
   loop
     exitwhen i >= max_harass_groups
@@ -10838,8 +10839,9 @@ function InitHarass takes nothing returns nothing
   else
     call FlushParentHashtable(harass_groups)
     set harass_groups = InitHashtable()
-    call GroupRemoveGuardPositionInstant(unit_harassing)
+    call GroupRecycleGuardPositionInstant(CopyGroup(unit_harassing, g))
     call GroupClear(unit_harassing)
+    set g = null
   endif
   //call Trace("InitHarassEnd")
   set distraction_group = 0
@@ -12626,12 +12628,10 @@ function LocalizeNewTown takes integer num returns boolean
     set t = m  // ud fix
   endif
   set own_town_loc[num] = GetUnitLoc(t)
-  if own_town_mine[num] == null then
-    if m != null then
-      set own_town_mine[num] = m
-    else
-      set own_town_mine[num] = GetMineNearLoc(own_town_mine[num], own_town_loc[num], 1500)
-    endif
+  if m != null then
+    set own_town_mine[num] = m
+  else
+    set own_town_mine[num] = GetMineNearLoc(own_town_mine[num], own_town_loc[num], 1500)
   endif
   set own_town_dist[num] = DistanceBetweenPoints(home_location, own_town_loc[num])
   if debugging > 0 then
@@ -12966,11 +12966,24 @@ function AttackGroupAddNeutrals takes nothing returns nothing
   endloop
 endfunction
 
+function RemoveHero takes group g nothing returns nothing
+  if hero_unit[1] != null then
+    call GroupRemoveUnit(g, hero_unit[1])
+  endif
+  if hero_unit[2] != null then
+    call GroupRemoveUnit(g, hero_unit[2])
+  endif
+  if hero_unit[3] != null then
+    call GroupRemoveUnit(g, hero_unit[3])
+  endif
+endfunction
+
 function AttackGroupAddUnknown takes nothing returns nothing
   local group g = CreateGroup()
   local unit u = null
   local integer i = 0
   call GroupEnumUnitsOfPlayer(g, ai_player, null)
+  call RemoveHero(g)
   loop
     exitwhen i >= attack_length or FirstOfGroup(g) == null
     set g = SelectByIdOr(g, old_id[attack_units[i]], old_id[attack_units[i + 1]], false)
@@ -13011,6 +13024,7 @@ function AttackDynamicDistribute takes nothing returns nothing
       set i = R2I(i * (1 - enemy_air_proportion))
     endif
     call GroupEnumUnitsOfPlayer(g, ai_player, null)
+    call RemoveHero(g)
     loop
       set u = FirstOfGroup(g)
       exitwhen u == null or c >= i
@@ -13490,13 +13504,14 @@ function CommonSleepUntilTargetDeadAM takes unit target, boolean iscreeping, boo
 
     call StaggerSleep(1 * sleep_multiplier, (1 * sleep_multiplier) + 3)
 
-    if desperation_assault and attack_length_counter > attack_reform_length * 10 then
-      call DesperationAssault()
-      set attack_length_counter = 0
-    else
-      set attack_length_counter = attack_length_counter + 1
-    endif
-    if not desperation_assault and reform then // Do not bother reforming in desperation mode, full attack speed
+    if desperation_assault then
+      if attack_length_counter > attack_reform_length * 10 then
+        call DesperationAssault()
+        set attack_length_counter = 0
+      else
+        set attack_length_counter = attack_length_counter + 1
+      endif
+    elseif reform then // Do not bother reforming in desperation mode, full attack speed
       if CaptainInCombat(true) then
         set combat_length_counter = combat_length_counter + 1
       else
@@ -15360,7 +15375,7 @@ function ForcedHarvest takes nothing returns boolean
   local integer i = 0
   local integer c = Min(TownCountDone(racial_expansion), GetMinesOwned())
   local boolean b = false
-  if Forced_Harvest_total == 0 and first_town_mine < 1 and (c > 1 or GetGoldOwned() < 3000) and (FoodUsed() < 26 or GetGold() < (1000 + tier * 200)) then  // later stages of the game, AI may not be harvest
+  if Forced_Harvest_total == 0 and first_town_mine < 1 and (c > 1 or GetGoldOwned() < 3000) and (FoodUsed() < 36 or GetGold() < (1200 * tier)) then  // later stages of the game, AI may not be harvest
     loop
       exitwhen i >= max_towns or m > c
       if own_town_mine[i] != null and UnitAlive(own_town_mine[i]) and GetResourceAmount(own_town_mine[i]) > 0 then
@@ -15372,7 +15387,7 @@ function ForcedHarvest takes nothing returns boolean
     endloop
     // call Trace("Forced Harvest mine total : " + Int2Str(m))
   endif
-  if (not b and m > 0 and GetGold() < 800) or (Forced_Harvest_total > 3 and c > 1) or Forced_Harvest_total > 6 then
+  if (not b and m > 0 and GetGold() < 1200) or (Forced_Harvest_total > 3 and c > 1) or Forced_Harvest_total > 6 then
     set Forced_Harvest_total = 0  //Prevent peon excessive harvest
   else
     set Forced_Harvest_total = Forced_Harvest_total + 1
