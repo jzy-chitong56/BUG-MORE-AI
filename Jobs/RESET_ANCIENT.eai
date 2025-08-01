@@ -17,7 +17,7 @@ function ResetAncient takes unit u, integer mode returns nothing
       endif
     elseif mode == -3 then
       set buildx = DistanceBetweenPoints_kd(home_location, GetUnitLoc(u))
-      if buildx < 800 or buildx > 1600 then
+      if buildx < 1000 or buildx > 1200 then
         set buildu = CreatePathingUnitFull(buildu, Player(PLAYER_NEUTRAL_PASSIVE), GetUnitTypeId(u), GetUnitX(u), GetUnitY(u))
         set mode = -4
       else
@@ -25,7 +25,7 @@ function ResetAncient takes unit u, integer mode returns nothing
       endif
     elseif mode >= 0 then
       set buildx = DistanceBetweenPoints_kd(front_loc[mode], GetUnitLoc(u))
-      if buildx < 360 or buildx > 1600 then
+      if buildx < 600 or buildx > 1200 then
         set buildu = CreatePathingUnitFull(buildu, Player(PLAYER_NEUTRAL_PASSIVE), GetUnitTypeId(u), GetUnitX(u), GetUnitY(u))
         set mode = -4
       else
@@ -41,9 +41,7 @@ function ResetAncient takes unit u, integer mode returns nothing
     call IssuePointOrder( u, "root", buildx, buildy)
     set buildu = null
   endif
-  if mode == -4 then  // Root done as not moved
-    call RecycleGuardPosition(u)
-  else
+  if mode != -4 then  // Root done as 4
     call TQAddUnitJob(4, RESET_ANCIENT, mode, u)
   endif
 endfunction
