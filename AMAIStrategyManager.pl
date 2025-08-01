@@ -644,7 +644,7 @@ sub InsertProfileSub {
   open(SOURCE, $filename) or do { confirm_box(get_translation('err_file_not_writing', "<$filename>")) };
   open(PROFILEFILE, ">>$version\\Profiles.txt") or do { confirm_box(get_translation('err_file_not_writing', "<$version\\Profiles.txt>")) };
   my $line = <SOURCE>;
-  if ($line !~ /#AMAI 2.0 Profile/) {ddo { confirm_box(get_translation('err_not_file_profiles')) };}
+  if ($line !~ /#AMAI 2.0 Profile/) {do { confirm_box(get_translation('err_not_file_profiles')) };}
   $line = <SOURCE>;
   $line =~ /^([^\t]*)\t/;
   my $oldprofilename = $1;
@@ -657,6 +657,7 @@ sub InsertProfileSub {
   $line =~ s/^$oldprofilename/$profilename/;
   $line = $line =~ /\S/ ? $line : '';
   $line =~ s/^\s+|\s+$//g; # Remove leading and trailing whitespace
+  print PROFILEFILE "\n";
   print PROFILEFILE $line;
   close(PROFILEFILE);
   close(SOURCE);
