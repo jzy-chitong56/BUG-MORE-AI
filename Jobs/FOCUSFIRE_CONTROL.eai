@@ -57,7 +57,7 @@ function GroupMicroSystem takes group g, group meleeg, group temp_focus, group f
         if IsStandardUnit(u) then
           call TQAddUnitJob(1.8, RESET_GUARD_POSITION_ONLY, 80, u)
         else
-          call TQAddUnitJob(1.8, RESET_GUARD_POSITION, 80, u)  // try fix harassing
+          call RecycleGuardPosition(u)  // try fix harassing
         endif
         call GroupRemoveUnit(temp_focus, u)  // prevent focus fire controls interrupting
         call RemoveLocation(l)
