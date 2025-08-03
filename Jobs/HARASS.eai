@@ -164,18 +164,19 @@ function HarassJob takes integer key, unit target returns nothing
     call GroupRemoveUnit(harasser, u)
   endloop
   call DestroyGroup(harasser)
-  set harasser = g
-  set g = null
   if harass_num == 0 then
     call TraceAll("HARASS ended as no units")
     call SaveInteger(additional_info, key, STATE_RETREAT, 0)
     call SaveBoolean(additional_info, key, STATE_ATTACKING, false)
     call SaveInteger(additional_info, key, INVISIBLE_COUNT, 0)
     call SaveReal(additional_info, key, START_STRENGTH, 0)
-    call DestroyGroup(harasser)
+    call DestroyGroup(g)
+    set g = null
     set harasser = null
     return
   endif
+  set harasser = g
+  set g = null
   call Trace("HARASS:" + Int2Str(harass_num) + " Units")
   if hero_unit[1] != null and IsUnitInGroup(hero_unit[1], harasser) then
     set hu = hero_unit[1]
@@ -268,8 +269,8 @@ function HarassJob takes integer key, unit target returns nothing
     //  set target = null
   //endif
 
+  call GroupRemoveGuardPositionInstant(harasser)
   if target != null and UnitAlive(target) then
-    call GroupRemoveGuardPositionInstant(harasser)
     set g = CreateGroup()
     if state_attacking then
       call GroupEnumUnitsInRange(g,GetUnitX(hu),GetUnitY(hu),harass_radius_attack_ranged,null)

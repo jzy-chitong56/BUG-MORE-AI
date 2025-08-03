@@ -4,10 +4,7 @@ function ResetByHealthJob takes unit u, integer p returns nothing
   if u != null and UnitAlive(u) then
     //call DisplayToAllJobDebug("RESET_HEALTH JOB START")
     call CreateDebugTag("RESET_HEALTH JOB", 10, u, 3.00, 1.50)
-    if GetOwningPlayer(u) != ai_player then
-      call RecycleGuardPosition(u)
-      return
-    elseif GetUnitState(u, UNIT_STATE_LIFE) >= GetUnitState(u, UNIT_STATE_MAX_LIFE) * (I2R(p) / 100) then
+    if GetOwningPlayer(u) != ai_player or (GetUnitState(u, UNIT_STATE_LIFE) >= GetUnitState(u, UNIT_STATE_MAX_LIFE) * (I2R(p) / 100)) then
       call RecycleGuardPosition(u)
       call AddAssault(1, GetUnitTypeId(u))
       call GroupRemoveUnit(unit_healing, u)
