@@ -1,0 +1,1836 @@
+//============================================================================
+//  global builds
+//============================================================================
+function global_init_strategy takes nothing returns nothing
+    call SetTierBlock(1, 0.75, 60, true)
+    call SetTierBlock(2, 0.75, 90, true)
+    if IsMapFlagSet(MAP_RANDOM_HERO) then
+      call AddBlock(1, NECROPOLIS_2, false, 0, UNDEAD_ALTAR, 36)
+      call AddBlock(1, CRYPT, true, 0, TOMB_OF_RELICS, 36)
+      call AddBlock(1, CRYPT, false, 0, ZIGGURAT_1, 16)
+      call AddBlock(1, CRYPT, true, 0, ZIGGURAT_2, 20)
+      call AddBlock(1, CRYPT, true, 0, ZIGGURAT_FROST, 16)
+    else
+      call AddBlock(1, UNDEAD_ALTAR, true, 0, TOMB_OF_RELICS, 36)
+      call AddBlock(1, UNDEAD_ALTAR, false, 0, CRYPT, 16)
+      call AddBlock(1, UNDEAD_ALTAR, false, 0, ZIGGURAT_1, 16)
+      call AddBlock(1, UNDEAD_ALTAR, true, 0, ZIGGURAT_2, 20)
+      call AddBlock(1, UNDEAD_ALTAR, true, 0, ZIGGURAT_FROST, 16)
+    endif
+    if towerrush then
+      call AddBlock(1, CRYPT, false, 0, TOMB_OF_RELICS, 20)
+    else
+      call AddBlock(1, CRYPT, true, 0, TOMB_OF_RELICS, 36)
+    endif
+    call AddBlock(1, CRYPT, false, 0, GRAVEYARD, 20)
+    call AddHarass(1, 1, GHOUL)
+    call AddHarass(2, 2, GHOUL)
+    call AddHarass(5, 2, GARGOYLE)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+endfunction
+function global_build_sequence takes nothing returns nothing
+    if TownCount(GHOUL) == 0 and GetWood() < 500 then
+      call BuildUnit(1, GHOUL, ghoul_prio)
+    endif
+    if GetUnitCount(old_id[SAC_PIT]) > 0 then
+      call BuildUnit(1, SHADE, 60)
+    endif
+    if IsMapFlagSet(MAP_RANDOM_HERO) then
+      call BuildUnit(1, UNDEAD_ALTAR, 56)
+    endif
+    // Anti rush
+    if GetRushFactor() < 5000 then
+      if GetUnitCount(old_id[ZIGGURAT_FROST]) < 1 then
+        call BuildAtMine(1, ZIGGURAT_FROST, 70)
+      else
+        call BuildUnit(2, ZIGGURAT_2, 45)
+      endif
+    elseif GetRushFactor() < 10000 then
+      if GetUnitCount(old_id[ZIGGURAT_FROST]) < 1 then
+        call BuildAtMine(1, ZIGGURAT_FROST, 60)
+      else
+        call BuildUnit(2, ZIGGURAT_2, 40)
+      endif
+    endif
+    // home_location tower
+    if GetGold() > 800 then
+      if GetUnitCount(old_id[ZIGGURAT_FROST]) < 1 then
+        call BuildAtMine(1, ZIGGURAT_FROST, 52)
+      else
+        call BuildUnit(2, ZIGGURAT_2, 50)
+      endif
+    endif
+    // exp tower
+    if HasExpanded() then
+      call DefendTownsDone(1, ZIGGURAT_FROST, 70)
+      call DefendTownsDone(2, ZIGGURAT_2, 68)
+      if TownCount(NECROPOLIS_1) < TownCountDone(racial_expansion) and GetGold() > 800 then
+        call DefendTownsDone(1, NECROPOLIS_1, 95)
+      endif
+      if GetGold() > 2000 then
+        call DefendTownsDone(3, ZIGGURAT_2, 35)
+        call DefendTownsDone(2, ZIGGURAT_FROST, 35)
+        if tier >= 2 then
+          if GetUnitCount(old_id[ZIGGURAT_2]) + GetUnitCount(old_id[ZIGGURAT_FROST]) >= 4 and TownCount(TOMB_OF_RELICS) < 2 then
+            call DefendTownsDone(1, TOMB_OF_RELICS, 40)
+          endif
+          if GetUnitCountDone(old_id[NECROPOLIS_1]) > 0 then
+            call DefendTownsCond(1, NECROPOLIS_2, 7600, 99999, 0, 90)
+          endif
+        endif
+      endif
+    endif
+    // updata
+    if GetGold() > 530 and GetUnitCountDone(old_id[ZIGGURAT_1]) > 0 then
+      if GetUnitCount(old_id[ZIGGURAT_FROST]) >= TownCount(racial_expansion) then
+        call BuildUnit(1, ZIGGURAT_2, 56)
+      else
+        call BuildUnit(1, ZIGGURAT_FROST, 62)
+      endif
+    endif
+
+    // transition train , sequence should be at the beginning
+    if tier == 2 and racial_highbuild_lv2_total < 1 and GetGold() > 250 then
+      call BuildUnit(1, CRYPT_FIEND, 32)
+      call BuildUnit(1, GHOUL, 22)
+    elseif tier == 3 and racial_highbuild_lv3_total < 1 and GetGold() > 300 then
+      call BuildUnit(1, CRYPT_FIEND, 32+racial_highbuild_lv2_total*5)
+      call BuildUnit(1, GARGOYLE, 26+racial_highbuild_lv2_total*5)
+    endif
+
+    // Global Items
+    call BuildItem(1, M_TOWN_PORTAL, 100)
+    if AatpAbility then
+      call BuildItem(1, RITUAL_DAGGER, 30)
+    endif
+    if tier > 1 then
+      call BuildItem(1, HEALING_POTION, 60)
+      call BuildItem(1, TOWN_PORTAL, 150)
+      if c_ally_total > 0 then
+        call BuildItem(1, STAFF_OF_PRESERVATION, 30)
+      endif
+      call BuildItem(1, M_SCROLL_OF_HEALING, 50)
+    endif
+    if tier >= 3 then
+      call BuildItem(1, SCROLL_OF_HEALING, 80)
+      if c_ally_total > 0 then
+        call BuildItem(1, STAFF_OF_SANCTUARY, 30)
+      endif
+    endif
+    call BuildItem(1, POTION_OF_LESSER_INVULNERBILITY, 50)
+    if GetGold() > 1000 then
+      call BuildItem(1, STAFF_OF_TELEPORTATION, 35)
+    endif
+
+    // DYNAMIC and Global Mercenaries
+    call ResetDynamicSystem()
+    if tier == 1 then
+      //call AddUnitToAntiair(CRYPT_FIEND,GetUpgradeLevel(old_id[UPG_FIEND_WEB])*29,-1)
+      call AddUnitToAnticasters(CRYPT_FIEND,29,-1)
+      call AddUnitToAntitowers(CRYPT_FIEND,29,-1)
+      call AddUnitToAntipiercing(GHOUL,29,-1)
+      call AddUnitToAntinormal(GHOUL,29,-1)
+      call AddUnitToAntisiege(CRYPT_FIEND,29,-1)
+      call AddUnitToAntisiege(GHOUL,26,-1)
+      call AddUnitToAntimagic(CRYPT_FIEND,29,-1)
+      call AddUnitToAntiunarmored(CRYPT_FIEND,29,-1)
+      call AddUnitToAntilightarmor(CRYPT_FIEND,29,-1)
+      call AddUnitToAntimediumarmor(GHOUL,7,-1)
+      call AddUnitToAntiheavyarmor(GHOUL,29,-1)
+      call DynamicBuildUnit(32, 40)
+      call MercBuilder(merc_range,merc_stopper)
+    elseif tier == 2 then
+      call AddUnitToAntiair(CRYPT_FIEND,GetUpgradeLevel(old_id[UPG_FIEND_WEB]),-1+GetUpgradeLevel(old_id[UPG_FIEND_WEB]))
+      call AddUnitToAntiair(GARGOYLE,2,0)
+      call AddUnitToAnticasters(BANSHEE,3+2*GetUpgradeLevel(old_id[UPG_BANSHEE]),0)
+      call AddUnitToAnticasters(GARGOYLE,4,0)
+      call AddUnitToAntitowers(MEAT_WAGON,1,-1)
+      call AddUnitToAntipiercing(CRYPT_FIEND,2,-1+GetUpgradeLevel(old_id[UPG_FIEND_WEB]))
+      call AddUnitToAntipiercing(GHOUL,1,-1)
+      call AddUnitToAntinormal(GARGOYLE,2,0)
+      call AddUnitToAntinormal(GHOUL,1,-1)
+      call AddUnitToAntisiege(CRYPT_FIEND,2,-1+GetUpgradeLevel(old_id[UPG_FIEND_WEB]))
+      call AddUnitToAntisiege(GHOUL,1,-1)
+      call AddUnitToAntimagic(BANSHEE,2*GetUpgradeLevel(old_id[UPG_BANSHEE]),0)
+      call AddUnitToAntimagic(GARGOYLE,2,0)
+      call AddUnitToAntimagic(CRYPT_FIEND,1,-1+GetUpgradeLevel(old_id[UPG_FIEND_WEB]))
+      call AddUnitToAntiunarmored(CRYPT_FIEND,7,-1+GetUpgradeLevel(old_id[UPG_FIEND_WEB]))
+      call AddUnitToAntiunarmored(GARGOYLE,3,0)
+      call AddUnitToAntiunarmored(MEAT_WAGON,1,-1)
+      call AddUnitToAntilightarmor(CRYPT_FIEND,8,-1+GetUpgradeLevel(old_id[UPG_FIEND_WEB]))
+      call AddUnitToAntilightarmor(GARGOYLE,6,0)
+      call AddUnitToAntilightarmor(NECRO,1,0)
+      call AddUnitToAntilightarmor(BANSHEE,1,0)
+      call AddUnitToAntimediumarmor(GHOUL,7,-1)
+      call AddUnitToAntiheavyarmor(NECRO,1,0)
+      call AddUnitToAntiheavyarmor(BANSHEE,1,0)
+      call AddUnitToAntiheavyarmor(GARGOYLE,2,0)
+      call DynamicBuildUnit(64, 40)
+      call MercBuilder(merc_range,merc_stopper)
+    else
+      call AddUnitToAntiair(GARGOYLE,2,0)
+      call AddUnitToAntiair(CRYPT_FIEND,2,-1+GetUpgradeLevel(old_id[UPG_FIEND_WEB]))
+      call AddUnitToAntiair(FROST_WYRM,1,0)
+      call AddUnitToAnticasters(BLK_SPHINX,6,0)
+      call AddUnitToAnticasters(BANSHEE,8,0)
+      call AddUnitToAntitowers(MEAT_WAGON,1,-1)
+      call AddUnitToAntipiercing(ABOMINATION,2,-1)
+      call AddUnitToAntipiercing(CRYPT_FIEND,1,-1+GetUpgradeLevel(old_id[UPG_FIEND_WEB]))
+      call AddUnitToAntinormal(ABOMINATION,1,-1)
+      //call AddUnitToAntinormal(GHOUL,1,-1)
+      call AddUnitToAntisiege(CRYPT_FIEND,2,-1+GetUpgradeLevel(old_id[UPG_FIEND_WEB]))
+      call AddUnitToAntimagic(BANSHEE,2*GetUpgradeLevel(old_id[UPG_BANSHEE]),0)
+      call AddUnitToAntimagic(GARGOYLE,2,0)
+      call AddUnitToAntimagic(CRYPT_FIEND,1,-1+GetUpgradeLevel(old_id[UPG_FIEND_WEB]))
+      call AddUnitToAntiunarmored(CRYPT_FIEND,7,-1+GetUpgradeLevel(old_id[UPG_FIEND_WEB]))
+      call AddUnitToAntiunarmored(GARGOYLE,3,0)
+      call AddUnitToAntiunarmored(MEAT_WAGON,1,-1)
+      call AddUnitToAntilightarmor(CRYPT_FIEND,5,-1+GetUpgradeLevel(old_id[UPG_FIEND_WEB]))
+      call AddUnitToAntilightarmor(GARGOYLE,5,0)
+      call AddUnitToAntilightarmor(BLK_SPHINX,1,0)
+      call AddUnitToAntilightarmor(FROST_WYRM,1,0)
+      call AddUnitToAntimediumarmor(ABOMINATION,2,-1)
+      call AddUnitToAntimediumarmor(GHOUL,GetUpgradeLevel(old_id[UPG_GHOUL_FRENZY]),-1)
+      call AddUnitToAntiheavyarmor(NECRO,1,0)
+      call AddUnitToAntiheavyarmor(BANSHEE,1,0)
+      call AddUnitToAntiheavyarmor(FROST_WYRM,5,0)
+      call AddUnitToAntiheavyarmor(BLK_SPHINX,4,0)
+      call DynamicBuildUnit(100, 40)
+      call DragonAndMercBuilder()
+    endif
+    call ResetDynamicUint()
+
+    // Global Upgrades
+    call BuildAdvUpgr2(3, UPG_UNHOLY_STR, 1,TownCountDone(GHOUL) + TownCountDone(ABOMINATION) + TownCountDone(MEAT_WAGON), 5,15,35)
+    call BuildAdvUpgr2(3, UPG_UNHOLY_ARMOR,1,TownCountDone(GHOUL) + TownCountDone(ABOMINATION),5,15,35)
+    call BuildAdvUpgr2(3, UPG_CR_ATTACK, 1,TownCountDone(CRYPT_FIEND) + TownCountDone(GARGOYLE) + TownCountDone(FROST_WYRM) + TownCountDone(BLK_SPHINX),5,15,35)
+    call BuildAdvUpgr2(3, UPG_CR_ARMOR,1,TownCountDone(CRYPT_FIEND) + TownCountDone(GARGOYLE) + TownCountDone(FROST_WYRM) + TownCountDone(BLK_SPHINX),5,15,35)
+
+    // TIER 1 UPGRADES
+    //--------------------------------------------------------
+    if tier == 1 then
+    endif
+    call BuildAdvUpgr2(1, UPG_CANNIBALIZE,1,TownCountDone(GHOUL) + TownCountDone(ABOMINATION), 0.33,15,75)
+
+    // TIER 2 UPGRADES
+    //--------------------------------------------------------
+    if tier == 2 then
+    endif
+    call BuildAdvUpgr2(1, UPG_EXHUME, 2,TownCountDone(MEAT_WAGON), 1, 10,50)
+    call BuildAdvUpgr2(1, UPG_BURROWING, 2,TownCountDone(CRYPT_FIEND),0.5,10,70)
+    call BuildAdvUpgr2(2, UPG_FIEND_WEB,2,TownCountDone(CRYPT_FIEND),0.33,15,70)
+    call BuildAdvUpgr2(2, UPG_NECROS,2,TownCountDone(NECRO),0.33,15,80)
+    call BuildAdvUpgr2(1, UPG_SKEL_LIFE,2,TownCountDone(NECRO),0.33,15,60)
+    call BuildAdvUpgr2(2, UPG_BANSHEE,2,TownCountDone(BANSHEE),0.33,15,80)
+
+    // TIER 3 UPGRADES
+    //--------------------------------------------------------
+    if tier == 3 then
+    endif
+    call BuildAdvUpgr2(1, UPG_PLAGUE,3,TownCountDone(ABOMINATION)+TownCountDone(MEAT_WAGON), 1,10,25)
+    call BuildAdvUpgr2(1, UPG_STONE_FORM,3,TownCountDone(GARGOYLE),0.33,10,50)
+    call BuildAdvUpgr2(1, UPG_BLK_SPHINX,3,TownCountDone(OBSIDIAN_STATUE),0.8,12,80)
+    call BuildAdvUpgr2(1, UPG_WYRM_BREATH,3,TownCountDone(FROST_WYRM),0.25,10,80)
+    call BuildAdvUpgr2(1, UPG_SKEL_MASTERY,3,TownCountDone(NECRO),0.33,15,60)
+
+
+    // Harassing
+    if not towerrush and not town_threatened then
+      call Harass(2, HARASS_TARGET_PEONS, true, 5, 0.75, 0, GetPlayerRace(nearest_enemy) != RACE_UNDEAD, 50, 120)
+      call Harass(1, HARASS_TARGET_PEONS, true, 5, 0.75, 0, GetPlayerRace(nearest_enemy) == RACE_NIGHTELF and TownCount(GHOUL) > 1, 10, 40)
+      call Harass(3, HARASS_TARGET_PEONS, true, 5, 0.75, 0, GetPlayerRace(nearest_enemy) != RACE_UNDEAD, 80, 120)
+    endif
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+endfunction
+
+//============================================================================
+//  build_sequence
+//============================================================================
+function init_strategy_NormalUndead takes nothing returns nothing
+
+    call AddHarass(4, 2, GHOUL)
+    set distraction_group = 4
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+endfunction
+function build_sequence_NormalUndead takes nothing returns nothing
+if tier == 3 then
+
+      call BuildUnit(4, NECRO, 48)
+      call BuildUnit(3, BANSHEE, 52)
+      call BuildUnit(3, ABOMINATION, 52)
+      call BuildUnit(5, GHOUL, 40)
+      call BuildUnit(4, GARGOYLE, 48)
+      call BuildUnit(4, CRYPT_FIEND, 50)
+      call BuildUnit(2, FROST_WYRM, 52)
+      call BuildUnit(2, MEAT_WAGON, 52)
+      call BuildUnit(1, hero[1], 80)
+      call BuildUnit(1, hero[2], 60)
+      call BuildUnit(1, hero[3], 50)
+      call BuildUnit(2, BLK_SPHINX, 52)
+      call BuildUnit(2, OBSIDIAN_STATUE, 54)
+
+      call BuildUpgr(2, UPG_NECROS, 54)
+      call BuildUpgr(2, UPG_BANSHEE, 54)
+      call BuildUpgr(1, UPG_BLK_SPHINX, 40)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+elseif tier == 2 then
+
+      call BuildUnit(3, NECRO, 50)
+      call BuildUnit(2, BANSHEE, 54)
+      call BuildUnit(6, CRYPT_FIEND, 52)
+      call BuildUnit(14, GHOUL, 30)
+      call BuildUnit(2, MEAT_WAGON, 54)
+      call BuildUnit(1, hero[1], 80)
+      call BuildUnit(1, hero[2], 60)
+      call BuildUnit(1, NECROPOLIS_3, 50)
+      call BuildUpgr(1, UPG_NECROS, 56)
+      call BuildUpgr(1, UPG_BANSHEE, 56)
+      call BuildUpgr(1, UPG_FIEND_WEB, 56)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+else
+
+      call BuildUnit(20, GHOUL, 55)
+      call BuildUnit(1, hero[1], 80)
+      call BuildUnit(1, NECROPOLIS_2, 50)
+      call BuildUpgr(1, UPG_CANNIBALIZE, 45)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+endif
+endfunction
+
+//============================================================================
+//  build_sequence
+//============================================================================
+function init_strategy_Wyrms takes nothing returns nothing
+    call AddBlock(1, NECROPOLIS_2, false, 1, ZIGGURAT_1, 60)
+    
+    call AddHarass(4, 2, GHOUL)
+    set distraction_group = 4
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+endfunction
+function build_sequence_Wyrms takes nothing returns nothing
+if tier == 3 then
+
+      call BuildUnit(4, GHOUL, 90)
+      call BuildUnit(12, CRYPT_FIEND, 50)
+      call BuildUnit(2, OBSIDIAN_STATUE, 53)
+      call BuildUnit(7, FROST_WYRM, 50)
+      call BuildUnit(1, hero[1], 80)
+      call BuildUnit(1, hero[2], 60)
+      call BuildUnit(1, hero[3], 40)
+
+      call BuildUpgr(1, UPG_FIEND_WEB, 66)
+      call BuildUpgr(1, UPG_WYRM_BREATH, 60)
+      call BuildUpgr(1, UPG_BURROWING, 66)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+elseif tier == 2 then
+
+      call BuildUnit(4, GHOUL, 90)
+      call BuildUnit(16, CRYPT_FIEND, 40)
+      call BuildUnit(1, hero[1], 80)
+      call BuildUnit(1, hero[2], 60)
+      call BuildUnit(2, OBSIDIAN_STATUE, 53)
+      call BuildUnit(1, NECROPOLIS_3, 65)
+
+      call BuildUpgr(1, UPG_FIEND_WEB, 60)
+      call BuildUpgr(1, UPG_BURROWING, 60)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+else
+
+      call BuildUnit(3, GHOUL, 90)
+      call BuildUnit(10, CRYPT_FIEND, 40)
+      call BuildUnit(1, hero[1], 80)
+      call BuildUnit(1, NECROPOLIS_2, 50)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+endif
+endfunction
+
+//============================================================================
+//  build_sequence
+//============================================================================
+function init_strategy_Necro takes nothing returns nothing
+
+    call AddHarass(4, 2, NECRO)
+    set distraction_group = 4
+
+
+
+
+
+
+
+
+
+
+
+
+
+endfunction
+function build_sequence_Necro takes nothing returns nothing
+if tier == 3 then
+
+      call BuildUnit(16, NECRO, 55)
+      call BuildUnit(6, ABOMINATION, 50)
+      call BuildUnit(2, MEAT_WAGON, 60)
+      call BuildUnit(2, OBSIDIAN_STATUE, 55)
+      call BuildUnit(5, GHOUL, 90)
+      call BuildUnit(1, hero[1], 80)
+      call BuildUnit(1, hero[2], 60)
+      call BuildUnit(1, hero[3], 50)
+      
+      call BuildUpgr(2, UPG_NECROS, 91)
+      call BuildUpgr(1, UPG_SKEL_MASTERY, 85)
+      call BuildUpgr(1, UPG_EXHUME, 65)
+      call BuildUpgr(1, UPG_SKEL_LIFE, 65)
+      call BuildUpgr(1, UPG_PLAGUE, 50)
+
+
+
+
+
+
+
+
+
+
+
+
+elseif tier == 2 then
+
+      call BuildUnit(12, NECRO, 55)
+      call BuildUnit(14, GHOUL, 55)
+      call BuildUnit(2, OBSIDIAN_STATUE, 55)
+      call BuildUnit(2, MEAT_WAGON, 60)
+      call BuildUnit(1, hero[1], 80)
+      call BuildUnit(1, hero[2], 60)
+      call BuildUnit(1, NECROPOLIS_3, 55)
+
+      call BuildUpgr(1, UPG_NECROS, 79)
+      call BuildUpgr(1, UPG_EXHUME, 65)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+else
+
+    call BuildUnit(20, GHOUL, 90)
+    call BuildUnit(1, hero[1], 80)
+    call BuildUnit(1, NECROPOLIS_2, 50)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+endif
+endfunction
+
+//============================================================================
+//  build_sequence
+//============================================================================
+function init_strategy_Banshee takes nothing returns nothing
+
+    call AddHarass(4, 2, BANSHEE)
+    set distraction_group = 4
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+endfunction
+function build_sequence_Banshee takes nothing returns nothing
+if tier == 3 then
+
+      call BuildUnit(16, BANSHEE, 50)
+      call BuildUnit(6, ABOMINATION, 50)
+      call BuildUnit(2, OBSIDIAN_STATUE, 55)
+      call BuildUnit(4, GHOUL, 90)
+      call BuildUnit(1, hero[1], 80)
+      call BuildUnit(1, hero[2], 60)
+      call BuildUnit(1, hero[3], 50)
+      
+      call BuildUpgr(2, UPG_BANSHEE, 86)
+      call BuildUpgr(1, UPG_PLAGUE, 80)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+elseif tier == 2 then
+
+      call BuildUnit(12, BANSHEE, 50)
+      call BuildUnit(2, OBSIDIAN_STATUE, 55)
+      call BuildUnit(16, GHOUL, 90)
+      call BuildUnit(1, hero[1], 80)
+      call BuildUnit(1, hero[2], 60)
+      call BuildUnit(1, NECROPOLIS_3, 55)
+
+      call BuildUpgr(1, UPG_BANSHEE, 70)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+else
+
+      call BuildUnit(20, GHOUL, 90)
+      call BuildUnit(1, hero[1], 80)
+      call BuildUnit(1, NECROPOLIS_2, 50)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+endif
+endfunction
+
+//============================================================================
+//  build_sequence
+//============================================================================
+function init_strategy_Ghouls takes nothing returns nothing
+
+    call AddHarass(4, 2, GHOUL)
+    set distraction_group = 4
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+endfunction
+function build_sequence_Ghouls takes nothing returns nothing
+if tier == 3 then
+
+      call BuildUnit(36, GHOUL, 45)
+      call BuildUnit(2, OBSIDIAN_STATUE, 65)
+      call BuildUnit(1, hero[1], 80)
+      call BuildUnit(1, hero[2], 70)
+      call BuildUnit(1, hero[3], 60)
+
+      call BuildUpgr(1, UPG_GHOUL_FRENZY, 115)
+      call BuildUpgr(1, UPG_CANNIBALIZE, 115)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+elseif tier == 2 then
+
+      call BuildUnit(28, GHOUL, 35)
+      call BuildUnit(2, OBSIDIAN_STATUE, 65)
+      call BuildUnit(1, hero[1], 80)
+      call BuildUnit(1, hero[2], 60)
+      call BuildUnit(1, NECROPOLIS_3, 55)
+
+      call BuildUpgr(1, UPG_CANNIBALIZE, 83)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+else
+
+      call BuildUnit(20, GHOUL, 35)
+      call BuildUnit(1, hero[1], 80)
+      call BuildUnit(1, NECROPOLIS_2, 50)
+      call BuildUpgr(1, UPG_CANNIBALIZE, 83)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+endif
+endfunction
+
+//============================================================================
+//  build_sequence
+//============================================================================
+function init_strategy_GargGhouls takes nothing returns nothing
+    call AddHarass(4, 2, GHOUL)
+    set distraction_group = 4
+
+
+
+
+
+
+
+
+
+
+
+
+endfunction
+function build_sequence_GargGhouls takes nothing returns nothing
+if tier == 3 then
+
+      call BuildUnit(16, GHOUL, 35)
+      call BuildUnit(20, GARGOYLE, 40)
+      call BuildUnit(2, OBSIDIAN_STATUE, 65)
+      call BuildUnit(1, hero[1], 80)
+      call BuildUnit(1, hero[2], 70)
+      call BuildUnit(1, hero[3], 60)
+      call BuildUnit(1, NECROPOLIS_3, 55)
+
+      call BuildUpgr(1, UPG_GHOUL_FRENZY, 115)
+      call BuildUpgr(1, UPG_STONE_FORM, 43)
+      call BuildUpgr(1, UPG_CANNIBALIZE, 83)
+
+
+
+
+
+
+
+
+
+elseif tier == 2 then
+
+      call BuildUnit(12, GHOUL, 35)
+      call BuildUnit(14, GARGOYLE, 40)
+      call BuildUnit(2, OBSIDIAN_STATUE, 65)
+      call BuildUnit(1, hero[1], 80)
+      call BuildUnit(1, hero[2], 60)
+      call BuildUnit(1, NECROPOLIS_3, 60)
+
+      call BuildUpgr(1, UPG_CANNIBALIZE, 83)
+
+
+
+
+
+
+else
+
+      call BuildUnit(17, GHOUL, 35)
+      call BuildUnit(1, hero[1], 80)
+      call BuildUnit(1, NECROPOLIS_2, 50)
+      call BuildUpgr(1, UPG_CANNIBALIZE, 83)
+
+
+
+
+
+
+
+
+
+endif
+endfunction
+
+//============================================================================
+//  build_sequence
+//============================================================================
+function init_strategy_Fiends takes nothing returns nothing
+
+    call AddHarass(4, 2, CRYPT_FIEND)
+    set distraction_group = 4
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+endfunction
+function build_sequence_Fiends takes nothing returns nothing
+if tier == 3 then
+
+      call BuildUnit(22, CRYPT_FIEND, 55)
+      call BuildUnit(2, OBSIDIAN_STATUE, 65)
+      call BuildUnit(4, GHOUL, 45)
+      call BuildUnit(1, hero[1], 80)
+      call BuildUnit(1, hero[2], 70)
+      call BuildUnit(1, hero[3], 60)
+
+      call BuildUpgr(1, UPG_FIEND_WEB, 95)
+      call BuildUpgr(1, UPG_BURROWING, 95)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+elseif tier == 2 then
+
+      call BuildUnit(14, CRYPT_FIEND, 45)
+      call BuildUnit(2, OBSIDIAN_STATUE, 65)
+      call BuildUnit(4, GHOUL, 55)
+      call BuildUnit(1, hero[1], 80)
+      call BuildUnit(1, hero[2], 60)
+      call BuildUnit(1, NECROPOLIS_3, 45)
+
+      call BuildUpgr(1, UPG_FIEND_WEB, 74)
+      call BuildUpgr(1, UPG_BURROWING, 74)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+else
+
+      call BuildUnit(4, GHOUL, 90)
+      call BuildUnit(12, CRYPT_FIEND, 40)
+      call BuildUnit(1, hero[1], 80)
+      call BuildUnit(1, NECROPOLIS_2, 50)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+endif
+endfunction
+
+//============================================================================
+//  build_sequence
+//============================================================================
+function init_strategy_GargWyrm takes nothing returns nothing
+
+    call AddHarass(4, 2, GARGOYLE)
+    set distraction_group = 4
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+endfunction
+function build_sequence_GargWyrm takes nothing returns nothing
+if tier == 3 then
+
+      call BuildUnit(5, ABOMINATION, 55)
+      call BuildUnit(4, GHOUL, 45)
+      call BuildUnit(10, GARGOYLE, 45)
+      call BuildUnit(2, OBSIDIAN_STATUE, 65)
+      call BuildUnit(6, FROST_WYRM, 60)
+      call BuildUnit(1, hero[1], 80)
+      call BuildUnit(1, hero[2], 70)
+      call BuildUnit(1, hero[3], 60)
+
+      call BuildUpgr(1, UPG_PLAGUE, 71)
+      call BuildUpgr(1, UPG_STONE_FORM, 72)
+      call BuildUpgr(1, UPG_WYRM_BREATH, 55)
+      call BuildUpgr(1, UPG_CANNIBALIZE, 70)
+
+
+
+
+
+
+
+
+
+
+
+
+
+elseif tier == 2 then
+
+      call BuildUnit(12, GHOUL, 45)
+      call BuildUnit(14, GARGOYLE, 40)
+      call BuildUnit(1, hero[1], 80)
+      call BuildUnit(1, hero[2], 60)
+      call BuildUnit(1, NECROPOLIS_3, 60)
+
+      call BuildUpgr(1, UPG_CANNIBALIZE, 50)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+else
+
+      call BuildUnit(20, GHOUL, 44)
+      call BuildUnit(1, hero[1], 80)
+      call BuildUnit(1, NECROPOLIS_2, 50)
+      call BuildUpgr(1, UPG_CANNIBALIZE, 50)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+endif
+endfunction
+
+//============================================================================
+//  build_sequence
+//============================================================================
+function init_strategy_Aboms takes nothing returns nothing
+
+    call AddHarass(4, 1, ABOMINATION)
+    set distraction_group = 4
+
+
+
+
+
+
+
+
+
+
+
+
+endfunction
+function build_sequence_Aboms takes nothing returns nothing
+if tier == 3 then
+
+      call BuildUnit(4, GHOUL, 45)
+      call BuildUnit(18, ABOMINATION, 35)
+      call BuildUnit(2, BLK_SPHINX, 50)
+      call BuildUnit(2, OBSIDIAN_STATUE, 55)
+      call BuildUnit(1, hero[1], 80)
+      call BuildUnit(1, hero[2], 70)
+      call BuildUnit(1, hero[3], 60)
+
+      call BuildUpgr(1, UPG_PLAGUE, 71)
+      call BuildUpgr(1, UPG_CANNIBALIZE, 71)
+      call BuildUpgr(1, UPG_BLK_SPHINX, 40)
+
+
+
+
+
+
+
+
+
+
+
+
+elseif tier == 2 then
+
+      call BuildUnit(26, GHOUL, 40)
+      call BuildUnit(2, OBSIDIAN_STATUE, 55)
+      call BuildUnit(1, hero[1], 80)
+      call BuildUnit(1, hero[2], 60)
+      call BuildUnit(1, NECROPOLIS_3, 55)
+
+      call BuildUpgr(1, UPG_CANNIBALIZE, 56)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+else
+
+      call BuildUnit(20, GHOUL, 90)
+      call BuildUnit(1, hero[1], 80)
+      call BuildUnit(1, NECROPOLIS_2, 50)
+      call BuildUpgr(1, UPG_CANNIBALIZE, 56)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+endif
+endfunction
+
+//============================================================================
+//  build_sequence
+//============================================================================
+function init_strategy_MeatFiends takes nothing returns nothing
+
+    call AddHarass(4, 2, CRYPT_FIEND)
+    set distraction_group = 4
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+endfunction
+function build_sequence_MeatFiends takes nothing returns nothing
+if tier == 3 then
+
+      call BuildUnit(18, CRYPT_FIEND, 45)
+      call BuildUnit(6, MEAT_WAGON, 60)
+      call BuildUnit(2, BLK_SPHINX, 50)
+      call BuildUnit(2, OBSIDIAN_STATUE, 65)
+      call BuildUnit(4, GHOUL, 45)
+      call BuildUnit(1, hero[1], 80)
+      call BuildUnit(1, hero[2], 70)
+      call BuildUnit(1, hero[3], 60)
+
+      call BuildUpgr(1, UPG_FIEND_WEB, 77)
+      call BuildUpgr(1, UPG_EXHUME, 72)
+      call BuildUpgr(1, UPG_BLK_SPHINX, 40)
+
+
+
+
+
+
+
+
+
+
+
+
+
+elseif tier == 2 then
+
+      call BuildUnit(13, CRYPT_FIEND, 45)
+      call BuildUnit(4, MEAT_WAGON, 50)
+      call BuildUnit(2, OBSIDIAN_STATUE, 65)
+      call BuildUnit(6, GHOUL, 55)
+      call BuildUnit(1, hero[1], 80)
+      call BuildUnit(1, hero[2], 60)
+      call BuildUnit(1, NECROPOLIS_3, 50)
+
+      call BuildUpgr(1, UPG_FIEND_WEB, 69)
+      call BuildUpgr(1, UPG_EXHUME, 58)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+else
+
+    call BuildUnit(4, GHOUL, 90)
+    call BuildUnit(10, CRYPT_FIEND, 40)
+    call BuildUnit(1, hero[1], 80)
+    call BuildUnit(1, NECROPOLIS_2, 50)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+endif
+endfunction
+
+function init_strategy_MassDestroyer takes nothing returns nothing
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+endfunction
+function build_sequence_MassDestroyer takes nothing returns nothing
+if tier == 3 then
+
+      call BuildUnit(2, OBSIDIAN_STATUE, 65)
+      call BuildUnit(15, BLK_SPHINX, 55)
+      call BuildUnit(4, ABOMINATION, 60)
+      call BuildUnit(3, GHOUL, 90)
+      call BuildUnit(1, hero[1], 80)
+      call BuildUnit(1, hero[2], 70)
+      call BuildUnit(1, hero[3], 60)
+
+      call BuildUpgr(1, UPG_BLK_SPHINX, 70)
+      call BuildUpgr(1, UPG_FIEND_WEB, 65)
+      call BuildUpgr(1, UPG_BURROWING, 65)
+      call BuildUpgr(1, UPG_PLAGUE, 45)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+elseif tier == 2 then
+
+      call BuildUnit(6, OBSIDIAN_STATUE, 55)
+      call BuildUnit(8, GHOUL, 55)
+      call BuildUnit(18, CRYPT_FIEND, 50)
+      call BuildUnit(1, hero[1], 80)
+      call BuildUnit(1, hero[2], 60)
+      call BuildUnit(1, NECROPOLIS_3, 63)
+
+      call BuildUpgr(1, UPG_FIEND_WEB, 45)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+else
+
+      call BuildUnit(11, GHOUL, 90)
+      call BuildUnit(6, CRYPT_FIEND, 50)
+      call BuildUnit(1, hero[1], 80)
+      call BuildUnit(1, NECROPOLIS_2, 50)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+endif
+endfunction
+
+function init_strategy_CryptMix takes nothing returns nothing
+
+    call AddHarass(4, 3, GHOUL)
+    set distraction_group = 4
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+endfunction
+function build_sequence_CryptMix takes nothing returns nothing
+if tier == 3 then
+
+      call SetBuildReact(20, 5, ABOMINATION, 2, CRYPT_FIEND, (enemy_unarmored + (enemy_air * 2) + enemy_magic - (enemy_normal * 3)), 4, 25, 70)
+      call SetBuildReact(20, 0, CRYPT_FIEND, 0, GARGOYLE, ((enemy_air * 3) + enemy_normal - (enemy_piercing * 2) - enemy_unarmored), 4, 25, 60)
+      call SetBuildReact(15, 2, OBSIDIAN_STATUE, 0, BLK_SPHINX, ((enemy_magic * 2) + enemy_casters - (enemy_piercing * 2)), 4, 25, 65)
+      call SetBuildReact(12, 0, MEAT_WAGON, 1, BLK_SPHINX, ((enemy_magic * 2) + enemy_casters - enemy_piercing - enemy_towers - (enemy_unarmored * 2)), 4, 25, 55)
+      call BuildUnit(1, hero[1], 80)
+      call BuildUnit(1, hero[2], 60)
+      call BuildUnit(1, hero[3], 50)
+
+      call BuildUpgr(Min((TownCountDone(GHOUL)/5),1), UPG_GHOUL_FRENZY, 60)
+      call BuildUpgr(Min((TownCountDone(CRYPT_FIEND)/3),1), UPG_BURROWING, 60)
+      call BuildUpgr(Min((TownCountDone(CRYPT_FIEND)/3),1), UPG_FIEND_WEB, 50)
+      call BuildUpgr(Min((TownCountDone(MEAT_WAGON) + TownCountDone(ABOMINATION))/4,1), UPG_PLAGUE, 50)
+      call BuildUpgr(Min((TownCountDone(GHOUL)/5),1), UPG_CANNIBALIZE, 60)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+elseif tier == 2 then
+
+      call SetBuildReact(22, 4, GHOUL, 3, CRYPT_FIEND, (enemy_unarmored + (enemy_air * 2) + enemy_magic - (enemy_normal * 3)), 4, 25, 70)
+      call SetBuildReact(26, 0, CRYPT_FIEND, 0, GARGOYLE, ((enemy_air * 3) + enemy_normal - (enemy_piercing * 2) - enemy_unarmored), 4, 25, 60)
+      call BuildUnit(2, OBSIDIAN_STATUE, 55)
+      call BuildUnit(1, MEAT_WAGON, 55)
+      call BuildUnit(1, NECROPOLIS_3, 50)
+      call BuildUnit(1, hero[1], 80)
+      call BuildUnit(1, hero[2], 60)
+
+      call BuildUpgr(Min((TownCountDone(CRYPT_FIEND)/3),1), UPG_BURROWING, 60)
+      call BuildUpgr(Min((TownCountDone(CRYPT_FIEND)/3),1), UPG_FIEND_WEB, 50)
+      call BuildUpgr(Min((TownCountDone(GHOUL)/5),1), UPG_CANNIBALIZE, 60)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+else
+
+      call SetBuildReact(40, 5, GHOUL, 3, CRYPT_FIEND, ((enemy_unarmored * 3) + enemy_magic - (enemy_normal * 3)), 4, 25, 60)
+      call BuildUnit(1, NECROPOLIS_2, 40)
+      call BuildUnit(1, hero[1], 80)
+
+      call BuildUpgr(Min((TownCountDone(GHOUL)/5),1), UPG_CANNIBALIZE, 60)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+endif
+endfunction
+
+function init_strategy_TempleMix takes nothing returns nothing
+    call AddHarass(4, 1, NECRO)
+    set distraction_group = 4
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+endfunction
+function build_sequence_TempleMix takes nothing returns nothing
+if tier == 3 then
+
+      call SetBuildReact(18, 3, ABOMINATION, 2, MEAT_WAGON, (enemy_towers * 2), 4, 25, 70)
+      call SetBuildReact(30, 5, NECRO, 5, BANSHEE, (enemy_casters * 2) - enemy_normal, 4, 25, 70)
+      call SetBuildReact(20, 2, OBSIDIAN_STATUE, 0, BLK_SPHINX, ((enemy_magic * 2) + enemy_casters - (enemy_piercing * 2)), 4, 25, 70)
+      call BuildUnit(6, GHOUL, 25)
+      call BuildUnit(1, hero[1], 80)
+      call BuildUnit(1, hero[2], 70)
+      call BuildUnit(1, hero[3], 60)
+
+      call BuildUpgr(Min((TownCountDone(MEAT_WAGON) + TownCountDone(ABOMINATION))/4,1), UPG_PLAGUE, 50)
+      call BuildUpgr(Min((TownCountDone(NECRO)/3),2), UPG_NECROS, 60)
+      call BuildUpgr(Min((TownCountDone(NECRO)/3),1), UPG_SKEL_LIFE, 60)
+      call BuildUpgr(Min((TownCountDone(NECRO)/4),1), UPG_SKEL_MASTERY, 60)
+      call BuildUpgr(Min((TownCountDone(BANSHEE)/3),2), UPG_BANSHEE, 40)
+      call BuildUpgr(Min((TownCountDone(MEAT_WAGON)/2),1), UPG_EXHUME, 40)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+elseif tier == 2 then
+
+      call BuildUnit(6, GHOUL, 25)
+      call SetBuildReact(36, 5, NECRO, 5, BANSHEE, (enemy_casters * 2) - enemy_normal, 4, 25, 85)
+      call SetBuildReact(10, 3, OBSIDIAN_STATUE, 2, MEAT_WAGON, enemy_towers, 4, 25, 65)
+      call BuildUnit(1, NECROPOLIS_3, 40)
+      call BuildUnit(1, hero[1], 80)
+      call BuildUnit(1, hero[2], 60)
+
+      call BuildUpgr(Min((TownCountDone(NECRO)/3),1), UPG_NECROS, 60)
+      call BuildUpgr(Min((TownCountDone(NECRO)/3),1), UPG_SKEL_LIFE, 50)
+      call BuildUpgr(Min((TownCountDone(BANSHEE)/3),1), UPG_BANSHEE, 40)
+      call BuildUpgr(Min((TownCountDone(MEAT_WAGON)/2),1), UPG_EXHUME, 40)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+else
+
+      call BuildUnit(10, GHOUL, 35)
+      call BuildUnit(6, CRYPT_FIEND, 37)
+      call BuildUnit(1, NECROPOLIS_2, 55)
+      call BuildUnit(1, hero[1], 80)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+endif
+endfunction
+
+
+
+
+
+function init_strategy_UAntiTower takes nothing returns nothing
+
+    call AddHarass(4, 2, GHOUL)
+    set distraction_group = 4
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+endfunction
+function build_sequence_UAntiTower takes nothing returns nothing
+if tier == 3 then
+
+      call BuildUnit(6, FROST_WYRM, 70)
+      call BuildUnit(6, ABOMINATION, 60)
+      call BuildUnit(10, MEAT_WAGON, 50)
+      call BuildUnit(3, GHOUL, 55)
+      call BuildUnit(1, hero[1], 80)
+      call BuildUnit(1, hero[2], 60)
+      call BuildUnit(1, hero[3], 50)
+
+      call BuildUpgr(1, UPG_PLAGUE, 71)
+      call BuildUpgr(1, UPG_CANNIBALIZE, 71)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+elseif tier == 2 then
+
+      call BuildUnit(1, NECROPOLIS_3, 55)
+      call BuildUnit(10, MEAT_WAGON, 50)
+      call BuildUnit(1, hero[1], 80)
+      call BuildUnit(1, hero[2], 60)
+      call BuildUnit(16, GHOUL, 55)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+else
+
+      call BuildUnit(20, GHOUL, 90)
+      call BuildUnit(1, hero[1], 80)
+      call BuildUnit(1, NECROPOLIS_2, 50)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+endif
+endfunction
