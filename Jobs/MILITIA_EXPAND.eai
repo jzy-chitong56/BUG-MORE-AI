@@ -21,16 +21,14 @@ function BuildMilitiaExpansion takes nothing returns boolean
   local boolean b = false
   call RemoveUnitAM(u)
   set u = null
+  call RecycleGuardPosition(militia_builder)
   if DistanceBetweenPoints_dd(Location(x, y), GetUnitLoc(not_taken_expansion)) <= race_max_expa_mine_distance then
-    call RecycleGuardPosition(militia_builder)
     call CreateDebugTag("Militia Expansion - build", 10, militia_builder, 3.00, 1.50)
     call IssuePointOrderById(militia_builder, old_id[racial_expansion], x, y)
     if race_has_power_build then
       call FastBuildCheck()
     endif
     set b = true
-  else
-    call RecycleGuardPosition(militia_builder)
   endif
   return b
 endfunction
@@ -142,9 +140,9 @@ local real d = 0
 			set militia_state = 3
 			call Trace("Militia state 2 to 3")
 			if d == 1 then
-				call TQAddJob(1, MILITIA_EXPAND, 0)
-			else
 				call TQAddJob(4, MILITIA_EXPAND, 0)
+			else
+				call TQAddJob(1, MILITIA_EXPAND, 0)
 			endif
 			return
 		// elseif militia_time_out < 1 then
