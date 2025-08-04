@@ -59,8 +59,7 @@ function TrackArmy takes integer num returns boolean
       if ModuloInteger(i, 32) == 0 then
         call Sleep(0.02)
       endif
-      set up = GetOwningPlayer(u)
-      if UnitAlive(u) and (up == ap or (up == ai_player and IsStandardUnit(u) and not IsUnitBuying(u))) then
+      if UnitAlive(u) and (up != ai_player or (IsStandardUnit(u) and not IsUnitBuying(u))) then
         set x = x + GetUnitX(u)
         set y = y + GetUnitY(u)
         set c = c + 1
