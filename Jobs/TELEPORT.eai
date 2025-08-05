@@ -30,7 +30,7 @@ function TeleportJob takes unit hu returns nothing
     set u = FirstOfGroup(g)
     exitwhen u == null
     if GetOwningPlayer(u) == ai_player and not IsUnitType(u, UNIT_TYPE_PEON) and not IsUnitType(u, UNIT_TYPE_STRUCTURE) and UnitAlive(u) and not IsUnitHidden(u) and DistanceBetweenPoints_kd(l, GetUnitLoc(u)) > teleport_radius then
-      call IssuePointOrderLoc(u, "move", l)
+      call IssueTargetOrder(u, "smart", hu)
     endif
     call GroupRemoveUnit(g, u)
   endloop

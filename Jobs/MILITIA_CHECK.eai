@@ -6,11 +6,11 @@
 #ELSE
 function GetMilitiaHall takes unit u returns unit
   local group g = CreateGroup()
-  call GroupEnumUnitsOfPlayer(g, ai_player, null)
+  call GroupEnumUnitsInRangeOfLoc(g, home_location, 1200, null)
   loop
     set u = FirstOfGroup(g)
     exitwhen u == null
-    if GetUnitAbilityLevel(u, race_militia_hall_ability) > 0 and UnitAlive(u) and not IsUnitHidden(u) then
+    if GetUnitAbilityLevel(u, race_militia_hall_ability) > 0 and GetOwningPlayer(u) == ai_player and UnitAlive(u) and not IsUnitHidden(u) then
       call DestroyGroup(g)
       set g = null
       return u
@@ -37,8 +37,9 @@ function MilitiaCheckJob takes nothing returns nothing
   local group g = null
   local unit u = null
   local integer i = 0
-  local boolean big_dist = false
+  //local boolean big_dist = false
   local integer militiarequired = 0
+  local real dist = 0
   call DisplayToAllJobDebug("MILITIA_CHECK JOB START")
   if militia_hall == null or not UnitAlive(militia_hall) then
     set militia_hall = GetMilitiaHall(militia_hall)
@@ -60,30 +61,31 @@ function MilitiaCheckJob takes nothing returns nothing
       set u = FirstOfGroup(g)
       exitwhen u == null
       if GetOwningPlayer(u) == ai_player and UnitAlive(u) and not IsUnitHidden(u) then
-        if not militia_allowed or DistanceBetweenPoints_dk(GetUnitLoc(u), home_location) > race_militia_max_distance then
+        set dist = DistanceBetweenPoints_dk(GetUnitLoc(u), home_location)
+        if not militia_allowed or (dist > race_militia_max_distance and dist < 2000) then  // just check home
           call IssueImmediateOrder(u, "militiaoff")
         endif
       endif
       call GroupRemoveUnit(g,u)
     endloop
-    set militiarequired = Max(1,GetLocationNonCreepStrength(GetUnitX(militia_hall), GetUnitY(militia_hall), 1500) / 2) // Militia are 2 strength so divide total enemy strength by 2
+    set militiarequired = Max(1,GetLocationNonCreepStrength(GetUnitX(militia_hall), GetUnitY(militia_hall), 1500) / 2) + 2 // Militia are 2 strength so divide total enemy strength by 2
     call GroupEnumUnitsOfType(g, race_militiaworker_unitstring, null)
-    // set g = SelectByPlayer(g, ai_player, true)
-    // set g = SelectByAlive(g, true)
-    // set g = SelectByHidden(g, false)
     loop
       set u = FirstOfGroup(g)
       exitwhen u == null
       if GetOwningPlayer(u) == ai_player and UnitAlive(u) and not IsUnitHidden(u) then
-        set big_dist = DistanceBetweenUnits(u, militia_hall) > 1500
-        if militia_allowed and i >= 2 and i < militiarequired + 2 and not big_dist then
-          if GetUnitAbilityLevel(u, race_militia_ability) <= 0 then
+        if DistanceBetweenUnits(u, militia_hall) > 1500 then  // not at home
+          if GetUnitAbilityLevel(u, race_militia_ability) < 1 then
             call UnitAddAbility(u, race_militia_ability)
           endif
-        elseif GetUnitAbilityLevel(u, race_militia_ability) > 0 then
-          call UnitRemoveAbility(u, race_militia_ability)
-        endif
-        if not big_dist then
+        else
+          if militia_allowed and i > 1 and i < militiarequired then
+            if GetUnitAbilityLevel(u, race_militia_ability) < 1 then
+              call UnitAddAbility(u, race_militia_ability)
+            endif
+          elseif GetUnitAbilityLevel(u, race_militia_ability) > 0 then
+            call UnitRemoveAbility(u, race_militia_ability)
+          endif
           set i = i + 1
         endif
       endif
