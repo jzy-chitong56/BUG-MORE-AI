@@ -127,6 +127,7 @@ function HarassJob takes integer key, unit target returns nothing
   local player p = null
   local real strength_sum = 0
   local real player_sum = 0
+  local real dist = 0
   local integer harass_num = 0
   local boolean towersdetected = false
   local boolean hero_harass = false
@@ -271,11 +272,20 @@ function HarassJob takes integer key, unit target returns nothing
 
   call GroupRemoveGuardPositionInstant(harasser)
   if target != null and UnitAlive(target) then
+    set dist = DistanceBetweenUnits(hu, target)
     set g = CreateGroup()
-    if state_attacking then
-      call GroupEnumUnitsInRange(g,GetUnitX(hu),GetUnitY(hu),harass_radius_attack_ranged,null)
+    if dist > harass_radius_flee_ranged then
+      if state_attacking then
+        call GroupEnumUnitsInRange(g,GetUnitX(target),GetUnitY(target),harass_radius_attack_ranged,null)
+      else
+        call GroupEnumUnitsInRange(g,GetUnitX(target),GetUnitY(target),harass_radius_flee_ranged,null)
+      endif
     else
-      call GroupEnumUnitsInRange(g,GetUnitX(hu),GetUnitY(hu),harass_radius_flee_ranged,null)
+      if state_attacking then
+        call GroupEnumUnitsInRange(g,GetUnitX(hu),GetUnitY(hu),harass_radius_attack_ranged,null)
+      else
+        call GroupEnumUnitsInRange(g,GetUnitX(hu),GetUnitY(hu),harass_radius_flee_ranged,null)
+      endif
     endif
     loop
       set u = FirstOfGroup(g)
@@ -309,8 +319,8 @@ function HarassJob takes integer key, unit target returns nothing
         set timedelay = -1	// Not a windwalker harassing so attack immediatly
         call SaveInteger(additional_info, key, WINDWALK_COUNT, 0)
       endif
-      if hu != null and DistanceBetweenUnits(hu, target) > 650 then
-        if DistanceBetweenUnits(hu, target) <= 5000 then
+      if hu != null and dist > 650 then
+        if dist <= 5000 then
           call GroupOrderWindWalkInstant_d(CopyGroup(harasser,g))
           set g = null
         endif

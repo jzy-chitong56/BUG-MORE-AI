@@ -58,12 +58,12 @@ function SellorDropNonHealingItem takes unit u, unit shop, boolean healitem retu
     set t = UnitItemInSlot(u, i)
     if t != null then
       set id = GetItemTypeId(t)
-      if id == 'crys' or id == 'wswd' or id == 'wshs' or id == 'tret' or id == 'fgun' then
+      if id == 'wshs' or id == 'tret' then
         if s < 1 and UnitDropItemTarget(u, t, shop) then
           set s = 1  // once sell one item
           set c = c + 1
         endif
-      elseif id == 'pomn' or id == 'mcri' then
+      elseif id == 'mcri' then
         call UnitUseItem(u, t)
         set c = c + 1
       elseif s < 1 and healitem and not IsHealingItem(id) and not IsValuablesItem(id) then  // Unknown item, dare not sell

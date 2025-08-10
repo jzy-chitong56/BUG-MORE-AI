@@ -1,9 +1,11 @@
 #IFDEF GLOBAL
     unit double_expansion_target = null
+    unit invisible_expansion = null
     boolean double_expansion_ally_present = false
     boolean double_expansion_allyhuman_present = false
     boolean double_own_present = false
     boolean double_expansion_enemy_present = false
+    boolean invisible_enemy_expansion = false
 #ELSE
 //============================================================================
 // Detect double expansion
@@ -45,30 +47,43 @@ endfunction
 
 function CheckDoubleExpansionsClaimedInArea takes real tx, real ty, boolean isBuildCommand returns boolean
   local group g = CreateGroup()
-  local unit u = null
+  local unit u = double_expansion_target
   local unit exp = null
   local player p = null
   local integer minecount = 0
   local integer claimedMines = 0
+  local integer towercount = 0
   set double_expansion_ally_present = false
   set double_expansion_enemy_present = false
   set double_expansion_allyhuman_present = false
   set double_own_present = false
+  set invisible_enemy_expansion = false
   call GroupEnumUnitsInRange(g, tx, ty, expansion_taken_radius, null)
   //set g = SelectByAlive2(g, true)
-  if double_expansion_target != null and not UnitAlive(double_expansion_target) then
+  if u != null and not UnitAlive(u) then
     set double_expansion_target = null
+  endif
+  set u = invisible_expansion
+  if u != null and not UnitAlive(u) then
+    set invisible_expansion = null
   endif
   loop
     set u = FirstOfGroup(g)
     exitwhen u == null
     set p = GetOwningPlayer(u)
     if p != Player(PLAYER_NEUTRAL_AGGRESSIVE) and UnitAlive(u) then
-      if IsPlayerEnemy(p, ai_player) and IsUnitType(u, UNIT_TYPE_STRUCTURE) then
-        if exp == null and not IsUnitHidden(u) then
-          set exp = u
+      if IsPlayerEnemy(p, ai_player) then
+        if IsUnitType(u, UNIT_TYPE_STRUCTURE) then
+          set double_expansion_enemy_present = true
         endif
-        set double_expansion_enemy_present = true
+        if not IsUnitHidden(u) and not IsUnitType(u, UNIT_TYPE_SUMMONED) then
+          if exp == null and double_expansion_enemy_present then
+            set exp = u
+          endif
+          if UnitInvis(u) and not IsUnitDetected(u,ai_player) then
+            set invisible_enemy_expansion = true  // Prevent transmission
+          endif
+        endif
       endif
       if IsUnitGoldMine(u) or IsUnitType(u, UNIT_TYPE_TOWNHALL) then
         if IsValidMineClaimed(u) then
@@ -92,10 +107,15 @@ function CheckDoubleExpansionsClaimedInArea takes real tx, real ty, boolean isBu
         if not IsUnitType(u, UNIT_TYPE_TOWNHALL) then
           set minecount = minecount + 1
         endif
+      elseif p == ai_player and IsUnitTower(u) then
+        set towercount = towercount + 1
       endif
     endif
     call GroupRemoveUnit(g,u)
   endloop
+  if not double_own_present or towercount < 2 then
+    set invisible_enemy_expansion = false  // enemy exp or no tower
+  endif
   if double_expansion_target == null then
     set double_expansion_target = exp
   endif
@@ -163,9 +183,9 @@ endfunction
 function CheckDoubleExpansion takes nothing returns nothing
   local group g = CreateGroup()
   local unit u = null
-  local boolean b = false
   local integer i = TownCount(racial_expansion)
   local integer id = 0
+  local integer tower_count = 0
   call GroupEnumUnitsOfPlayer(g, ai_player, null)
   //set g = SelectNumberOfId(g, 100, old_id[racial_expansion])
   if race_manual_loading then
@@ -176,7 +196,6 @@ function CheckDoubleExpansion takes nothing returns nothing
     exitwhen u == null
     set id = GetUnitTypeId(u)
     if id == old_id[racial_expansion] and UnitAlive(u) and not IsUnitHidden(u) then
-      set b = true
       if CheckDoubleExpansionsClaimedInArea(GetUnitX(u), GetUnitY(u), false) then
         if double_expansion_ally_present and i > 1 and DistanceBetweenPoints_kd(home_location, GetUnitLoc(u)) > 1300 then
           if GetUnitState(u, UNIT_STATE_LIFE) < GetUnitState(u, UNIT_STATE_MAX_LIFE) then
@@ -188,23 +207,33 @@ function CheckDoubleExpansion takes nothing returns nothing
               call SetPlayerState(ai_player, PLAYER_STATE_RESOURCE_LUMBER, GetPlayerState(ai_player, PLAYER_STATE_RESOURCE_LUMBER) + GetUnitWoodCost(id))
               call KillUnit(u)
             endif
+            set double_own_present = false
+            set invisible_enemy_expansion = false
             set i = i - 1
           endif
         endif
       endif
+      if invisible_enemy_expansion then
+        call Trace("Enemy invisible enemy detected on expansion")
+        if invisible_expansion == null then // Deal with one at a time
+          set invisible_expansion = u
+        endif
+      endif
+      if double_expansion_ally_present then
+        call Trace("Ally double expansion detected")
+      endif
+      if double_expansion_enemy_present then
+        call Trace("Enemy double expansion detected")
+      endif
     endif
     call GroupRemoveUnit(g,u)
   endloop
-  if b then
-    if double_expansion_ally_present then
-      call Trace("Ally double expansion detected")
-    endif
-    if double_expansion_enemy_present then
-      call Trace("Enemy double expansion detected")
-    endif
-  endif
   call DestroyGroup(g)
   set g = null
+  if not neutral_ordered[NEUTRAL_OBSERVATORY] then
+    call TQAddJob(0, BUY_NEUTRAL, 852270)  // hope tower can kill enemies
+    set neutral_ordered[NEUTRAL_OBSERVATORY] = true
+  endif
 endfunction
 
 function DetectDoubleExpJob takes nothing returns nothing
