@@ -14910,7 +14910,7 @@ endfunction
 //  the hero in the healing groups so a bug occurs in those functions.
 //============================================================================
 function HeroHealingBugFix takes integer i returns nothing
-  if HeroBugFixHealthCheck(i) then
+  if HeroBugFixHealthCheck(i, GetUnitState(hero_unit[i], UNIT_STATE_LIFE) / RMax(GetUnitState(hero_unit[i], UNIT_STATE_MAX_LIFE), 1)) then
     call Trace("HERO: Healing Bug Fix")
     call RecycleGuardPosition(hero_unit[i])
     call GroupRemoveUnit(unit_healing, hero_unit[i])
@@ -14923,7 +14923,7 @@ function AwaitMeleeHeroesAM takes nothing returns boolean
   local boolean hero_available = false
 
   loop
-    //call HeroHealingBugFix()
+    //call HeroHealingBugFix(i)
     loop
       exitwhen i > 3
       if GetUnitCountDone(old_id[hero[i]]) > 0 then
