@@ -3,14 +3,14 @@ boolean retreat_home_n = false
 #ELSE
 function ResetBuyNeutralUnit takes integer nn returns nothing
   local unit u = neutral_sent[nn]
-  if u != null then
+  if u != null and not IsUnitType(u, UNIT_TYPE_STRUCTURE) then
     call GroupRemoveUnit(unit_buying_merc, u)
     if UnitAlive(u) and not IsUnitInGroup(u, unit_buying_item) and not IsUnitInGroup(u, unit_buying_tavern) and IsStandardUnit(u) then
       call RecycleGuardPosition(u)
       call AddAssault(1, GetUnitTypeId(u))
     endif
+    set neutral_sent[nn] = null
   endif
-  set neutral_sent[nn] = null
   set u = null
   set neutral_ordered[nn] = false
   set retreat_home_n = false
@@ -32,7 +32,7 @@ function BuyNeutral takes integer id returns nothing
 
   call DisplayToAllJobDebug("BUY_NEUTRAL JOB START")
   // moved this check here to prevent a job crash if placed lower down
-  if TownCountDone(id) >= neutral_wanted[nn] then
+  if id != 852270 and TownCountDone(id) >= neutral_wanted[nn] then
     call ResetBuyNeutralUnit(nn)
     set buy_place = null
     return
@@ -80,7 +80,11 @@ function BuyNeutral takes integer id returns nothing
   set dist = DistanceBetweenUnits(neutral_sent[nn], buy_place)
   //  call DisplayToAll("Buy Neutral Started")
   if (buy_time_large[nn] >= 0 and buy_time_large[nn] + buy_timeout_large < current_time) or (buy_time_small[nn] >= 0 and buy_time_small[nn] + buy_timeout_small < current_time) then
-    set available_time[id] = ai_time + regenerate_time[id] / 2
+    if id != 852270 then
+      set available_time[id] = ai_time + regenerate_time[id] / 2
+    else
+      set available_time[id] = ai_time
+    endif
     call ResetBuyNeutralUnit(nn)
     set buy_place = null
     return
@@ -98,7 +102,16 @@ function BuyNeutral takes integer id returns nothing
       if GetUnitCurrentOrder(neutral_sent[nn]) == OrderId("move") then
         call IssueImmediateOrder(neutral_sent[nn], "holdposition")  // stop will let panda cancel element clone
       endif
-      call IssueNeutralImmediateOrderById(ai_player, buy_place, old_id[id])
+      if id != 852270 then
+        call IssueNeutralImmediateOrderById(ai_player, buy_place, old_id[id])
+      else
+        if invisible_expansion != null and UnitAlive(invisible_expansion) then
+          call IssueNeutralPointOrderById(ai_player, buy_place, id, GetUnitX(invisible_expansion), GetUnitY(invisible_expansion))
+        endif
+        call ResetBuyNeutralUnit(nn)
+        set buy_place = null
+        return
+      endif
       if buy_time_small[nn] < 0 then
         set buy_time_small[nn] = current_time
       endif
