@@ -160,6 +160,11 @@ function global_build_sequence takes nothing returns nothing
     if GetGold() > 1000 then
       call BuildItem(1, STAFF_OF_TELEPORTATION, 35)
     endif
+    if GetRandomInt(0, 1) > 0 then
+      call BuildItem(1, DUST_OF_APPEARANCE, 20)
+    else
+      call BuildItem(1, M_DUST_OF_APPEARANCE, 10)
+    endif
 
     // DYNAMIC and Global Mercenaries
     call ResetDynamicSystem()
