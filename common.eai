@@ -229,6 +229,7 @@ globals
     constant integer BT_MERC = 7
     constant integer BT_GOBLIN_MERC = 8
     constant integer BT_DRAGON = 9
+    constant integer BT_MARKETPLACE = 10
     constant integer BT_MERCHANT_ITEM = 10
 
     constant integer COMPARE_TRUE = 0
@@ -7732,19 +7733,21 @@ function AntiInvisibleUseAbility takes real x, real y returns nothing
   loop
     set u = FirstOfGroup(vg)
     exitwhen u == null
-    if UnitAlive(u) then
-      if IsUnitInGroup(u, g) then
+    if GetOwningPlayer(u) == ai_player and UnitAlive(u) then
+      if IsUnitInGroup(u, g) and IsStandardUnit(u) and not IsUnitBuying(u) then
         set id = GetUnitTypeId(u)
         if false then
         #INCLUDETABLE <$VER$\InvisibleDetection.txt> #EFR #COND "%3" eq "SUDDEN"
         elseif id == %1 then
           call IssueImmediateOrderById(u, %4)
+          call CreateDebugTag("Unit anti invisible", 10, u, 1.00, 0.80)
           set anti_invisible_lock = anti_invisible_lock + 30
           exitwhen true
         #ENDINCLUDE
         #INCLUDETABLE <$VER$\InvisibleDetection.txt> #EFR #COND "%3" eq "COORDINATE"
         elseif id == %1 then
           call IssuePointOrderById(u, %4, GetUnitX(u), GetUnitY(u))
+          call CreateDebugTag("Unit anti invisible", 10, u, 1.00, 0.80)
           set anti_invisible_lock = anti_invisible_lock + 30
           exitwhen true
         #ENDINCLUDE
@@ -7769,6 +7772,7 @@ function AntiInvisibleUseItem takes unit u returns nothing
   if false then
   #INCLUDETABLE <$VER$\InvisibleDetection.txt> #EFR #COND "%2" eq "HERO" and "%3" eq "SUDDEN"
   elseif id == %1 and IssueImmediateOrderById(u, %4) then
+    call CreateDebugTag("Anti invisible", 10, u, 1.00, 0.80)
     set i = 6
   #ENDINCLUDE
   endif
@@ -7781,12 +7785,14 @@ function AntiInvisibleUseItem takes unit u returns nothing
       #INCLUDETABLE <$VER$\InvisibleDetection.txt> #EFR #COND "%2" eq "ITEM" and "%3" eq "SUDDEN"
       elseif id == %1 then
         call UnitUseItem(u, t)
-        set i = 8
+        call CreateDebugTag("Use item anti invisible", 10, u, 1.00, 0.80)
+        set i = 5
       #ENDINCLUDE
       #INCLUDETABLE <$VER$\InvisibleDetection.txt> #EFR #COND "%2" eq "ITEM" and "%3" eq "COORDINATE"
       elseif id == %1 then
         call UnitUseItemPoint(u, t, GetUnitX(u), GetUnitY(u))
-        set i = 8
+        call CreateDebugTag("Use item anti invisible", 10, u, 1.00, 0.80)
+        set i = 5
       #ENDINCLUDE
       endif
     endif
