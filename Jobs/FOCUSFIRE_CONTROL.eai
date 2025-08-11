@@ -291,7 +291,7 @@ function FocusFire takes unit u, group fg returns nothing
   set t = null
 endfunction
 
-function FocusEnemyUnitsNearGroup takes group g, group fg returns nothing
+function FocusEnemyUnitsNearGroup takes group g, group fg, location l returns nothing
   local unit u = null
   local real hero_min_health = 100000
   local unit hero_min_health_unit = null
@@ -365,8 +365,11 @@ function FocusEnemyUnitsNearGroup takes group g, group fg returns nothing
               endif
             endif
           endif
-        elseif not IsUnitType(u, UNIT_TYPE_STRUCTURE) then
+        elseif not IsUnitType(u, UNIT_TYPE_STRUCTURE) and p != Player(PLAYERAGGRESSIVE) then
           set unvisible_count = unvisible_count + 1
+          if IsUnitType(u, UNIT_TYPE_HERO) then
+            set unvisible_count = unvisible_count + 1
+          endif
           set vx = vx + GetUnitX(u)
           set vy = vy + GetUnitY(u)
         endif
@@ -412,8 +415,12 @@ function FocusEnemyUnitsNearGroup takes group g, group fg returns nothing
     endif
   endif
   if unvisible_count > 2 then
-    call AntiInvisibleUseAbility(vx / unvisible_count, vy / unvisible_count)
-  endif
+    set vx = vx / unvisible_count
+    set vy = vy / unvisible_count
+    if DistanceBetweenPoints_dk(Location(vx, vy), l) > 1000 then
+      call AntiInvisibleUseAbility(vx, vy)
+    endif
+  endif 
   set p = null
   set u = null
   set hero_min_health_unit = null
@@ -461,17 +468,17 @@ function FocusFireJob takes nothing returns nothing
     if major_hero != null then
       call MoveLocation(last_major_hero_loc, GetUnitX(major_hero), GetUnitY(major_hero))
       call GroupEnumUnitsInRange(g,GetUnitX(major_hero),GetUnitY(major_hero),battle_radius,null)
-      call FocusEnemyUnitsNearGroup(g, fg)
+      call FocusEnemyUnitsNearGroup(g, fg, last_major_hero_loc)
     endif
     if main_army >= 0 and army_loc[main_army] != null then
       call GroupEnumUnitsInRange(g, GetLocationX(army_loc[main_army]), GetLocationY(army_loc[main_army]), battle_radius, null)
-      call FocusEnemyUnitsNearGroup(g, fg)
+      call FocusEnemyUnitsNearGroup(g, fg, army_loc[main_army])
     endif
     loop
       exitwhen i >= army_num
       if army_loc[i] != null and Player(army_owner[i]) == ai_player and main_army != i then
         call GroupEnumUnitsInRange(g, GetLocationX(army_loc[i]), GetLocationY(army_loc[i]), battle_radius, null)
-        call FocusEnemyUnitsNearGroup(g, fg)
+        call FocusEnemyUnitsNearGroup(g, fg, army_loc[i])
       endif
       set i = i + 1
     endloop

@@ -278,14 +278,10 @@ function HarassJob takes integer key, unit target returns nothing
       if state_attacking then
         call GroupEnumUnitsInRange(g,GetUnitX(target),GetUnitY(target),harass_radius_attack_ranged,null)
       else
-        call GroupEnumUnitsInRange(g,GetUnitX(target),GetUnitY(target),harass_radius_flee_ranged,null)
-      endif
-    else
-      if state_attacking then
-        call GroupEnumUnitsInRange(g,GetUnitX(hu),GetUnitY(hu),harass_radius_attack_ranged,null)
-      else
         call GroupEnumUnitsInRange(g,GetUnitX(hu),GetUnitY(hu),harass_radius_flee_ranged,null)
       endif
+    else
+      call GroupEnumUnitsInRange(g,GetUnitX(hu),GetUnitY(hu),harass_radius_flee_ranged,null)
     endif
     loop
       set u = FirstOfGroup(g)
