@@ -10,7 +10,6 @@ function global_init_strategy takes nothing returns nothing
       call AddBlock(1, CRYPT, false, 0, ZIGGURAT_1, 16)
       call AddBlock(1, CRYPT, true, 0, ZIGGURAT_2, 20)
       call AddBlock(1, CRYPT, true, 0, ZIGGURAT_FROST, 16)
-      
     else
       call AddBlock(1, UNDEAD_ALTAR, true, 0, TOMB_OF_RELICS, 36)
       call AddBlock(1, UNDEAD_ALTAR, false, 0, CRYPT, 16)
@@ -71,9 +70,7 @@ function global_build_sequence takes nothing returns nothing
     if TownCount(GHOUL) == 0 and GetWood() < 500 then
       call BuildUnit(1, GHOUL, ghoul_prio)
     endif
-    if GetUnitCount(old_id[SAC_PIT]) > 0 then
-      call BuildUnit(1, SHADE, 60)
-    endif
+    call BuildUnit(1, SHADE, 40)
     if IsMapFlagSet(MAP_RANDOM_HERO) then
       call BuildUnit(1, UNDEAD_ALTAR, 56)
     endif
