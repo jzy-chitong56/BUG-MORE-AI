@@ -71,9 +71,7 @@ function global_build_sequence takes nothing returns nothing
     if TownCount(GHOUL) == 0 and GetWood() < 500 then
       call BuildUnit(1, GHOUL, ghoul_prio)
     endif
-    if GetUnitCount(old_id[SAC_PIT]) > 0 then
-      call BuildUnit(1, SHADE, 60)
-    endif
+    call BuildUnit(1, SHADE, 40)
     if IsMapFlagSet(MAP_RANDOM_HERO) then
       call BuildUnit(1, UNDEAD_ALTAR, 56)
     endif
