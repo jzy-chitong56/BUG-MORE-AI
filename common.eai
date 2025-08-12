@@ -5380,7 +5380,7 @@ endfunction
 function GetUnitToBuy takes unit ru, unit buy_place returns unit
   local group g = CreateGroup()
   local unit u = null
-  local unit hu = null
+  local unit tu = null
   local real distance = 10000
   local real newdistance = 0
   set ru = null
@@ -5398,7 +5398,7 @@ function GetUnitToBuy takes unit ru, unit buy_place returns unit
         set distance = newdistance
         set ru = u
       endif
-      if not IsUnitIdType(u, UNIT_TYPE_HERO) then
+      if not IsUnitType(u, UNIT_TYPE_HERO) then
         set tu = u  // not take hero
       endif
     endif
@@ -6731,7 +6731,7 @@ function MultipleMinefix takes nothing returns boolean
         set u = null
         if DistanceBetweenPoints_kd(l, GetUnitLoc(fixmine)) <= race_max_expa_mine_distance and GetGold() > GetUnitGoldCost(old_id[racial_expansion]) and GetWood() > GetUnitWoodCost(old_id[racial_expansion]) then
           call IssuePointOrderByIdLoc(peon, old_id[racial_expansion], l)  // this API only return false , cannot set b
-          call CreateDebugTag("Multiple Mine fix - build expansion", 10, peon != null, 10.00, 8.00)
+          call CreateDebugTag("Multiple Mine fix - build expansion", 10, peon, 10.00, 8.00)
           set b = true
         endif
         call RemoveLocation(l)
@@ -6741,7 +6741,7 @@ function MultipleMinefix takes nothing returns boolean
   elseif race_uses_mine_expansion then
     if peon != null and fixmine != null and UnitAlive(fixmine) and (TownCount(racial_expansion) < 2 or (GetGold() > 1200 and TownCount(racial_expansion) < 3)) and Min(GetResourceAmount(fixmine) * 2, GetGold()) > GetUnitGoldCost(old_id[racial_expansion]) and GetWood() > GetUnitWoodCost(old_id[racial_expansion]) then
       call IssueTargetOrderById(peon != null, old_id[racial_expansion], fixmine)  // this API only return false , cannot set b
-      call CreateDebugTag("Multiple Mine fix - build expansion", 10, peon != null, 10.00, 8.00)
+      call CreateDebugTag("Multiple Mine fix - build expansion", 10, peon, 10.00, 8.00)
       set b = true
     endif
   else
