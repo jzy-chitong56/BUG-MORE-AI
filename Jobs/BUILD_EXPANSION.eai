@@ -49,7 +49,6 @@ function BuildExpansionJob takes unit u, unit expansion returns nothing
 				call TQAddUnit2Job(2, BUILD_EXPANSION, 0, u, expansion)
 			endif
 			set v = null
-			endif
 		endif
 	endif
 endfunction
