@@ -6740,7 +6740,7 @@ function MultipleMinefix takes nothing returns boolean
     endif
   elseif race_uses_mine_expansion then
     if peon != null and fixmine != null and UnitAlive(fixmine) and (TownCount(racial_expansion) < 2 or (GetGold() > 1200 and TownCount(racial_expansion) < 3)) and Min(GetResourceAmount(fixmine) * 2, GetGold()) > GetUnitGoldCost(old_id[racial_expansion]) and GetWood() > GetUnitWoodCost(old_id[racial_expansion]) then
-      call IssueTargetOrderById(peon != null, old_id[racial_expansion], fixmine)  // this API only return false , cannot set b
+      call IssueTargetOrderById(peon, old_id[racial_expansion], fixmine)  // this API only return false , cannot set b
       call CreateDebugTag("Multiple Mine fix - build expansion", 10, peon, 10.00, 8.00)
       set b = true
     endif
