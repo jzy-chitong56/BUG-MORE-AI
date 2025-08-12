@@ -60,6 +60,9 @@ function GetDensities takes location l, player p, real r, boolean army, integer 
         //set enemy_density_loc = GetSumLoc_dd(enemy_density_loc, GetMultipleLoc(ul, ur))
         if UnitInvis(u) and not IsUnitDetected(u,ai_player) and not IsUnitType(u, UNIT_TYPE_STRUCTURE) then
           set invisible_count = invisible_count + 1
+          if IsUnitType(u, UNIT_TYPE_HERO) then
+            set invisible_count = invisible_count + 3
+          endif
         endif
       else  //if IsPlayerAlly(p, up) then
         set ally_density = ally_density + ur
