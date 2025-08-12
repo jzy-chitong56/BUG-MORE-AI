@@ -7934,18 +7934,32 @@ function AntiInvisibleUseAbility takes real x, real y returns nothing
       if IsUnitInGroup(u, g) and IsStandardUnit(u) and not IsUnitBuying(u) then
         set id = GetUnitTypeId(u)
         if false then
-        #INCLUDETABLE <$VER$\InvisibleDetection.txt> #EFR #COND "%3" eq "SUDDEN"
+        #INCLUDETABLE <$VER$\InvisibleDetection.txt> #EFR #COND "%2" eq "BUILD" and "%3" eq "SUDDEN"
         elseif id == %1 then
           call IssueImmediateOrderById(u, %4)
           call CreateDebugTag("Unit anti invisible", 10, u, 1.00, 0.80)
-          set anti_invisible_lock = anti_invisible_lock + 30
+          set anti_invisible_lock = ai_time
           exitwhen true
         #ENDINCLUDE
-        #INCLUDETABLE <$VER$\InvisibleDetection.txt> #EFR #COND "%3" eq "COORDINATE"
+        #INCLUDETABLE <$VER$\InvisibleDetection.txt> #EFR #COND "%2" eq "UNIT" and "%3" eq "SUDDEN"
+        elseif id == %1 then
+          call IssueImmediateOrderById(u, %4)
+          call CreateDebugTag("Unit anti invisible", 10, u, 1.00, 0.80)
+          set anti_invisible_lock = ai_time
+          exitwhen true
+        #ENDINCLUDE
+        #INCLUDETABLE <$VER$\InvisibleDetection.txt> #EFR #COND "%2" eq "BUILD" and "%3" eq "COORDINATE"
         elseif id == %1 then
           call IssuePointOrderById(u, %4, GetUnitX(u), GetUnitY(u))
           call CreateDebugTag("Unit anti invisible", 10, u, 1.00, 0.80)
-          set anti_invisible_lock = anti_invisible_lock + 30
+          set anti_invisible_lock = ai_time
+          exitwhen true
+        #ENDINCLUDE
+        #INCLUDETABLE <$VER$\InvisibleDetection.txt> #EFR #COND "%2" eq "UNIT" and "%3" eq "COORDINATE"
+        elseif id == %1 then
+          call IssuePointOrderById(u, %4, GetUnitX(u), GetUnitY(u))
+          call CreateDebugTag("Unit anti invisible", 10, u, 1.00, 0.80)
+          set anti_invisible_lock = ai_time
           exitwhen true
         #ENDINCLUDE
         endif
@@ -7995,7 +8009,7 @@ function AntiInvisibleUseItem takes unit u returns nothing
     endif
     set i = i + 1
   endloop
-  if i > 6 then
+  if i > 5 then
     set anti_invisible_lock = ai_time
   endif
   set t = null
@@ -10489,22 +10503,19 @@ function SetBuildAllAMCore takes integer t, integer qty, integer unitid, integer
     endif
     set i = i + 1
   endloop
-  if build_length > 0 and i > 0 then   //Bottom line fault tolerance
-    set j = build_length - 1
-    loop
-      exitwhen j < i
-      if j > 0 and ModuloInteger(j, 300) == 0 then
-        call Sleep(0.05)
-      endif
-      set build_qty[j+1] = build_qty[j]
-      set build_type[j+1] = build_type[j]
-      set build_item[j+1] = build_item[j]
-      set build_town[j+1] = build_town[j]
-      set build_loc[j+1] = build_loc[j]
-      set build_prio[j+1] = build_prio[j]
-      set j = j - 1
-    endloop
+  if i >= 150 then
+    call Sleep(0.05)
   endif
+  loop
+    exitwhen j < i
+    set build_qty[j+1] = build_qty[j]
+    set build_type[j+1] = build_type[j]
+    set build_item[j+1] = build_item[j]
+    set build_town[j+1] = build_town[j]
+    set build_loc[j+1] = build_loc[j]
+    set build_prio[j+1] = build_prio[j]
+    set j = j - 1
+  endloop
   set build_qty[i] = qty
   set build_type[i] = t
   set build_item[i] = unitid
