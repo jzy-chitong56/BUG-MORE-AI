@@ -414,7 +414,7 @@ function FocusEnemyUnitsNearGroup takes group g, group fg returns nothing
       call FocusFire(building_min_health_unit, fg)
     endif
   endif
-  if unvisible_count > 2 and set anti_invisible_lock - ai_time > 5 then
+  if unvisible_count > 2 and anti_invisible_lock - ai_time > 5 then
     set vx = vx / unvisible_count
     set vy = vy / unvisible_count
     call AntiInvisibleUseAbility(vx, vy)
