@@ -39,7 +39,6 @@ endfunction
 
 function TrackArmy takes integer num returns boolean
   local group g = CreateGroup()
-  local group tg = null
   local unit u = FirstOfGroup(army_group[num])
   local unit tu = null
   local location l = null
@@ -54,37 +53,11 @@ function TrackArmy takes integer num returns boolean
   set army_count[num] = 0
   set army_strength[num] = 0
   if u != null then  // If tracking existing army select range from current position not historic position
-    set tu = u
-    loop
-      if ModuloInteger(i, 32) == 0 then
-        call Sleep(0.02)
-      endif
-      if UnitAlive(u) and (up != ai_player or (IsStandardUnit(u) and not IsUnitBuying(u))) then
-        set x = x + GetUnitX(u)
-        set y = y + GetUnitY(u)
-        set c = c + 1
-        set s = s + GetUnitStrength(u)
-        call GroupAddUnit(g, u)
-      else
-        call GroupRemoveUnit(in_army_group, u)
-      endif
-      call GroupRemoveUnit(army_group[num], u)
-      set u = FirstOfGroup(army_group[num])
-      exitwhen u == null
-      set i = i + 1
-    endloop
-    set tg = army_group[num]
-    set army_group[num] = g
-    call DestroyGroup(tg)
-    set tg = null
-    set i = 1
-    set g = CreateGroup()
-    call GroupEnumUnitsInRange(g, GetUnitX(tu), GetUnitY(tu), army_radius, null)
-    set tu = null
+    call GroupEnumUnitsInRange(g, GetUnitX(u), GetUnitY(u), army_radius, null)
   else
     call GroupEnumUnitsInRangeOfLoc(g, army_loc[num], army_radius, null)
-    call GroupClear(army_group[num])
   endif
+  call GroupClear(army_group[num])
   loop
     set u = FirstOfGroup(g)
     exitwhen u == null
@@ -256,7 +229,7 @@ function SeedNewArmies takes nothing returns nothing
   if p >= PLAYERAGGRESSIVE then
     set mode = 2
     set lastFreeNum = 0
-    //call GroupClear(in_army_group)
+    call GroupClear(in_army_group)
   else
     set lastFreeNum = p
     call TQAddJob(1, ARMY_TRACK, 0)
