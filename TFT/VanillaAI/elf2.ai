@@ -551,7 +551,7 @@ endfunction
 //--------------------------------------------------------------------------------------------------
 //  buy_item
 //--------------------------------------------------------------------------------------------------
-function DistanceBetweenLoc_dk takes location locA, location locB returns real
+function Distance_BetweenLoc_dk takes location locA, location locB returns real
   local real x = GetLocationX(locB) - GetLocationX(locA)
   local real y = GetLocationY(locB) - GetLocationY(locA)
   call RemoveLocation(locA)
@@ -576,7 +576,7 @@ function SetShop takes nothing returns nothing
     set u = null
 endfunction
 
-function BuyItem takes integer item_id, boolean stack returns nothing
+function Buy_Item takes integer item_id, boolean stack returns nothing
     local integer i = 1
     local integer c = 0
     local integer sum = 0
@@ -609,7 +609,7 @@ function BuyItem takes integer item_id, boolean stack returns nothing
         endloop
         if u != null then
             set l = GetUnitLoc(u)
-            if DistanceBetweenLoc_dk(GetUnitLoc(shop), l) < 350 then
+            if Distance_BetweenLoc_dk(GetUnitLoc(shop), l) < 350 then
                 call IssueTargetOrderById(shop, 'Aall', u)
                 call IssueTargetOrderById(shop, 'Aneu', u)
                 call IssueNeutralImmediateOrderById(ai_player, shop, item_id)
