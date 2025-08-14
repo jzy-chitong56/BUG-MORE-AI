@@ -50,14 +50,14 @@ function TrackArmy takes integer num returns boolean
   local integer c = 0
   local player ap = Player(p)
   local player up = null
-  set army_count[num] = 0
-  set army_strength[num] = 0
   if u != null then  // If tracking existing army select range from current position not historic position
     call GroupEnumUnitsInRange(g, GetUnitX(u), GetUnitY(u), army_radius, null)
   else
     call GroupEnumUnitsInRangeOfLoc(g, army_loc[num], army_radius, null)
   endif
   call GroupClear(army_group[num])
+  set army_strength[num] = 0
+  set army_count[num] = 0
   loop
     set u = FirstOfGroup(g)
     exitwhen u == null
