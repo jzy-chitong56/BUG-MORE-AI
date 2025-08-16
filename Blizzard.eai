@@ -106,6 +106,19 @@
     boolean array ZoomKey
     real array current_zoom
 
+    dialog game_start_dialog = null
+    trigger game_start_trigger = null
+    button commander_mode = null
+    button no_human_mode = null
+    button shared_mode = null
+    button ai_only_mode = null
+
+    dialog language_dialog = null
+    trigger language_trigger = null
+#INCLUDETABLE <Languages.txt> #EFR
+    button %1_button = null
+#ENDINCLUDE
+
     trigger W3CDeny = CreateTrigger()
     trigger W3CDenyControl = CreateTrigger()
     boolean W3CDenySign = true
@@ -137,19 +150,6 @@
     timer ClockTimer = null
     timer ClockTimerTemp = null
     timerdialog W3CTimerDialog = null
-
-    dialog game_start_dialog = null
-    trigger game_start_trigger = null
-    button commander_mode = null
-    button no_human_mode = null
-    button shared_mode = null
-    button ai_only_mode = null
-
-    dialog language_dialog = null
-    trigger language_trigger = null
-#INCLUDETABLE <Languages.txt> #EFR
-    button %1_button = null
-#ENDINCLUDE
 
     string chat_no_ally = ""
     string you_no_gold = ""
@@ -299,6 +299,7 @@ function Parser takes string ChatMsg returns nothing
     set parsed_command[I] = ""
     set I = I + 1
   endloop
+
 endfunction
 
 //===========================================================================
@@ -307,56 +308,58 @@ endfunction
 function ColorPlayer takes string CompC returns playercolor
 
   //Finds player color of the text color
-  if CompC == "Red" then
+  if (CompC == "Red") then
     return PLAYER_COLOR_RED
-  elseif CompC == "Blue" then
+  elseif (CompC == "Blue") then
     return PLAYER_COLOR_BLUE
-  elseif CompC == "Cyan" then
+  elseif (CompC == "Cyan") then
     return PLAYER_COLOR_CYAN
-  elseif CompC == "Purple" then
+  elseif (CompC == "Purple") then
     return PLAYER_COLOR_PURPLE
-  elseif CompC == "Yellow" then
+  elseif (CompC == "Yellow") then
     return PLAYER_COLOR_YELLOW
-  elseif CompC == "Orange" then
+  elseif (CompC == "Orange") then
     return PLAYER_COLOR_ORANGE
-  elseif CompC == "Green" then
+  elseif (CompC == "Green") then
     return PLAYER_COLOR_GREEN
-  elseif CompC == "Pink" then
+  elseif (CompC == "Pink") then
     return PLAYER_COLOR_PINK
-  elseif CompC == "Light Gray" then
+  elseif (CompC == "Light Gray") then
     return PLAYER_COLOR_LIGHT_GRAY
-  elseif CompC == "Light Blue" then
+  elseif (CompC == "Light Blue") then
     return PLAYER_COLOR_LIGHT_BLUE
-  elseif CompC == "Aqua" then
+  elseif (CompC == "Aqua") then
     return PLAYER_COLOR_AQUA
-  elseif CompC == "Brown" then
+  elseif (CompC == "Brown") then
     return PLAYER_COLOR_BROWN
-  elseif CompC == "MAROON" then
+  elseif (CompC == "MAROON") then
     return PLAYER_COLOR_MAROONX
-  elseif CompC == "Navy" then
+  elseif (CompC == "Navy") then
     return PLAYER_COLOR_NAVYX
-  elseif CompC == "Turquoise" then
+  elseif (CompC == "Turquoise") then
     return PLAYER_COLOR_TURQUOISEX
-  elseif CompC == "Violet" then
+  elseif (CompC == "Violet") then
     return PLAYER_COLOR_VIOLETX
-  elseif CompC == "Wheat" then
+  elseif (CompC == "Wheat") then
     return PLAYER_COLOR_WHEATX
-  elseif CompC == "Peach" then
+  elseif (CompC == "Peach") then
     return PLAYER_COLOR_PEACHX
-  elseif CompC == "Mint" then
+  elseif (CompC == "Mint") then
     return PLAYER_COLOR_MINTX
-  elseif CompC == "Lavender" then
+  elseif (CompC == "Lavender") then
     return PLAYER_COLOR_LAVENDERX
-  elseif CompC == "Coal" then
+  elseif (CompC == "Coal") then
     return PLAYER_COLOR_COALX
-  elseif CompC == "Snow" then
+  elseif (CompC == "Snow") then
     return PLAYER_COLOR_SNOWX
-  elseif CompC == "Emerald" then
+  elseif (CompC == "Emerald") then
     return PLAYER_COLOR_EMERALDX
-  elseif CompC == "Peanut" then
+  elseif (CompC == "Peanut") then
     return PLAYER_COLOR_PEANUTX
+  else
+    return null
   endif
-  return null
+
 endfunction
 
 //===========================================================================
@@ -979,6 +982,7 @@ function W3CDenyTip takes nothing returns nothing
   local player p2 = GetOwningPlayer(u2)
   local texttag t = null
   local string s = cs2s("!",GetPlayerColor(p2))
+  local boolean b = W3CDenySign
   if p1 == GetLocalPlayer() and p2 == GetLocalPlayer() and not (IsUnitType(u1,UNIT_TYPE_STRUCTURE) and GetUnitTypeId(u2) == 'uaco') and GetUnitTypeId(u2) != 'otot' and GetUnitTypeId(u2) != 'usap' and not IsUnitHidden(u1) then
     if (IsPlayerAlly(p1,p2) or p1 == Player(playermax) or p2 == Player(playermax)) and p1 != Player(playerpassive) then
       if p2 == Player(playermax) then
@@ -1864,9 +1868,8 @@ function Translation takes string s returns string
     call TraceToAll("Cannot translate:" + s + " to " + language)
     set translate = null
     return s
-  else
-    return translate
   endif
+  return translate
 endfunction
 
 function reTranslateCommands takes nothing returns nothing
@@ -2202,7 +2205,7 @@ function DialogResponse takes nothing returns nothing
     set current_command[GetPlayerId(GetTriggerPlayer())] = cn
     if (d == number_dialog) then
       set t = CreateTrigger()
-      if (b == strategyBtn) then 
+      if (b == strategyBtn) then
         set strategyDialog = true
       endif
       set d = BuildNumberDialog(commanded_player[GetPlayerId(GetTriggerPlayer())], 0)
@@ -2222,18 +2225,18 @@ function DialogResponse takes nothing returns nothing
         //call BuildTributeDialogs()
         call DialogDisplay(GetTriggerPlayer(), tribute_type_dlg, true)
       elseif message != "" then
-          set i = 0
-          loop
-            if d == dlg_dialog[i] then
-              if dlg_string[i] != null then
-                set message = dlg_string[i]
-              endif
+        set i = 0
+        loop
+          if d == dlg_dialog[i] then
+            if dlg_string[i] != null then
+              set message = dlg_string[i]
             endif
-            set i = i + 1
-            call DestroyLastTrigger(dlg_trigger[dlg_length], null) //  clean up previous triggers
-            exitwhen i >= dlg_length
-          endloop
-          call DialogSetMessage(d, message)
+          endif
+          set i = i + 1
+          call DestroyLastTrigger(dlg_trigger[dlg_length], null) //  clean up previous triggers
+          exitwhen i >= dlg_length
+        endloop
+        call DialogSetMessage(d, message)
       endif
       call DialogDisplay(GetTriggerPlayer(), d, true)
     endif 
