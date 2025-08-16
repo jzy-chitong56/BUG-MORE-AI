@@ -11775,7 +11775,9 @@ function StartExpansionAM takes integer qty, integer hall returns integer
   if first_town_mine > 1 or (count == 0 and first_town_mine < 2 and GetMinesOwned() > 0 and (race_manual_loading or race_uses_mine_expansion)) then
     set f = MultipleMinefix()
     if not f and town_threatened and race_uses_mine_expansion and GetGold() > 480 and TownCount(racial_hall[1]) < 2 then
-      call SetProduce(1,old_id[racial_hall[1]],-1)
+      if SetProduce(1,old_id[racial_hall[1]],-1) then  // help build peon
+        return BUILT_ALL
+      endif
       return CANNOT_BUILD
     endif
     if first_town_mine > 1 and f then
