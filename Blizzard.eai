@@ -1028,6 +1028,7 @@ function SetStartHero_d takes player p, race r, location l returns nothing
     set u = CreateUnit(p, RandomHeroNum[GetRandomInt(0, 23)], GetLocationX(l), GetLocationY(l) - GetRandomInt(350, 450), bj_UNIT_FACING)
   endif
   call UnitAddItemById(u, 'stwp')
+  set bj_meleeTwinkedHeroes[GetPlayerId(p)] = bj_meleeTwinkedHeroes[GetPlayerId(p)] + 1
   call RemoveLocation(l)
   set u = null
 endfunction
@@ -1236,7 +1237,6 @@ function InitZoom takes nothing returns nothing
     if GetPlayerController(p) != MAP_CONTROL_COMPUTER then
       call DisplayTimedTextToPlayer(p,0,0,7,"Set Zoom type: |c00d5f038-zoom1850|r")
       call TriggerRegisterPlayerChatEvent( ZoomSetx, p, "-zoom", false )
-      set current_zoom[i] = GetCameraField(CAMERA_FIELD_TARGET_DISTANCE)
       if legacyCamera then // Only required for legacy versions as no camera support built into the game
         call TriggerRegisterPlayerKeyEventBJ( AdjustZoomUp, p, bj_KEYEVENTTYPE_DEPRESS, bj_KEYEVENTKEY_UP )
         call TriggerRegisterPlayerKeyEventBJ( AdjustZoomDown, p, bj_KEYEVENTTYPE_DEPRESS, bj_KEYEVENTKEY_DOWN )
@@ -1249,6 +1249,8 @@ function InitZoom takes nothing returns nothing
           call SetCameraField(CAMERA_FIELD_TARGET_DISTANCE, 2050, 0.0)
           set current_zoom[i] = 2050
         endif
+      else
+        set current_zoom[i] = GetCameraField(CAMERA_FIELD_TARGET_DISTANCE)
       endif
     endif
     set i = i + 1
