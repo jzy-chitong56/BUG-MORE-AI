@@ -6434,9 +6434,14 @@ function GetLumberLocationAtBase takes nothing returns location
     call IssueImmediateOrder(u, "autoharvestlumber")
     call Sleep(2.00)
   endif
-  call Sleep(3.00)
-  set x = GetUnitX(u)
-  set y = GetUnitY(u)
+  if GetUnitCurrentOrder(u) == 0 then
+    set x = GetLocationX(home_location) + GetRandomInt(300,1000)*ISign()
+    set y = GetLocationY(home_location) + GetRandomInt(300,1000)*ISign()
+  else
+    call Sleep(3.00)
+    set x = GetUnitX(u)
+    set y = GetUnitY(u)
+  endif
   call RemoveUnitAM(u)
   set u = null
   return Location(x,y)
@@ -10489,6 +10494,7 @@ function SetBuildAllAMCore takes integer t, integer qty, integer unitid, integer
     return false
   endif
   call GetBuildLock()
+  set j = Max(build_length - 1,0)
   loop
     exitwhen i >= build_length
     exitwhen build_prio[i] < prio
@@ -11973,6 +11979,10 @@ function StartExpansionAM takes integer qty, integer hall returns integer
   endif
   if first_town_mine > 1 or (count == 0 and first_town_mine < 2 and GetMinesOwned() > 0 and (race_manual_loading or race_uses_mine_expansion)) then
     set f = MultipleMinefix()
+    if not f and town_threatened and race_uses_mine_expansion and GetGold() > 480 and TownCount(racial_hall[1]) < 2 then
+      call SetProduce(1,old_id[racial_hall[1]],-1)
+      return CANNOT_BUILD
+    endif
     if first_town_mine > 1 and f then
       call Trace("AMAIStartexpa: MultiMineFix")  // home_location have multiple mine , fix GetMinesOwned bug
       return BUILT_ALL
