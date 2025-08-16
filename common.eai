@@ -6429,17 +6429,12 @@ function GetLumberLocationAtBase takes nothing returns location
   call IssueImmediateOrder(u, "autoharvestlumber")
   call Sleep(2.00)
   if GetUnitCurrentOrder(u) == 0 then  // home near no tree , move unit to random coordinates
-    call IssuePointOrder(u, "move", GetLocationX(home_location) + GetRandomInt(1000,1200)*ISign(), GetLocationY(home_location) + GetRandomInt(1000,1200)*ISign())
-    call Sleep(2.00)
-    call IssueImmediateOrder(u, "autoharvestlumber")
-    call Sleep(1.00)
-  endif
-  if GetUnitCurrentOrder(u) == 0 then  // home no tree , fix build
     call RemoveUnitAM(u)
-    set u = CreatePathingUnitFull(u, Player(PLAYERPASSIVE), old_id[racial_lumber], GetLocationX(home_location) + GetRandomInt(700,1200)*ISign(), GetLocationY(home_location) + GetRandomInt(700,1200)*ISign())
-  else
-    call Sleep(4.00)
+    set u = CreatePathingUnitFull(u, Player(PLAYERPASSIVE), old_id[racial_lumber], GetLocationX(home_location) + GetRandomInt(880,1000)*ISign(), GetLocationY(home_location) + GetRandomInt(880,1000)*ISign())
+    call IssueImmediateOrder(u, "autoharvestlumber")
+    call Sleep(2.00)
   endif
+  call Sleep(3.00)
   set x = GetUnitX(u)
   set y = GetUnitY(u)
   call RemoveUnitAM(u)
@@ -11568,7 +11563,7 @@ function BuildAtSpecialLoc takes integer unitid, integer town, integer bloc retu
   endif
   if i >= 0 then
     if u != null and UnitAlive(u) and not neutral_guarded[i] and GetGoldOwned() > 600 and not IsVisibleToPlayer(GetUnitX(u), GetUnitY(u), ai_player) then
-      if own_race != R_UNDEAD or IsPointBlighted(GetLocationX(l), GetLocationY(l)) then  // can build
+      if own_race != R_UNDEAD or IsPointBlighted(GetUnitX(u), GetUnitY(u)) then  // can build
         set spaceunit = CreateUnit(Player(PLAYERPASSIVE), old_id[unitid], GetUnitX(u), GetUnitY(u), 270.0)
         set l = GetUnitLoc(spaceunit)
         call RemoveUnitAM(spaceunit)

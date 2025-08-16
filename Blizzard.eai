@@ -1179,6 +1179,7 @@ function SetStartHero_d takes player p, race r, location l returns nothing
     set u = CreateUnit(p, RandomHeroNum[GetRandomInt(0, 23)], GetLocationX(l), GetLocationY(l) - GetRandomInt(350, 450), bj_UNIT_FACING)
   endif
   call UnitAddItemById(u, 'stwp')
+  set bj_meleeTwinkedHeroes[GetPlayerId(p)] = bj_meleeTwinkedHeroes[GetPlayerId(p)] + 1
   call RemoveLocation(l)
   set u = null
 endfunction
@@ -1388,7 +1389,6 @@ function InitZoom takes nothing returns nothing
       call TriggerRegisterPlayerChatEvent( ZoomSetx, p, "-zoom", false )
       call TriggerRegisterPlayerKeyEventBJ( AdjustZoomUp, p, bj_KEYEVENTTYPE_DEPRESS, bj_KEYEVENTKEY_UP )
       call TriggerRegisterPlayerKeyEventBJ( AdjustZoomDown, p, bj_KEYEVENTTYPE_DEPRESS, bj_KEYEVENTKEY_DOWN )
-      set current_zoom[i] = GetCameraField(CAMERA_FIELD_TARGET_DISTANCE)
       set ZoomKey[i] = true  // Default expected in legacy systems
       call DisplayTimedTextToPlayer(p,0,0,7,"Enable/Disable Zoom Hot Keys: |c00d5f038-zoomkey|r")
       if IsPlayerObserver(p) then
