@@ -982,7 +982,6 @@ function W3CDenyTip takes nothing returns nothing
   local player p2 = GetOwningPlayer(u2)
   local texttag t = null
   local string s = cs2s("!",GetPlayerColor(p2))
-  local boolean b = W3CDenySign
   if p1 == GetLocalPlayer() and p2 == GetLocalPlayer() and not (IsUnitType(u1,UNIT_TYPE_STRUCTURE) and GetUnitTypeId(u2) == 'uaco') and GetUnitTypeId(u2) != 'otot' and GetUnitTypeId(u2) != 'usap' and not IsUnitHidden(u1) then
     if (IsPlayerAlly(p1,p2) or p1 == Player(playermax) or p2 == Player(playermax)) and p1 != Player(playerpassive) then
       if p2 == Player(playermax) then
