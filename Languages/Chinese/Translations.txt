@@ -54,6 +54,6 @@ Coal:S	碳色
 Snow:S	雪白色
 Emerald:S	祖母绿
 Peanut:S	花生色
-chat_CurrentGold	当前金钱
-chat_Target	目标
-chat_TargetColor	目标颜色
+CurrentGold	当前金钱
+Target	目标
+TargetColor	目标颜色
