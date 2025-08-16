@@ -34,7 +34,7 @@ function FixBuildJob takes nothing returns nothing
           call IssuePointOrderById(u, id, x, y)
           call CreateDebugTag("Fix Job : fix build", 10, u, 4.00, 2.00)
         endif
-      elseif id != OrderId("smart") and id != OrderId("repair") and id != OrderId("resumeharvesting") then
+      elseif id != OrderId("smart") and id != OrderId("repair") and id != OrderId("renew") and id != OrderId("restoration") and id != OrderId("resumeharvesting") then
         call CreateDebugTag("Fix Job : fix harvest", 10, u, 4.00, 2.00)
         if own_town_mine[0] != null then
           call IssueTargetOrder(u, "harvest", own_town_mine[0])
