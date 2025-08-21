@@ -224,13 +224,13 @@ globals
     constant integer BT_HERO = 2
     constant integer BT_UPGRADE = 3
     constant integer BT_ML_UPGRADE = 4
-    constant integer BT_RACIAL_ITEM = 5
-    constant integer BT_NEUTRAL_HERO = 6
+    constant integer BT_NEUTRAL_HERO = 5
+    constant integer BT_RACIAL_ITEM = 6
     constant integer BT_MERC = 7
     constant integer BT_GOBLIN_MERC = 8
     constant integer BT_DRAGON = 9
-    constant integer BT_MARKETPLACE = 10
     constant integer BT_MERCHANT_ITEM = 10
+    constant integer BT_MARKETPLACE = 11
 
     constant integer COMPARE_TRUE = 0
     constant integer COMPARE_EQ = 1
@@ -753,7 +753,7 @@ globals
 
     boolean attacking_expansion = false
     boolean recalculate_heros = false // Tavern heros cannot be trained so get a normal hero
-    boolean TavernResurrect = false
+    integer AwakenHeroLock = 0
 
     integer tier = 0
     integer own_strength = 0
@@ -2053,17 +2053,19 @@ endfunction
 function GetUnitGoldCost2 takes integer id returns integer
   if needed3[id] == UPGRADED then
     return GetUnitGoldCost(old_id[id]) - GetUnitGoldCost(old_id[needed1[id]])
-  else
-    return GetUnitGoldCost(old_id[id])
+  elseif id == hero[1] and not hero_built[1] then  // fix , first hero gold is 0
+    return 0
   endif
+  return GetUnitGoldCost(old_id[id])
 endfunction
 
 function GetUnitWoodCost2 takes integer id returns integer
   if needed3[id] == UPGRADED then
     return GetUnitWoodCost(old_id[id]) - GetUnitWoodCost(old_id[needed1[id]])
-  else
-    return GetUnitWoodCost(old_id[id])
+  elseif (id == hero[1]) or (id == hero[2] and hero_built[2]) or (id == hero[3] and hero_built[3]) then  // fix , when build done or first hero, wood is 0
+    return 0
   endif
+  return GetUnitWoodCost(old_id[id])
 endfunction
 
 //============================================================================
@@ -6470,6 +6472,7 @@ function MultipleMinefix takes nothing returns boolean
   local unit tree = null
   local unit peon = null
   local boolean b = race_manual_loading or race_uses_mine_expansion
+  local boolean enemy = false
   if town_threatened or not hero_built[1] or (not b and ((not_taken_expansion != null and UnitAlive(not_taken_expansion) and DistanceBetweenPoints_kd(home_location,GetUnitLoc(not_taken_expansion)) < expansion_taken_radius and GetResourceAmount(not_taken_expansion) > 200) or (fixmine != null and GetResourceAmount(fixmine) > 200))) or (race_manual_loading and GetUnitCount(old_id[race_manual_loading_mine]) > 1) or (race_uses_mine_expansion and TownCount(racial_expansion) > 1) then
     return false  //no first hero priority build army , human and orc just harvest
   endif
@@ -6497,6 +6500,9 @@ function MultipleMinefix takes nothing returns boolean
           set peon = u
         endif
       endif
+      if IsPlayerEnemy(GetOwningPlayer(u), ai_player) and GetPlayerId(GetOwningPlayer(u)) < PLAYER_NEUTRAL_AGGRESSIVE then
+        set enemy = true
+      endif
     endif
     call GroupRemoveUnit(g, u)
   endloop
@@ -6513,6 +6519,10 @@ function MultipleMinefix takes nothing returns boolean
     endif
     call Trace("Multiple Mine fix done , no mine")
     return false
+  else
+    if not race_manual_loading and not enemy and (first_town_mine == 1 or first_town_mine == 2) then
+      set first_town_mine = 3  // enemy defeated, adjust mode
+    endif
   endif
   set b = false
   if fixmine != null and UnitAlive(fixmine) and not_taken_expansion != fixmine and first_town_mine > 1 then
@@ -9979,6 +9989,9 @@ function InitHeroInfo takes integer hn returns nothing
   set hero_enemy_loc[hn] = Location(0,0)
   set hero_ally_loc[hn] = Location(0,0)
   set hero_hp[hn] = 1
+  if buy_type[hero[hn]] == BT_NEUTRAL_HERO then
+    set buy_type[hero[hn]] = BT_HERO  // Prevent core build from treating its resurrection as neutral buy
+  endif
   call GetHeroSkin(hn)
 endfunction
 
@@ -10274,7 +10287,7 @@ endfunction
 function SetBuildAllAMCore takes integer t, integer qty, integer unitid, integer town, integer bloc, integer prio returns boolean
   local integer i = 0
   local integer j = 0
-  if unitid < 1 or qty < 1 or prio < 1 then
+  if unitid < 1 or qty < 1 or prio < 1 or build_length >= JASS_MAX_ARRAY_SIZE then
     return false
   endif
   if t == BUILD_UPGRADE then
@@ -11774,12 +11787,6 @@ function StartExpansionAM takes integer qty, integer hall returns integer
   endif
   if first_town_mine > 1 or (count == 0 and first_town_mine < 2 and GetMinesOwned() > 0 and (race_manual_loading or race_uses_mine_expansion)) then
     set f = MultipleMinefix()
-    if not f and town_threatened and race_uses_mine_expansion and GetGold() > 480 and TownCount(racial_hall[1]) < 2 then
-      if SetProduce(1,old_id[racial_hall[1]],-1) then  // help build peon
-        return BUILT_ALL
-      endif
-      return CANNOT_BUILD
-    endif
     if first_town_mine > 1 and f then
       call Trace("AMAIStartexpa: MultiMineFix")  // home_location have multiple mine , fix GetMinesOwned bug
       return BUILT_ALL
@@ -12197,26 +12204,40 @@ endfunction
 
 //============================================================================
 function BuildPeons takes integer number returns nothing
-  if towerrush and (TownCount(hero[1]) + TownCount(hero[2]) + TownCount(hero[3])) != 0 then  // towerrush compensate
-    if not race_has_ghouls and TownCount(racial_peon) < 14 then
-      set number = number + race_tower_peon
-    elseif race_has_ghouls and TownCount(racial_peon) < 5 + race_tower_peon then
-      set number = number + race_tower_peon
+  if towerrush then
+    if (TownCount(hero[1]) + TownCount(hero[2]) + TownCount(hero[3])) != 0 then  // towerrush compensate
+      if not race_has_ghouls and TownCount(racial_peon) < 14 then
+        set number = number + race_tower_peon
+      elseif race_has_ghouls and TownCount(racial_peon) < 5 + race_tower_peon then
+        set number = number + race_tower_peon
+      endif
+      if race_tower_bypeon == true then
+        set number = Min(TownCountDone(racial_expansion) * ver_optimal_gold + 6, number + 2)
+      endif
     endif
-    if race_tower_bypeon == true then
-      set number = Min(TownCountDone(racial_expansion) * ver_optimal_gold + 6, number + 2)
-    endif
-  endif
-  if first_town_mine > 1 and not towerrush then  // startloc have more mine compensate
+  elseif first_town_mine > 1 then  // startloc have more mine compensate
     if not race_manual_loading and not race_uses_mine_expansion and not race_has_ghouls then
       set number = Min(TownCountDone(racial_expansion) * ver_optimal_gold + 6, number + 3)
+    endif
+  endif
+  if town_threatened and most_threatened_town >= 0 and Player(town_owner[most_threatened_town]) == ai_player then
+    if race_has_ghouls then
+      if TownCount(racial_peon) < 6 then
+        set number = number + 1  // Avoid affecting the harvest due to repair
+      endif
+    elseif race_militia_available then
+      set number = Max(number + 1, 12 - TownCount(racial_peon))
     endif
   endif
   call BuildUnit(number, racial_peon, peon_prio)
 endfunction
 
 function BuildGhouls takes integer number returns nothing
-  if towerrush and TownCount(racial_ghoul) < 8 then  // towerrush compensate
+  if towerrush then
+    if TownCount(racial_ghoul) < 8 then  // towerrush compensate
+      set number = number + 1
+    endif
+  elseif (first_town_mine == 1 or first_town_mine == 2) and TownCount(racial_ghoul) < 10 and most_threatened_town >= 0 and Player(town_owner[most_threatened_town]) == ai_player then
     set number = number + 1
   endif
   call BuildUnit(number, racial_ghoul, ghoul_prio)
@@ -12478,16 +12499,19 @@ function HeroReviver takes nothing returns nothing
         call SetHeroUnit(i)
       endif
     elseif hero_built[i] then
-      if not TavernResurrect then
+      if AwakenHeroLock == 0 then
         if nearest_neutral[NEUTRAL_TAVERN] != null and not neutral_ordered[NEUTRAL_TAVERN] and difficulty > GetRandomInt(0, 4) and FoodSpace() >= GetFoodUsed(old_id[hero[i]]) and (82 * (GetUnitLevel(hero_unit[i]) + 3)) < GetGold() and (22 * (GetUnitLevel(hero_unit[i]) + 3)) < GetWood() then
           set neutral_ordered[NEUTRAL_TAVERN] = true
           set neutral_wanted[NEUTRAL_TAVERN] = 1
-          set TavernResurrect = true
+          set AwakenHeroLock = 1
           call TQAddJob(0, BUY_NEUTRAL_HERO, hero[i])
           call Trace("Try Resurrect Hero from Tavern")
         else
           call BuildUnit(1, hero[i], hero_revive_prio[i])
         endif
+      elseif AwakenHeroLock != 1 then
+        call BuildUnit(1, hero[i], hero_revive_prio[i])
+        set AwakenHeroLock = 0  // reset
       endif
     endif
     set i = i + 1
@@ -12811,8 +12835,15 @@ function OneBuildLoopAM takes nothing returns nothing
         if tp == BUILD_UNIT and not IsUnitIdType(old_id[id], UNIT_TYPE_STRUCTURE) and TownCountTown(id,build_town[index]) < build_qty[index] * bl_tier_unitlock[tier - 1] and FoodUsed() < bl_tier_foodlock[tier - 1] then
           set blocktierup = true // Strictly Block tier up if a large proportion of requested units of strategy not built so we follow strategy definition, otherwise will tier up early if spare resources and can't build higher priority tasks first
         endif
-        exitwhen ret == NOT_ENOUGH_RES and tp != BUILD_ITEM and tp != BUILD_UPGRADE // Don't try and build anything else as thing we trying to buy is too expensive
+        if ret == NOT_ENOUGH_RES and tp != BUILD_ITEM and tp != BUILD_UPGRADE then // Don't try and build anything else as thing we trying to buy is too expensive
+          set index = index + 1  // Prevent queue blocked
+          exitwhen true
+        endif
         if ret == CANNOT_BUILD or ret == BUILT_SOME or ret == NOT_ENOUGH_RES or (ret == BUILT_ALL and qty < build_qty[index]) then
+          if ret == CANNOT_BUILD or ret == NOT_ENOUGH_RES then
+            set index = index + 1  // Prevent queue blocked
+            exitwhen index >= build_length
+          endif
           set build_qty[index_free] = build_qty[index]
           set build_type[index_free] = build_type[index]
           set build_item[index_free] = build_item[index]
@@ -12821,6 +12852,7 @@ function OneBuildLoopAM takes nothing returns nothing
           set build_prio[index_free] = build_prio[index] + prio_t_inc
           set index_free = index_free + 1
         endif
+        set ret = 0 // reset
       endif
 
       set index = index + 1
@@ -12833,7 +12865,9 @@ function OneBuildLoopAM takes nothing returns nothing
     endloop
 
 //    call EndDump(Int2Str(ai_time))
-
+    if build_length >= JASS_MAX_ARRAY_SIZE then
+      set build_length = R2I(build_length / 2)
+    endif
     loop
       exitwhen index >= build_length
       if index > 0 and ModuloInteger(index, 300) == 0 then
@@ -13068,10 +13102,10 @@ function FormGroupAM takes integer seconds returns nothing
         endif
         set attacking_ghouls = desire
       else
-        set count = ghoul
-        set desire = Max((count - harvesting_ghouls), 0) // all spare ghouls should attack and join attack as built
+        set desire = Max((ghoul - harvesting_ghouls), 0) // all spare ghouls should attack and join attack as built
+        set count = Min(ghoul, desire)
         if towerrush then
-          set desire = Max(Min(count - 2 ,desire), 0)  // reserve
+          set count = Max(count - 2, 0)  // reserve
         endif
         set attacking_ghouls = Max(desire, 0)
       endif
@@ -13080,8 +13114,10 @@ function FormGroupAM takes integer seconds returns nothing
     if desire > 0 then
       call ConversionsAM(desire,unitid)
     endif
-    if count >= desire and desire > 0 then
-      call AddAssault(desire,old_id[unitid])
+    if count >= desire then
+      if desire > 0 then
+        call AddAssault(desire,old_id[unitid])
+      endif
     elseif count > 0 then
       call AddAssault(count,old_id[unitid])
     endif
@@ -13311,7 +13347,7 @@ function DesperationAssault takes nothing returns nothing
   endif
 endfunction
 
-function CommonSleepUntilTargetDeadAM takes unit target, boolean iscreeping, boolean reform, boolean ally_override returns nothing
+function CommonSleepUntilTargetDeadAM takes unit target_o, boolean iscreeping, boolean reform, boolean ally_override returns nothing
   local real dist = 0
   local real dist_hero = -1
   local integer attack_length_counter = 0
@@ -13319,6 +13355,7 @@ function CommonSleepUntilTargetDeadAM takes unit target, boolean iscreeping, boo
   local unit ally_target = null
   local unit utemp = null
   local unit u = null
+  local unit target = target_o  // Prevent cache Alliance Target can not reset
   local group g = null
   local player p = null
   local string a = Int2Str(ALLIANCE_TARGET)
@@ -13492,6 +13529,7 @@ function CommonSleepUntilTargetDeadAM takes unit target, boolean iscreeping, boo
   set l = null
   set a = null
   set ally_target = null
+  set target = null
 endfunction
 
 //============================================================================
