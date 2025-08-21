@@ -71,9 +71,6 @@ function global_build_sequence takes nothing returns nothing
     if TownCount(GHOUL) == 0 and GetWood() < 500 then
       call BuildUnit(1, GHOUL, ghoul_prio)
     endif
-    if town_threatened and GetGold() > 500 and TownCount(racial_hall[1]) < 2 then
-      call BuildUnit(2, racial_hall[1], 100)  // help build peon
-    endif
     if tier > 1 then
       call BuildUnit(1, SHADE, 40)
     endif
