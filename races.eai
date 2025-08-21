@@ -550,7 +550,11 @@ function setup_ghouls takes nothing returns nothing
   local integer wood = GetWood()
 
   if wave <= 2 then
-    set harvesting_ghouls = 1
+    if wood < maximum_peon_wood then  // extreme cases, game beginning need Defended Town
+      set harvesting_ghouls = 2
+    else
+      set harvesting_ghouls = 1
+    endif
   //elseif wave==2 then
     //set attacking_ghouls = Max(6, gn - 2)
   //elseif wood < maximum_peon_wood then
@@ -562,7 +566,7 @@ function setup_ghouls takes nothing returns nothing
   elseif wave <= 4 then
     set harvesting_ghouls = Max(1,Min(R2I(race_min_ghouls*LinearInterpolation(maximum_peon_wood, minimum_peon_wood, 1, 0, wood) + 0.5),gn) - (R2I(shredder_peon_count / 2) * TownCountDone(neutral_shredder)))
   else
-    set harvesting_ghouls = Max(1,Min(R2I(race_max_ghouls*LinearInterpolation(maximum_peon_wood, minimum_peon_wood, 1, 0, wood) + 0.5),gn) - (R2I(shredder_peon_count / 2) * TownCountDone(neutral_shredder)))
+    set harvesting_ghouls = Max(1,Min(R2I(race_max_ghouls*LinearInterpolation(maximum_peon_wood, minimum_peon_wood, 2, 0, wood) + 0.5),gn) - (R2I(shredder_peon_count / 2) * TownCountDone(neutral_shredder)))
   endif
   //set attacking_ghouls = gn - harvesting_ghouls
   //set attacking_ghouls = Min(Max(attacking_ghouls, 0), gn)
