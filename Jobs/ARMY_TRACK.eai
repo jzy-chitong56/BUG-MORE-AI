@@ -363,7 +363,7 @@ function UpdateTownThreat takes nothing returns nothing
       set town_threat_count = 0
       set most_threatened_town = most_threatened_player_town
       set enemy_army = town_threat_army[most_threatened_town]
-      if enemy_army >= 0 and threatmark != most_threatened_town then  // Prevent interruption attacks
+      if enemy_army >= 0 and not IsVisibleToPlayer(GetLocationX(town_loc[most_threatened_town]), GetLocationY(town_loc[most_threatened_town]), Player(army_owner[enemy_army])) and threatmark != most_threatened_town then  // Prevent interruption attacks
         call SetCaptainHome(BOTH_CAPTAINS,GetLocationX(army_loc[enemy_army]), GetLocationY(army_loc[enemy_army]))
       elseif threatmark != most_threatened_player_town then
         call SetCaptainHome(BOTH_CAPTAINS, GetLocationX(town_loc[most_threatened_player_town]), GetLocationY(town_loc[most_threatened_player_town]))
@@ -374,7 +374,7 @@ function UpdateTownThreat takes nothing returns nothing
       set town_threatened = true
       set town_threat_count = 0
       set enemy_army = town_threat_army[most_threatened_town]
-      if enemy_army >= 0 and threatmark != most_threatened_town then  // Prevent interruption attacks
+      if enemy_army >= 0 and not IsVisibleToPlayer(GetLocationX(town_loc[most_threatened_town]), GetLocationY(town_loc[most_threatened_town]), Player(army_owner[enemy_army])) and threatmark != most_threatened_town then  // Prevent interruption attacks
         call SetCaptainHome(BOTH_CAPTAINS,GetLocationX(army_loc[enemy_army]), GetLocationY(army_loc[enemy_army]))
       elseif threatmark != most_threatened_town then
         call SetCaptainHome(BOTH_CAPTAINS, GetLocationX(town_loc[most_threatened_town]), GetLocationY(town_loc[most_threatened_town]))

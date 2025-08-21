@@ -32,7 +32,7 @@ function BuyNeutral takes integer id returns nothing
 
   call DisplayToAllJobDebug("BUY_NEUTRAL JOB START")
   // moved this check here to prevent a job crash if placed lower down
-  if id != 852270 and TownCountDone(id) >= neutral_wanted[nn] then
+  if id != 852023 and TownCountDone(id) >= neutral_wanted[nn] then
     call ResetBuyNeutralUnit(nn)
     set buy_place = null
     return
@@ -80,7 +80,7 @@ function BuyNeutral takes integer id returns nothing
   set dist = DistanceBetweenUnits(neutral_sent[nn], buy_place)
   //  call DisplayToAll("Buy Neutral Started")
   if (buy_time_large[nn] >= 0 and buy_time_large[nn] + buy_timeout_large < current_time) or (buy_time_small[nn] >= 0 and buy_time_small[nn] + buy_timeout_small < current_time) then
-    if id != 852270 then
+    if id != 852023 then
       set available_time[id] = ai_time + regenerate_time[id] / 2
     else
       set available_time[id] = ai_time
@@ -102,7 +102,7 @@ function BuyNeutral takes integer id returns nothing
       if GetUnitCurrentOrder(neutral_sent[nn]) == OrderId("move") then
         call IssueImmediateOrder(neutral_sent[nn], "holdposition")  // stop will let panda cancel element clone
       endif
-      if id != 852270 then
+      if id != 852023 then
         call IssueNeutralImmediateOrderById(ai_player, buy_place, old_id[id])
       else
         if invisible_expansion != null and UnitAlive(invisible_expansion) then

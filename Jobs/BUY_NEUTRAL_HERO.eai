@@ -16,7 +16,7 @@ function ResetBuyNeutralHero takes integer nn, integer id returns unit
   set neutral_sent[nn] = null
   set u = null
   set neutral_ordered[nn] = false
-  set TavernResurrect = false
+  set AwakenHeroLock = 2
   set buy_time_large[nn] = -1
   set buy_time_small[nn] = -1
   return null
@@ -84,14 +84,14 @@ function BuyNeutralHero takes integer id returns nothing
         if GetUnitCurrentOrder(neutral_sent[nn]) == OrderId("move") then
           call IssueImmediateOrder(neutral_sent[nn], "holdposition")  // stop will let panda cancel element clone
         endif
-        if TavernResurrect then  // try Resurrect all hero
+        call IssueNeutralImmediateOrderById(ai_player, tavern, old_id[id])
+        if AwakenHeroLock == 1 then  // try Resurrect all hero
           call AwakenHero(tavern, 1)
           call AwakenHero(tavern, 2)
           call AwakenHero(tavern, 3)
           set tavern = ResetBuyNeutralHero(nn, id)
           return  // end job
         endif
-        call IssueNeutralImmediateOrderById(ai_player, tavern, old_id[id])
         set time_next_try = 0.5
       endif
     endif
