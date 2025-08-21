@@ -6,10 +6,20 @@ function RepairControlJob takes nothing returns nothing
   call DisplayToAllJobDebug("REPAIR_CONTROL JOB START")
   if towerrush then
     call SetPeonsRepair(false)
-  elseif peons <= repair_threshold or (peons <= repair_threshold_threatened and town_threatened) then
-    call SetPeonsRepair(false)
   else
-    call SetPeonsRepair(true)
+    if race_uses_mine_expansion then
+      if peons <= 3 then
+        call SetPeonsRepair(false)
+      else
+        call SetPeonsRepair(true)
+      endif
+    else
+      if peons <= repair_threshold or (peons <= repair_threshold_threatened and town_threatened) then
+        call SetPeonsRepair(false)
+      else
+        call SetPeonsRepair(true)
+      endif
+    endif
   endif
   if not pathing_done then
     call TQAddJob(15, REPAIR_CONTROL, 0)

@@ -101,7 +101,7 @@ function CheckRallyPoint takes nothing returns nothing
   loop
     set u = FirstOfGroup(hg)
     exitwhen u == null
-    if GetOwningPlayer(u) == ai_player and GetUnitAbilityLevel(u, 'ARal') > 0 and UnitAlive(u) and not IsUnitHidden(u) then
+    if IsUnitType(u, UNIT_TYPE_STRUCTURE) and not IsUnitType(u, UNIT_TYPE_TOWNHALL) and GetUnitAbilityLevel(u, 'ARal') > 0 and UnitAlive(u) and not IsUnitHidden(u) then
       call IssuePointOrderLoc(u, "setrally", l)  //avoid being blocked by front_loc build
     endif
     call GroupRemoveUnit(g,u)
@@ -110,7 +110,7 @@ function CheckRallyPoint takes nothing returns nothing
   loop
     set u = FirstOfGroup(g)
     exitwhen u == null
-    if GetUnitAbilityLevel(u, 'ARal') > 0 and UnitAlive(u) and not IsUnitHidden(u) then
+    if IsUnitType(u, UNIT_TYPE_STRUCTURE) and not IsUnitType(u, UNIT_TYPE_TOWNHALL) and GetUnitAbilityLevel(u, 'ARal') > 0 and UnitAlive(u) and not IsUnitHidden(u) then
       call IssuePointOrderLoc(u, "setrally", home_location)
     endif
     call GroupRemoveUnit(g,u)

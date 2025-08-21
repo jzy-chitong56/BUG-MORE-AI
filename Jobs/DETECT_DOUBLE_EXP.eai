@@ -232,7 +232,7 @@ function CheckDoubleExpansion takes nothing returns nothing
   call DestroyGroup(g)
   set g = null
   if invisible_expansion != null and not neutral_ordered[NEUTRAL_OBSERVATORY] then
-    call TQAddJob(2, BUY_NEUTRAL, 852270)  // hope tower can kill enemies
+    call TQAddJob(2, BUY_NEUTRAL, 852023)  // hope tower can kill enemies
     set neutral_ordered[NEUTRAL_OBSERVATORY] = true
   endif
 endfunction

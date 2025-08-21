@@ -9,6 +9,7 @@ function FixBuildJob takes nothing returns nothing
   local group g = CreateGroup()
   local unit u = null
   local unit build = null
+  local unit tempu = null
   local integer id = 0
   local real x = 0
   local real y = 0
@@ -41,12 +42,23 @@ function FixBuildJob takes nothing returns nothing
         else
           call IssuePointOrder(u, "move", GetLocationX(home_location), GetLocationY(home_location))
         endif
+        set tempu = u
       endif
     endif
     call GroupRemoveUnit(g, u)
   endloop
   call DestroyGroup(g)
   set g = null
+  if race_uses_mine_expansion and build == null and tempu != null then
+    if (first_town_mine == 1 or first_town_mine == 2) and GetGold() > 500 and TownCount(racial_hall[1]) < 2 then
+      set id = old_id[racial_hall[1]]
+      set build = CreatePathingUnitFull(build, ai_player, id, GetLocationX(home_location) + ISign() * GetRandomReal(500, 1000), GetLocationY(home_location) + ISign() * GetRandomReal(-1000, -500))
+      set x = GetUnitX(build)
+      set y = GetUnitY(build)
+      call RemoveUnitAM(build)
+      call IssuePointOrderById(tempu, id, x, y)  // help build peon
+    endif
+  endif
   if GetUnitCountDone(old_id[racial_farm]) < 2 then
     call TQAddJob(2, FIX_BUILD, 0)
   elseif TownCount(racial_expansion) < 2 then
