@@ -772,7 +772,7 @@ globals
 
     boolean attacking_expansion = false
     boolean recalculate_heros = false // Tavern heros cannot be trained so get a normal hero
-    boolean AwakenHeroLock = false
+    integer AwakenHeroLock = 0
 
     integer tier = 0
     integer own_strength = 0
@@ -6660,6 +6660,7 @@ endfunction
 function MultipleMinefix takes nothing returns boolean
   local integer c = 0
   local integer gold = 0
+  local integer t = 0
   local real i = 0
   local real distance = 2000
   local location l = null
@@ -6667,14 +6668,14 @@ function MultipleMinefix takes nothing returns boolean
   local unit u = null
   local unit tree = null
   local unit peon = null
-  local boolean b = race_manual_loading or race_uses_mine_expansion
+  local boolean b = false //race_manual_loading or race_uses_mine_expansion
   local boolean enemy = false
   if town_threatened or not hero_built[1] or (not b and ((not_taken_expansion != null and UnitAlive(not_taken_expansion) and DistanceBetweenPoints_kd(home_location,GetUnitLoc(not_taken_expansion)) < expansion_taken_radius and GetResourceAmount(not_taken_expansion) > 200) or (fixmine != null and GetResourceAmount(fixmine) > 200))) or (race_manual_loading and GetUnitCount(old_id[race_manual_loading_mine]) > 1) or (race_uses_mine_expansion and TownCount(racial_expansion) > 1) then
     return false  //no first hero priority build army , human and orc just harvest
   endif
   call Trace("Check Multiple Mine")
   set g = CreateGroup()
-  call GroupEnumUnitsInRangeOfLoc(g, home_location, expansion_taken_radius, null)
+  call GroupEnumUnitsInRangeOfLoc(g, home_location, 2000, null)
   loop
     set u = FirstOfGroup(g)
     exitwhen u == null
@@ -6689,14 +6690,17 @@ function MultipleMinefix takes nothing returns boolean
         endif
         set gold = GetResourceAmount(u) + gold
         set c = c + 1
-      elseif b and GetOwningPlayer(u) == ai_player then
-        if tree == null and IsUnitType(u, UNIT_TYPE_TOWNHALL) then
-          set tree = u
+      elseif GetOwningPlayer(u) == ai_player then
+        if IsUnitType(u, UNIT_TYPE_TOWNHALL) then
+          if tree == null then
+            set tree = u
+          endif
+          set t = t + 1
         elseif peon == null and IsUnitType(u, UNIT_TYPE_PEON) and not IsUnitLoaded(u) then
           set peon = u
         endif
       endif
-      if IsPlayerEnemy(GetOwningPlayer(u), ai_player) and GetPlayerId(GetOwningPlayer(u)) < PLAYER_NEUTRAL_AGGRESSIVE then
+      if IsPlayerEnemy(GetOwningPlayer(u), ai_player) and GetPlayerId(GetOwningPlayer(u)) <= PLAYER_NEUTRAL_AGGRESSIVE then
         set enemy = true
       endif
     endif
@@ -6717,10 +6721,13 @@ function MultipleMinefix takes nothing returns boolean
     return false
   else
     if not race_manual_loading and not enemy and (first_town_mine == 1 or first_town_mine == 2) then
-      set first_town_mine = 3  // enemy defeated, adjust mode
+      set first_town_mine = 4  // enemy defeated, need exp
+      if not race_uses_mine_expansion then
+        call TQAddJob(4, HARVEST_CHECK, 0)  // now have 2 or more mine
+      endif
     endif
   endif
-  set b = false
+  //set b = false
   if fixmine != null and UnitAlive(fixmine) and not_taken_expansion != fixmine and first_town_mine > 1 then
     set not_taken_expansion = fixmine  // prevent build too much TOWNHALL , olny first_town_mine > 1 mode need set
   endif
@@ -6734,7 +6741,7 @@ function MultipleMinefix takes nothing returns boolean
           set b = true
         endif
         set tree = null
-      elseif peon != null and TownCount(racial_expansion) < 2 and c > 1 and gold > 3 * GetUnitGoldCost(old_id[racial_expansion]) then  //  build one tree
+      elseif peon != null and t < 2 and c > 1 and gold > 3 * GetUnitGoldCost(old_id[racial_expansion]) then  //  build one tree
         set u = CreateUnit(Player(PLAYERPASSIVE), old_id[racial_expansion], GetUnitX(fixmine), GetUnitY(fixmine), 270.0)
         set l = GetUnitLoc(u)
         call RemoveUnitAM(u)
@@ -6756,6 +6763,19 @@ function MultipleMinefix takes nothing returns boolean
     endif
   else
     set b = c < 2
+    if first_town_mine == 4 and peon != null and t < 2 and c > 1 then  //  build one tree
+      set u = CreateUnit(Player(PLAYERPASSIVE), old_id[racial_expansion], GetUnitX(fixmine), GetUnitY(fixmine), 270.0)
+      set l = GetUnitLoc(u)
+      call RemoveUnitAM(u)
+      set u = null
+      if DistanceBetweenPoints_kd(l, GetUnitLoc(fixmine)) <= race_max_expa_mine_distance and GetGold() > GetUnitGoldCost(old_id[racial_expansion]) and GetWood() > GetUnitWoodCost(old_id[racial_expansion]) then
+        call IssuePointOrderByIdLoc(peon, old_id[racial_expansion], l)  // this API only return false , cannot set b
+        call CreateDebugTag("Multiple Mine fix - build expansion", 10, peon, 10.00, 8.00)
+        set b = true
+      endif
+      call RemoveLocation(l)
+      set l = null
+    endif
   endif
   call DestroyGroup(g)
   set g = null
@@ -8708,7 +8728,6 @@ function PJInitJobs takes nothing returns nothing
   if nearest_neutral[NEUTRAL_HEAL_WARD] != null then
     call PathingJobEx(6 * sleep_multiplier, NEUTRAL_ENEMY_CHECK, NEUTRAL_HEAL_WARD, true)         //NeutralEnemyCheckJob
   endif
-  call PathingJobEx(13 * sleep_multiplier, DETECT_DEFEAT, 0, false)                               //DetectDefeatJob
   call PathingJobEx(15 * sleep_multiplier, UPDATE_STRENGTH, 0, false)                             //UpdateStrengthJob
   loop
     exitwhen i >= NEUTRAL_COUNT
@@ -8721,7 +8740,7 @@ endfunction
 
 //============================================================================
 function PathingThread takes nothing returns nothing
-  local integer t = 0
+  local integer t = 1
   call StaggerSleep(1,5)
   call SetAIArray()
   //  set command_wait = 0.5
@@ -8742,18 +8761,22 @@ function PathingThread takes nothing returns nothing
   call StaggerSleep(1,10)
   loop
     exitwhen player_defeated or pj_length < 1
-    if t >= pj_length then
-      set t = 0
-    endif
-    set t = t + 1
-    if pj_remove[t] then
-      call RemovePJ(pj_jid[t], pj_par[t], t)
-    endif
-    if TimerGetElapsed(tq_timer) >= pj_time[t] then
-      call TQDoJob(pj_jid[t], pj_par[t], null, null, null)
-      set pj_time[t] = TimerGetElapsed(tq_timer) + pj_frequency[t]
-    endif
-    call StaggerSleep(1, 1.8)
+    loop
+      if pj_remove[t] then
+        call RemovePJ(pj_jid[t], pj_par[t], t)
+      endif
+      if TimerGetElapsed(tq_timer) >= pj_time[t] then
+        call TQDoJob(pj_jid[t], pj_par[t], null, null, null)
+        set pj_time[t] = TimerGetElapsed(tq_timer) + pj_frequency[t]
+        call StaggerSleep(0.2, 0.8)
+      else
+        call StaggerSleep(0.02, 0.1)
+      endif
+      set t = t + 1
+      exitwhen t >= pj_length or player_defeated
+    endloop
+    set t = 1
+    call StaggerSleep(1, 2)
   endloop
 endfunction
 
@@ -9159,7 +9182,7 @@ function InitCheckHarvest takes nothing returns nothing
           set s = s + 1  //race mine and mine cannot be calculated repeatedly
         endif
       endif
-      if (IsUnitType(u, UNIT_TYPE_TOWNHALL) or m > 0) and play != ai_player and play != Player(PLAYERAGGRESSIVE) and play != Player(PLAYERPASSIVE) and GetPlayerSlotState(play) == PLAYER_SLOT_STATE_PLAYING then
+      if (IsUnitType(u, UNIT_TYPE_TOWNHALL) or m > 0) and play != ai_player and GetPlayerId(play) < PLAYERAGGRESSIVE and GetPlayerSlotState(play) == PLAYER_SLOT_STATE_PLAYING then
         if b[GetPlayerId(play)] == false then  // town and mine of the same player cannot be calculated repeatedly
           set b[GetPlayerId(play)] = true
           set p = p + 1
@@ -9169,7 +9192,7 @@ function InitCheckHarvest takes nothing returns nothing
     call GroupRemoveUnit(g, u)
   endloop
   if p > 1 then
-    if c + s == p and i != GOLD_MINE then
+    if c + s == p then
       set first_town_mine = 1  // mode one , Right number of players and mines or this mine too close (like (4)synergybigpaved.w3x) , just fix UD and ELF harvest
     elseif c + s > p then
       set first_town_mine = 2  // mode two , more mines than players, one player have more mine , fix UD and ELF harvest and all race expensive - prior take closest home_location mine
@@ -11990,7 +12013,7 @@ function StartExpansionAM takes integer qty, integer hall returns integer
   elseif first_town_mine > 0 then
     set countdone = Min(countdone, GetMinesOwned())
   endif
-  if first_town_mine > 1 or (count == 0 and first_town_mine < 2 and GetMinesOwned() > 0 and (race_manual_loading or race_uses_mine_expansion)) then
+  if first_town_mine > 0 or (count == 0 and first_town_mine < 2 and GetMinesOwned() > 0 and (race_manual_loading or race_uses_mine_expansion)) then
     set f = MultipleMinefix()
     if first_town_mine > 1 and f then
       call Trace("AMAIStartexpa: MultiMineFix")  // home_location have multiple mine , fix GetMinesOwned bug
@@ -13045,8 +13068,8 @@ function OneBuildLoopAM takes nothing returns nothing
         if ret == CANNOT_BUILD or ret == BUILT_SOME or ret == NOT_ENOUGH_RES or (ret == BUILT_ALL and qty < build_qty[index]) then
           if ret == CANNOT_BUILD or ret == NOT_ENOUGH_RES then
             set index = index + 1  // Prevent queue blocked
-            exitwhen index >= build_length
           endif
+          exitwhen index >= build_length
           set build_qty[index_free] = build_qty[index]
           set build_type[index_free] = build_type[index]
           set build_item[index_free] = build_item[index]
@@ -13068,9 +13091,6 @@ function OneBuildLoopAM takes nothing returns nothing
     endloop
 
 //    call EndDump(Int2Str(ai_time))
-    if build_length >= JASS_MAX_ARRAY_SIZE then
-      set build_length = R2I(build_length / 2)
-    endif
     loop
       exitwhen index >= build_length
       if index > 0 and ModuloInteger(index, 300) == 0 then
@@ -13199,7 +13219,7 @@ function AttackGroupAddUnknown takes nothing returns nothing
     if not IsUnitType(u, UNIT_TYPE_PEON) and not IsUnitType(u, UNIT_TYPE_STRUCTURE) and not IsUnitType(u, UNIT_TYPE_SUMMONED) and not IsUnitType(u, UNIT_TYPE_SAPPER) and (IsUnitType(u, UNIT_TYPE_ATTACKS_FLYING) or IsUnitType(u, UNIT_TYPE_ATTACKS_GROUND)) and UnitAlive(u) and not IsUnitHidden(u) then
       set i = GetUnitTypeId(u)
       if i != 'ngir' then
-        call SetMeleeGroupAM(i)  //other hero and unit , like other race and custom
+        call AddAssault(20,i)  //other hero and unit , like other race and custom
       endif
     endif
     call GroupRemoveUnit(g, u)
@@ -13268,7 +13288,7 @@ function FormGroupAM takes integer seconds returns nothing
     set take_all_ghouls_along = false
   endif
 
-  if TownCountDone(racial_ghoul) > 0 then  // Ghoul count needs to exclude units sent back to heal otherwise harvesting ghouls will be pulled off.
+  if not take_all_ghouls_along and TownCountDone(racial_ghoul) > 0 then  // Ghoul count needs to exclude units sent back to heal otherwise harvesting ghouls will be pulled off.
     set unitid = old_id[racial_ghoul]
     set g = CreateGroup()
     call GroupEnumUnitsOfPlayer(g, ai_player, null)
@@ -13306,9 +13326,9 @@ function FormGroupAM takes integer seconds returns nothing
         set attacking_ghouls = desire
       else
         set desire = Max((ghoul - harvesting_ghouls), 0) // all spare ghouls should attack and join attack as built
-        set count = Min(ghoul, desire)
+        set count = ghoul
         if towerrush then
-          set count = Max(count - 2, 0)  // reserve
+          set desire = Max(count - 2, 0)  // reserve
         endif
         set attacking_ghouls = Max(desire, 0)
       endif
@@ -14827,6 +14847,7 @@ if desperation_assault and not no_attack then
         set common = null
         return
       endif
+      set common = null
     endif
   endif
 
@@ -14883,6 +14904,7 @@ if queue_running then
       set queue_running = false
     elseif not UnitAlive(queue_t_u) then
       call Trace("Unit is dead, next command" )
+      set queue_t_u = null
       call QueueGetNextCommand()
     else
       call Trace("Attacking unit" )
@@ -14901,6 +14923,7 @@ if attack_player then
   if hall == null or not UnitAlive(hall) or IsUnitHidden(hall) then
     call Trace("No target found" )
     set attack_player = false
+    set hall = null
     return
   endif
   call FromGroupAndGhoulsAM(3)
@@ -14925,6 +14948,7 @@ if attack_unit then
   elseif not UnitAlive(target_unit) then
     call Trace("Unit is dead" )
     set attack_unit = false
+    set target_unit = null
   else
     call Trace("Attacking unit" )
     call FromGroupAndGhoulsAM(3)
@@ -15035,6 +15059,7 @@ if not creeping_only then	// Do the normal attack sequence
         set common = null
         return
       endif
+      call ClearAllianceTarget(null)
       set common = null
     endif
   endif
