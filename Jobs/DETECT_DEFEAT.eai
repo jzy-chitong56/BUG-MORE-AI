@@ -414,7 +414,7 @@ function DetectDefeatJob takes nothing returns nothing
     set over_control_state[t] = true  // own take control
     call TakeOverOfflineAlly(Player(t))
   endif
-  if not player_defeated and not pathing_done then
+  if not player_defeated then
     call TQAddJob(13 * sleep_multiplier, DETECT_DEFEAT, 0)
   endif
   set p = null
