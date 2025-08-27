@@ -2197,16 +2197,16 @@ function GetUnitGoldCost2 takes integer id returns integer
   else
     if id == hero[1] then
       if hero_unit[1] != null then
-        return Min(GetUnitGoldCost(old_id[id]) * 4, Min(GetUnitGoldCost(old_id[id]) * (0.4 + 0.1 * (GetHeroLevel(hero_unit[1]) - 1)), 700))
+        return Min(GetUnitGoldCost(old_id[id]) * 4, Min(GetUnitGoldCost(old_id[id]) * R2I(0.4 + 0.1 * (GetHeroLevel(hero_unit[1]) - 1)), 700))
       endif
       return 0  // fix , first hero gold is 0 , not friendly to custom maps
     elseif id == hero[2] then
       if hero_unit[2] != null then
-        return Min(GetUnitGoldCost(old_id[id]) * 4, Min(GetUnitGoldCost(old_id[id]) * (0.4 + 0.1 * (GetHeroLevel(hero_unit[2]) - 1)), 700))
+        return Min(GetUnitGoldCost(old_id[id]) * 4, Min(GetUnitGoldCost(old_id[id]) * R2I(0.4 + 0.1 * (GetHeroLevel(hero_unit[2]) - 1)), 700))
       endif
     elseif id == hero[3] then
       if hero_unit[3] != null then
-        return Min(GetUnitGoldCost(old_id[id]) * 4, Min(GetUnitGoldCost(old_id[id]) * (0.4 + 0.1 * (GetHeroLevel(hero_unit[3]) - 1)), 700))
+        return Min(GetUnitGoldCost(old_id[id]) * 4, Min(GetUnitGoldCost(old_id[id]) * R2I(0.4 + 0.1 * (GetHeroLevel(hero_unit[3]) - 1)), 700))
       endif
     endif
   endif
@@ -14824,6 +14824,7 @@ function SetLeadAlly takes nothing returns nothing
   local integer i = 0
   local boolean checkdone = false
   local player p = null
+  set leadally = false  // reset
   loop
     exitwhen i >= PLAYERAGGRESSIVE or checkdone
     set p = Player(i)
