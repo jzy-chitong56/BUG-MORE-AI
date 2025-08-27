@@ -2194,8 +2194,21 @@ endfunction
 function GetUnitGoldCost2 takes integer id returns integer
   if needed3[id] == UPGRADED then
     return GetUnitGoldCost(old_id[id]) - GetUnitGoldCost(old_id[needed1[id]])
-  elseif id == hero[1] and not hero_built[1] then  // fix , first hero gold is 0
-    return 0
+  else
+    if id == hero[1] then
+      if hero_unit[1] != null then
+        return Min(GetUnitGoldCost(old_id[id]) * 4, Min(GetUnitGoldCost(old_id[id]) * (0.4 + 0.1 * (GetHeroLevel(hero_unit[1]) - 1)), 700))
+      endif
+      return 0  // fix , first hero gold is 0 , not friendly to custom maps
+    elseif id == hero[2] then
+      if hero_unit[2] != null then
+        return Min(GetUnitGoldCost(old_id[id]) * 4, Min(GetUnitGoldCost(old_id[id]) * (0.4 + 0.1 * (GetHeroLevel(hero_unit[2]) - 1)), 700))
+      endif
+    elseif id == hero[3] then
+      if hero_unit[3] != null then
+        return Min(GetUnitGoldCost(old_id[id]) * 4, Min(GetUnitGoldCost(old_id[id]) * (0.4 + 0.1 * (GetHeroLevel(hero_unit[3]) - 1)), 700))
+      endif
+    endif
   endif
   return GetUnitGoldCost(old_id[id])
 endfunction
@@ -6662,20 +6675,20 @@ function MultipleMinefix takes nothing returns boolean
   local integer gold = 0
   local integer t = 0
   local real i = 0
-  local real distance = 2000
+  local real distance = 2200
   local location l = null
   local group g = null
   local unit u = null
   local unit tree = null
   local unit peon = null
-  local boolean b = false //race_manual_loading or race_uses_mine_expansion
+  local boolean b = race_manual_loading or race_uses_mine_expansion
   local boolean enemy = false
   if town_threatened or not hero_built[1] or (not b and ((not_taken_expansion != null and UnitAlive(not_taken_expansion) and DistanceBetweenPoints_kd(home_location,GetUnitLoc(not_taken_expansion)) < expansion_taken_radius and GetResourceAmount(not_taken_expansion) > 200) or (fixmine != null and GetResourceAmount(fixmine) > 200))) or (race_manual_loading and GetUnitCount(old_id[race_manual_loading_mine]) > 1) or (race_uses_mine_expansion and TownCount(racial_expansion) > 1) then
     return false  //no first hero priority build army , human and orc just harvest
   endif
   call Trace("Check Multiple Mine")
   set g = CreateGroup()
-  call GroupEnumUnitsInRangeOfLoc(g, home_location, 2000, null)
+  call GroupEnumUnitsInRangeOfLoc(g, home_location, distance, null)
   loop
     set u = FirstOfGroup(g)
     exitwhen u == null
@@ -6721,13 +6734,13 @@ function MultipleMinefix takes nothing returns boolean
     return false
   else
     if not race_manual_loading and not enemy and (first_town_mine == 1 or first_town_mine == 2) then
-      set first_town_mine = 4  // enemy defeated, need exp
+      set first_town_mine = 4  // enemy defeated, take mine
       if not race_uses_mine_expansion then
         call TQAddJob(4, HARVEST_CHECK, 0)  // now have 2 or more mine
       endif
     endif
   endif
-  //set b = false
+  set b = false
   if fixmine != null and UnitAlive(fixmine) and not_taken_expansion != fixmine and first_town_mine > 1 then
     set not_taken_expansion = fixmine  // prevent build too much TOWNHALL , olny first_town_mine > 1 mode need set
   endif
@@ -6756,14 +6769,14 @@ function MultipleMinefix takes nothing returns boolean
       endif
     endif
   elseif race_uses_mine_expansion then
-    if peon != null and fixmine != null and UnitAlive(fixmine) and (TownCount(racial_expansion) < 2 or (GetGold() > 1200 and TownCount(racial_expansion) < 3)) and Min(GetResourceAmount(fixmine) * 2, GetGold()) > GetUnitGoldCost(old_id[racial_expansion]) and GetWood() > GetUnitWoodCost(old_id[racial_expansion]) then
+    if peon != null and fixmine != null and UnitAlive(fixmine) and (t < 2 or (GetGold() > 700 and TownCount(racial_expansion) < 3)) and Min(GetResourceAmount(fixmine) * 2, GetGold()) > GetUnitGoldCost(old_id[racial_expansion]) and GetWood() > GetUnitWoodCost(old_id[racial_expansion]) then
       call IssueTargetOrderById(peon, old_id[racial_expansion], fixmine)  // this API only return false , cannot set b
       call CreateDebugTag("Multiple Mine fix - build expansion", 10, peon, 10.00, 8.00)
       set b = true
     endif
   else
     set b = c < 2
-    if first_town_mine == 4 and peon != null and t < 2 and c > 1 then  //  build one tree
+    if first_town_mine == 4 and fixmine != null and peon != null and t < 2 and c > 1 then  //  take mine
       set u = CreateUnit(Player(PLAYERPASSIVE), old_id[racial_expansion], GetUnitX(fixmine), GetUnitY(fixmine), 270.0)
       set l = GetUnitLoc(u)
       call RemoveUnitAM(u)
@@ -7953,6 +7966,7 @@ endfunction
 function AntiInvisibleUseAbility takes real x, real y returns nothing
   local integer id = 0
   local unit u = null
+  local unit antiu = null
   local group g = CreateGroup()
   local group vg = null
   call GroupEnumUnitsInRange(g, x, y, battle_radius, null)
@@ -7968,37 +7982,39 @@ function AntiInvisibleUseAbility takes real x, real y returns nothing
         elseif id == %1 then
           call IssueImmediateOrderById(u, %4)
           call CreateDebugTag("Unit anti invisible", 10, u, 1.00, 0.80)
-          set anti_invisible_lock = ai_time
-          exitwhen true
+          set antiu = u
         #ENDINCLUDE
         #INCLUDETABLE <$VER$\InvisibleDetection.txt> #EFR #COND "%2" eq "UNIT" and "%3" eq "SUDDEN"
         elseif id == %1 then
           call IssueImmediateOrderById(u, %4)
           call CreateDebugTag("Unit anti invisible", 10, u, 1.00, 0.80)
-          set anti_invisible_lock = ai_time
-          exitwhen true
+          set antiu = u
         #ENDINCLUDE
         #INCLUDETABLE <$VER$\InvisibleDetection.txt> #EFR #COND "%2" eq "BUILD" and "%3" eq "COORDINATE"
         elseif id == %1 then
           call IssuePointOrderById(u, %4, GetUnitX(u), GetUnitY(u))
           call CreateDebugTag("Unit anti invisible", 10, u, 1.00, 0.80)
-          set anti_invisible_lock = ai_time
-          exitwhen true
+          set antiu = u
         #ENDINCLUDE
         #INCLUDETABLE <$VER$\InvisibleDetection.txt> #EFR #COND "%2" eq "UNIT" and "%3" eq "COORDINATE"
         elseif id == %1 then
           call IssuePointOrderById(u, %4, GetUnitX(u), GetUnitY(u))
           call CreateDebugTag("Unit anti invisible", 10, u, 1.00, 0.80)
-          set anti_invisible_lock = ai_time
-          exitwhen true
+          set antiu = u
         #ENDINCLUDE
         endif
+        exitwhen antiu != null
       endif
     else
       call GroupRemoveUnit(anti_invisible_group, u)
     endif
     call GroupRemoveUnit(vg, u)
   endloop
+  if antiu != null then
+    set anti_invisible_lock = ai_time
+    call GroupRemoveUnit(anti_invisible_group, antiu)
+    set antiu = null
+  endif
   call DestroyGroup(g)
   set g = null
   call DestroyGroup(vg)
@@ -9194,6 +9210,7 @@ function InitCheckHarvest takes nothing returns nothing
   if p > 1 then
     if c + s == p then
       set first_town_mine = 1  // mode one , Right number of players and mines or this mine too close (like (4)synergybigpaved.w3x) , just fix UD and ELF harvest
+      set fixmine = null  // can not take mine
     elseif c + s > p then
       set first_town_mine = 2  // mode two , more mines than players, one player have more mine , fix UD and ELF harvest and all race expensive - prior take closest home_location mine
     endif
@@ -10396,7 +10413,7 @@ function isTieringUp takes nothing returns boolean
   local integer i = tiernum
   loop
     exitwhen i <= 1
-    if GetUnitCountDone(racial_hall[i]) < GetUnitCount(racial_hall[i]) then
+    if GetUnitCountDone(old_id[racial_hall[i]]) < GetUnitCount(old_id[racial_hall[i]]) then
       return true
     endif
     set i = i - 1
@@ -13062,11 +13079,13 @@ function OneBuildLoopAM takes nothing returns nothing
           set blocktierup = true // Strictly Block tier up if a large proportion of requested units of strategy not built so we follow strategy definition, otherwise will tier up early if spare resources and can't build higher priority tasks first
         endif
         if ret == NOT_ENOUGH_RES and tp != BUILD_ITEM and tp != BUILD_UPGRADE then // Don't try and build anything else as thing we trying to buy is too expensive
-          set index = index + 1  // Prevent queue blocked
+          if tp != BUILD_EXPAND and not IsRacialHallId(id, 1) then
+            set index = index + 1  // Prevent queue blocked
+          endif
           exitwhen true
         endif
         if ret == CANNOT_BUILD or ret == BUILT_SOME or ret == NOT_ENOUGH_RES or (ret == BUILT_ALL and qty < build_qty[index]) then
-          if ret == CANNOT_BUILD or ret == NOT_ENOUGH_RES then
+          if (ret == CANNOT_BUILD or ret == NOT_ENOUGH_RES) and tp != BUILD_EXPAND and not IsRacialHallId(id, 1) then
             set index = index + 1  // Prevent queue blocked
           endif
           exitwhen index >= build_length
@@ -13281,7 +13300,7 @@ function FormGroupAM takes integer seconds returns nothing
   local unit u = null
 
   call InitAssault()
-
+  set take_all_ghouls_along = false  // reset
   if count > minimum_peon_wood then
     set take_all_ghouls_along = true
   elseif count < maximum_peon_wood then
@@ -13322,13 +13341,16 @@ function FormGroupAM takes integer seconds returns nothing
       if take_all_ghouls_along then
         if towerrush then
           set desire = Max(Min(count - 2 ,desire), 0)  // reserve
+        else
+          set desire = count
         endif
         set attacking_ghouls = desire
       else
-        set desire = Max((ghoul - harvesting_ghouls), 0) // all spare ghouls should attack and join attack as built
         set count = ghoul
         if towerrush then
           set desire = Max(count - 2, 0)  // reserve
+        else
+          set desire = Max((ghoul - harvesting_ghouls), 0) // all spare ghouls should attack and join attack as built
         endif
         set attacking_ghouls = Max(desire, 0)
       endif
