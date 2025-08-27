@@ -57,7 +57,7 @@ function FixBuildJob takes nothing returns nothing
   if race_uses_mine_expansion and build == null and tempu != null then
     if (first_town_mine == 1 or first_town_mine == 2) and GetGold() > 500 and TownCount(racial_hall[1]) < 2 then
       set id = old_id[racial_hall[1]]
-      set build = CreatePathingUnitFull(build, ai_player, id, GetLocationX(home_location) + ISign() * GetRandomReal(500, 1000), GetLocationY(home_location) + ISign() * GetRandomReal(-1000, -500))
+      set build = CreatePathingUnitFull(build, ai_player, id, GetLocationX(home_location) + ISign() * GetRandomReal(600, 800), GetLocationY(home_location) + ISign() * GetRandomReal(-800, -600))
       set x = GetUnitX(build)
       set y = GetUnitY(build)
       call RemoveUnitAM(build)
@@ -77,6 +77,7 @@ function FixBuildJob takes nothing returns nothing
       call TQAddJob(30, FIX_BUILD, 0)
     endif
   endif
+  set tempu = null
   set build = null
 endfunction
 #ENDIF
