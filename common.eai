@@ -2059,14 +2059,10 @@ function GetUnitGoldCost2 takes integer id returns integer
         return Min(GetUnitGoldCost(old_id[id]) * 4, Min(GetUnitGoldCost(old_id[id]) * R2I(0.4 + 0.1 * (GetHeroLevel(hero_unit[1]) - 1)), 700))
       endif
       return 0  // fix , first hero gold is 0 , not friendly to custom maps
-    elseif id == hero[2] then
-      if hero_unit[2] != null then
-        return Min(GetUnitGoldCost(old_id[id]) * 4, Min(GetUnitGoldCost(old_id[id]) * R2I(0.4 + 0.1 * (GetHeroLevel(hero_unit[2]) - 1)), 700))
-      endif
-    elseif id == hero[3] then
-      if hero_unit[3] != null then
-        return Min(GetUnitGoldCost(old_id[id]) * 4, Min(GetUnitGoldCost(old_id[id]) * R2I(0.4 + 0.1 * (GetHeroLevel(hero_unit[3]) - 1)), 700))
-      endif
+    elseif id == hero[2] and hero_unit[2] != null then
+      return Min(GetUnitGoldCost(old_id[id]) * 4, Min(GetUnitGoldCost(old_id[id]) * R2I(0.4 + 0.1 * (GetHeroLevel(hero_unit[2]) - 1)), 700))
+    elseif id == hero[3] and hero_unit[3] != null then
+      return Min(GetUnitGoldCost(old_id[id]) * 4, Min(GetUnitGoldCost(old_id[id]) * R2I(0.4 + 0.1 * (GetHeroLevel(hero_unit[3]) - 1)), 700))
     endif
   endif
   return GetUnitGoldCost(old_id[id])
@@ -12724,7 +12720,7 @@ function TimeKeeper takes nothing returns nothing
   //endif
   //set time_of_day = new_time_of_day
   set ai_time = R2I(TimerGetElapsed(tq_timer) / 5)
-  if ai_time - taunt_start_time >= 0 then
+  if ai_time - taunt_start_time >= 0 and not town_threatened and not TownThreatened() then
     call Chat(C_Taunt)
     set taunt_start_time = ai_time
   endif
