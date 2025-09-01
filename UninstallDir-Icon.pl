@@ -66,26 +66,26 @@ sub process_dir {
 			system "MPQEditor d \"$dirname/$filename\" ReplaceableTextures\\CommandButtons\\BTN_AMAIRoP+4.dds";
 			system "MPQEditor d \"$dirname/$filename\" ReplaceableTextures\\CommandButtons\\BTN_AMAIRoP+5.dds";
 
-			system "MPQEditor d \"$dirname/$filename\" ReplaceableTextures\\CommandButtonsDisabled\\DISBTN_AMAI_AMAIClawsOfAttack+3.blp";
-			system "MPQEditor d \"$dirname/$filename\" ReplaceableTextures\\CommandButtonsDisabled\\DISBTN_AMAI_AMAIClawsOfAttack+6.blp";
-			system "MPQEditor d \"$dirname/$filename\" ReplaceableTextures\\CommandButtonsDisabled\\DISBTN_AMAI_AMAIClawsOfAttack+9.blp";
-			system "MPQEditor d \"$dirname/$filename\" ReplaceableTextures\\CommandButtonsDisabled\\DISBTN_AMAI_AMAIClawsOfAttack+12.blp";
-			system "MPQEditor d \"$dirname/$filename\" ReplaceableTextures\\CommandButtonsDisabled\\DISBTN_AMAI_AMAIClawsOfAttack+15.blp";
-			system "MPQEditor d \"$dirname/$filename\" ReplaceableTextures\\CommandButtonsDisabled\\DISBTN_AMAI_AMAIRingGreen+1.blp";
-			system "MPQEditor d \"$dirname/$filename\" ReplaceableTextures\\CommandButtonsDisabled\\DISBTN_AMAI_AMAIRingGreen+2.blp";
-			system "MPQEditor d \"$dirname/$filename\" ReplaceableTextures\\CommandButtonsDisabled\\DISBTN_AMAI_AMAIRingGreen+3.blp";
-			system "MPQEditor d \"$dirname/$filename\" ReplaceableTextures\\CommandButtonsDisabled\\DISBTN_AMAI_AMAIRingGreen+4.blp";
-			system "MPQEditor d \"$dirname/$filename\" ReplaceableTextures\\CommandButtonsDisabled\\DISBTN_AMAI_AMAIRingGreen+5.blp";
+			system "MPQEditor d \"$dirname/$filename\" ReplaceableTextures\\CommandButtonsDisabled\\DISBTN_AMAIClawsOfAttack+3.blp";
+			system "MPQEditor d \"$dirname/$filename\" ReplaceableTextures\\CommandButtonsDisabled\\DISBTN_AMAIClawsOfAttack+6.blp";
+			system "MPQEditor d \"$dirname/$filename\" ReplaceableTextures\\CommandButtonsDisabled\\DISBTN_AMAIClawsOfAttack+9.blp";
+			system "MPQEditor d \"$dirname/$filename\" ReplaceableTextures\\CommandButtonsDisabled\\DISBTN_AMAIClawsOfAttack+12.blp";
+			system "MPQEditor d \"$dirname/$filename\" ReplaceableTextures\\CommandButtonsDisabled\\DISBTN_AMAIClawsOfAttack+15.blp";
+			system "MPQEditor d \"$dirname/$filename\" ReplaceableTextures\\CommandButtonsDisabled\\DISBTN_AMAIRingGreen+1.blp";
+			system "MPQEditor d \"$dirname/$filename\" ReplaceableTextures\\CommandButtonsDisabled\\DISBTN_AMAIRingGreen+2.blp";
+			system "MPQEditor d \"$dirname/$filename\" ReplaceableTextures\\CommandButtonsDisabled\\DISBTN_AMAIRingGreen+3.blp";
+			system "MPQEditor d \"$dirname/$filename\" ReplaceableTextures\\CommandButtonsDisabled\\DISBTN_AMAIRingGreen+4.blp";
+			system "MPQEditor d \"$dirname/$filename\" ReplaceableTextures\\CommandButtonsDisabled\\DISBTN_AMAIRingGreen+5.blp";
 
-			system "MPQEditor d \"$dirname/$filename\" ReplaceableTextures\\CommandButtonsDisabled\\DISBTN_AMAI_AMAIClaw+4.dds";
-			system "MPQEditor d \"$dirname/$filename\" ReplaceableTextures\\CommandButtonsDisabled\\DISBTN_AMAI_AMAIClaw+5.dds";
-			system "MPQEditor d \"$dirname/$filename\" ReplaceableTextures\\CommandButtonsDisabled\\DISBTN_AMAI_AMAIClaw+8.dds";
-			system "MPQEditor d \"$dirname/$filename\" ReplaceableTextures\\CommandButtonsDisabled\\DISBTN_AMAI_AMAIClaw+9.dds";
-			system "MPQEditor d \"$dirname/$filename\" ReplaceableTextures\\CommandButtonsDisabled\\DISBTN_AMAI_AMAIClaw+12.dds";
-			system "MPQEditor d \"$dirname/$filename\" ReplaceableTextures\\CommandButtonsDisabled\\DISBTN_AMAI_AMAIClaw+15.dds";
-			system "MPQEditor d \"$dirname/$filename\" ReplaceableTextures\\CommandButtonsDisabled\\DISBTN_AMAI_AMAIRoP+3.dds";
-			system "MPQEditor d \"$dirname/$filename\" ReplaceableTextures\\CommandButtonsDisabled\\DISBTN_AMAI_AMAIRoP+4.dds";
-			system "MPQEditor d \"$dirname/$filename\" ReplaceableTextures\\CommandButtonsDisabled\\DISBTN_AMAI_AMAIRoP+5.dds";
+			system "MPQEditor d \"$dirname/$filename\" ReplaceableTextures\\CommandButtonsDisabled\\DISBTN_AMAIClaw+4.dds";
+			system "MPQEditor d \"$dirname/$filename\" ReplaceableTextures\\CommandButtonsDisabled\\DISBTN_AMAIClaw+5.dds";
+			system "MPQEditor d \"$dirname/$filename\" ReplaceableTextures\\CommandButtonsDisabled\\DISBTN_AMAIClaw+8.dds";
+			system "MPQEditor d \"$dirname/$filename\" ReplaceableTextures\\CommandButtonsDisabled\\DISBTN_AMAIClaw+9.dds";
+			system "MPQEditor d \"$dirname/$filename\" ReplaceableTextures\\CommandButtonsDisabled\\DISBTN_AMAIClaw+12.dds";
+			system "MPQEditor d \"$dirname/$filename\" ReplaceableTextures\\CommandButtonsDisabled\\DISBTN_AMAIClaw+15.dds";
+			system "MPQEditor d \"$dirname/$filename\" ReplaceableTextures\\CommandButtonsDisabled\\DISBTN_AMAIRoP+3.dds";
+			system "MPQEditor d \"$dirname/$filename\" ReplaceableTextures\\CommandButtonsDisabled\\DISBTN_AMAIRoP+4.dds";
+			system "MPQEditor d \"$dirname/$filename\" ReplaceableTextures\\CommandButtonsDisabled\\DISBTN_AMAIRoP+5.dds";
 
 			system "MPQEditor d \"$dirname/$filename\" UI\\MiniMap\\AMAI_MiniMap-FountainLife.dds";
 			system "MPQEditor d \"$dirname/$filename\" UI\\MiniMap\\AMAI_MiniMap-FountainLife.mdx";
