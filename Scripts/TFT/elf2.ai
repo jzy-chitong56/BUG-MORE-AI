@@ -27,6 +27,7 @@ globals
     integer c_hippo_done        = 0
     integer c_food_made         = 0
     integer c_food_used         = 0
+    integer c_food_max          = GetPlayerState(Player(GetAiPlayer()), PLAYER_STATE_FOOD_CAP_CEILING)
     integer c_gold              = 0
     integer c_gold_owned        = 0
     integer c_hero1_done        = 0
@@ -57,7 +58,7 @@ globals
     integer c_zeps              = 0
     integer hero_id4            = 0
     integer array skills4
-    boolean HarvestFix          = true
+    boolean HarvestFix          = false
     unit array laboratory
     unit array herounit
     unit shop = null
@@ -394,7 +395,7 @@ function setup_force takes nothing returns nothing
     if GetUnitCountDone(BLK_SPHINX) > 0 then
         call SetMeleeGroup( BLK_SPHINX  )
     endif
-
+    call SetMeleeGroup( SHADE       )
     call SetInitialWave(10)
 endfunction
 
@@ -525,6 +526,9 @@ function init_vars takes nothing returns nothing
     set c_zeps              = GetUnitCount(ZEPPELIN)
     set c_food_made         = GetUnitCountDone(TREE_LIFE) * GetFoodMade(TREE_LIFE) + GetUnitCountDone(TREE_AGES) * GetFoodMade(TREE_AGES) + GetUnitCountDone(TREE_ETERNITY) * GetFoodMade(TREE_ETERNITY) + c_moon_well_done * GetFoodMade(MOON_WELL)
     set c_food_used         = FoodUsed()
+    if c_food_made > c_food_max then
+      set c_food_made = c_food_max
+    endif
 
     if basic_opening then
 
@@ -576,14 +580,14 @@ function SetShop takes nothing returns nothing
     set u = null
 endfunction
 
-function Buy_Item takes integer item_id, boolean stack returns nothing
+function Buy_Item takes integer item_id, boolean stack, boolean buyneed returns nothing
     local integer i = 1
     local integer c = 0
     local integer sum = 0
     local unit u = null
     local item t = null
     local location l = null
-    if GetGold() > 800 and not TownThreatened() and not CaptainInCombat(false) and shop != null and UnitAlive(shop) then
+    if buyneed and c_gold > 800 and not TownThreatened() and not CaptainInCombat(false) and shop != null and UnitAlive(shop) then
         loop
             exitwhen i > 4
             if herounit[i] != null and UnitAlive(herounit[i]) then
@@ -592,9 +596,13 @@ function Buy_Item takes integer item_id, boolean stack returns nothing
                     set t = UnitItemInSlot(herounit[i], c)
                     if t == null then
                         set sum = sum + 1
-                    elseif GetItemTypeId(t) == item_id and not stack then
-                        set sum = - 1
-                        set c = 5
+                    elseif GetItemTypeId(t) == item_id then
+                        if stack then
+                            set sum = sum + 1
+                        else
+                            set sum = - 1
+                            set c = 5
+                        endif
                     endif
                     set c = c + 1
                 endloop
@@ -609,9 +617,9 @@ function Buy_Item takes integer item_id, boolean stack returns nothing
         endloop
         if u != null then
             set l = GetUnitLoc(u)
-            if Distance_BetweenLoc_dk(GetUnitLoc(shop), l) < 350 then
+            if Distance_BetweenLoc_dk(GetUnitLoc(shop), l) < 550 then
                 call IssueTargetOrderById(shop, 'Aall', u)
-                call IssueTargetOrderById(shop, 'Aneu', u)
+                call Sleep(GetRandomInt(2,3))
                 call IssueNeutralImmediateOrderById(ai_player, shop, item_id)
             endif
             call RemoveLocation(l)
@@ -769,6 +777,32 @@ endfunction
 //--------------------------------------------------------------------------------------------------
 //  build_sequence
 //--------------------------------------------------------------------------------------------------
+function build_hero_fix takes integer heronum, boolean herodone, integer heroid, integer num returns nothing
+    local integer i = 0
+    if heronum < 1 and c_altar_done > 0 then
+      if herodone then  // resurrection no need wood, only can forcibly fix
+        set i = GetUnitGoldCost(heroid)
+        if herounit[num] != null and c_food_made - c_food_used >= 5 then
+          set i = Min(i * 4, Min(i * R2I(0.4 + 0.1 * (GetHeroLevel(herounit[num]) - 1)), 700))
+          if c_gold >= i then
+            set total_gold = Max(0, total_gold - i) // compensation
+            call SetProduce(1,heroid,-1)
+            return
+          endif
+        endif
+        if c_gold >= GetUnitGoldCost(heroid) and GetWood() >= GetUnitWoodCost(heroid) then  // Prevent StartUnit function interruptions
+          call SetBuildUnit(1, heroid)  // only can add sequence
+        endif
+      else  // build
+        if num == 1 and c_food_made - c_food_used >= 5 then  // build first hero no need gold and wood -- just melee map , cannot custom map
+          call SetProduce(1,heroid,-1)
+          return
+        endif
+        call SetBuildUnit(1, heroid)  // only can add sequence
+      endif
+    endif
+endfunction
+
 function build_sequence takes nothing returns nothing
     local boolean primary_melee
     local integer wisps
@@ -777,18 +811,17 @@ function build_sequence takes nothing returns nothing
 
     if basic_opening then
         call SetBuildUnit(  1, TREE_LIFE        )
-        call SetBuildUnit(  5, WISP             )
+        call SetBuildUnit(  2, WISP             )
         call SetBuildUnit(  1, ELF_ALTAR        )
         call SetBuildUnit(  7, WISP             )
         call SetBuildUnit(  1, MOON_WELL        )
         call SetBuildUnit(  8, WISP             )
         call SetBuildUnit(  1, ANCIENT_WAR      )
+        call build_hero_fix(GetUnitCount(hero_id), b_hero1_done, hero_id, 1)
         call SetBuildUnit(  9, WISP             )
-        call SetBuildUnit(  1, hero_id          )
-        call SetBuildUnit( 10, WISP             )
         call SetBuildUnit(  2, MOON_WELL        )
+        call SetBuildUnit( 10, WISP             )
         call basics(2)// (  1, ARCHER           )
-        call SetBuildUnit(  1, DEN_OF_WONDERS   )
         call basics(4)// (  2, ARCHER           )
         call SetBuildUnit( 11, WISP             )
         call basics(6)// (  3, ARCHER           )
@@ -802,6 +835,7 @@ function build_sequence takes nothing returns nothing
         call SetBuildUnit( 15, WISP             )
         call basics(15)//(  6, ARCHER           )
                        //(  1, HUNTRESS         )
+        call SetBuildUnit(  1, DEN_OF_WONDERS   )
         call SetBuildUnit(  1, TREE_AGES        )
         call BasicExpansion( c_mines < 2, TREE_LIFE )
 
@@ -815,13 +849,13 @@ function build_sequence takes nothing returns nothing
         call SetBuildUnit(  4, MOON_WELL        )
 
         if c_tree_ages_done > 0 and MeleeDifficulty() != MELEE_NEWBIE then
-            call SetBuildUnit(  1, hero_id2     )
+            call build_hero_fix(GetUnitCount(hero_id2), b_hero2_done, hero_id2, 2)
         endif
 
         return
     endif
 
-    if c_tree_life_done > 0 then 
+    if c_tree_life_done > 0 then
         set wisps = 6 - GetWood() / 200
         if wisps < 3 then
             set wisps = 3
@@ -849,7 +883,7 @@ function build_sequence takes nothing returns nothing
 
     // get enough moon wells to cover food need
     //
-    if c_food_used + 6 > c_food_made then
+    if c_food_used + 6 > c_food_made and c_food_made < c_food_max then
         call SetBuildUnit( c_moon_well_done + 1, MOON_WELL )
     endif
 
@@ -865,30 +899,61 @@ function build_sequence takes nothing returns nothing
     // recover heroes for basic defense
     //
     if c_altar_done >= 1 then
-        if b_hero1_done then
-            if b_hero2_done then
-                if b_hero3_done or c_tree_etern_done >= 1  then
-                    call SetBuildUnit( 1, hero_id3 )
-                    if b_hero4_done and GetUnitCount(hero_id4) == 0 then
-                        call SetBuildUnit( 1, hero_id4 )
-                    endif
+        if c_hero1_done > 0 then
+            if c_hero2_done > 0 then
+                if b_hero3_done or c_tree_etern_done >= 1 then
+                    call build_hero_fix(GetUnitCount(hero_id3), b_hero3_done, hero_id3, 3)
+                endif
+                if b_hero4_done then
+                    call build_hero_fix(GetUnitCount(hero_id4), b_hero4_done, hero_id4, 4)
                 endif
             else
-                call SetBuildUnit( 1, hero_id2 )
+                call build_hero_fix(GetUnitCount(hero_id2), b_hero2_done, hero_id2, 2)
             endif
         else
-            call SetBuildUnit( 1, hero_id  )
+            call build_hero_fix(GetUnitCount(hero_id), b_hero1_done, hero_id, 1)
         endif
     else
         call SetBuildUnit( 1, ELF_ALTAR )
     endif
-    if GetUnitCount(TREE_LIFE) < 1 then
-        call SetBuildUnit( 1, TREE_LIFE   )
-    endif
-    if GetUnitCountDone(TREE_LIFE) > 0 and GetUnitCount(TREE_AGES) < 1 then
+    if TownCount(TREE_AGES) < 1 and GetUnitCountDone(TREE_LIFE) > 0 then
         call SetBuildUnit( 1, TREE_AGES   )
     endif
-    call SetBuildUnit( 1, ANCIENT_WAR   )
+    call BuildFactory( ANCIENT_WAR   )
+
+    // the primary melee force is the mountain giant
+    //
+   set primary_melee = c_lore_done >= 1 and c_wonders_done >= 1 and c_tree_ages_done >= 1
+    if primary_melee then
+        call SetBuildUnit( 1, MOUNTAIN_GIANT )
+
+    // the backup melee force is the huntress
+    //
+    endif
+    if c_hunt_hall_done > 0 and c_war_done > 0 then
+        call SetBuildUnit( 3, HUNTRESS      )
+    endif
+
+    // the primary ranged force is the dryad
+    //
+    if c_lore_done >= 1 then
+        call SetBuildUnit( 2, DRYAD )
+
+    // the backup ranged force is the archer
+    //
+    elseif c_war_done > 0 then
+        call SetBuildUnit( 3, ARCHER        )
+    endif
+
+    // need siege to take out enemy towns and expansions
+    //
+    if b_acid_breath and c_roost_done >= 1 then
+        call SetBuildUnit( 2, CHIMAERA )
+    endif
+    if c_war_done > 0 and c_mtn_giant < 1 and c_hunt_hall_done > 0 then
+        call SetBuildUnit( 2, BALLISTA )
+    endif
+
     call SetBuildUnit( 1, HUNTERS_HALL  )
     call SetBuildUnit( 1, DEN_OF_WONDERS )
     if c_tree_ages_done > 0 then
@@ -900,38 +965,6 @@ function build_sequence takes nothing returns nothing
     endif
     if GetUnitCountDone(TREE_ETERNITY) > 0 then
         call SetBuildUnit(  1, CHIMAERA_ROOST   )
-    endif
-    // the primary melee force is the mountain giant
-    //
-    set primary_melee = c_lore_done >= 1 and c_wonders_done >= 1 and c_tree_ages_done >= 1
-    if primary_melee then
-        call SetBuildNext( 1, MOUNTAIN_GIANT )
-
-    // the backup melee force is the huntress
-    //
-    else
-        if c_hunt_hall_done > 0 and c_war_done > 0 then
-            call SetBuildNext( 3, HUNTRESS      )
-        endif
-    endif
-
-    // the primary ranged force is the dryad
-    //
-    if c_lore_done >= 1 then
-        call SetBuildUnit( 2, DRYAD )
-
-    // the backup ranged force is the archer
-    //
-    else
-        call SetBuildUnit( 3, ARCHER        )
-    endif
-
-    // need siege to take out enemy towns and expansions
-    //
-    if b_acid_breath and c_roost_done >= 1 then
-        call SetBuildUnit( 2, CHIMAERA )
-    elseif c_war_done > 0 and c_mtn_giant < 1 and c_hunt_hall_done > 0 then
-        call SetBuildUnit( 2, BALLISTA )
     endif
 
     // if we have enough gold then advance on the tech tree
@@ -958,7 +991,7 @@ function build_sequence takes nothing returns nothing
     call GuardSecondary( 1, 1, ANCIENT_PROTECT )
     call GuardSecondary( 1, 2, ANCIENT_PROTECT )
     call GuardSecondary( 1, 2, MOON_WELL )
-    call MeleeTownHall( 1, DEN_OF_WONDERS )
+    call GuardSecondary( 1, 1, DEN_OF_WONDERS )
     if c_food_used >= UPKEEP_TIER2 - 10 and c_gold < 2000 then
         return
     endif
@@ -966,20 +999,20 @@ function build_sequence takes nothing returns nothing
     // build units from whatever buildings we already have
     //
     if primary_melee then
-        call SetBuildNext( 3, MOUNTAIN_GIANT )
+        call SetBuildUnit( 3, MOUNTAIN_GIANT )
     elseif c_hunt_hall_done > 0 and c_war_done > 0 then
-        call SetBuildNext( 7, HUNTRESS )
+        call SetBuildUnit( 7, HUNTRESS )
     endif
 
     if c_lore_done >= 1 then
         call SetBuildNext( 4, DRYAD )
-    else
-        call SetBuildNext( 6, ARCHER )
+    elseif c_war_done > 0 then
+        call SetBuildUnit( 6, ARCHER )
     endif
 
     if c_tree_ages_done >= 1 then
         if c_lore_done >= 1 then
-            call SetBuildUnit( 1, DRUID_CLAW )
+            call SetBuildUnit( 3, DRUID_CLAW )
         endif
     endif
 
@@ -988,7 +1021,7 @@ function build_sequence takes nothing returns nothing
             call SetBuildUnit( 1, FAERIE_DRAGON )
         endif
 
-        call SetBuildUnit( 1, DRUID_TALON )
+        call SetBuildNext( 2, DRUID_TALON )
         call SetBuildUnit( 1, HIPPO )
     endif
     if c_archer > 3 and c_hippo_done > 3 then
@@ -1005,12 +1038,13 @@ function build_sequence takes nothing returns nothing
     if c_food_used >= 60 and c_zeps < 3 then
         call GetZeppelin()
     endif
-    if c_food_made > 100 and c_food_made - c_food_used < 4 then  // can build more food
+    if c_food_made - c_food_used < 4 and c_food_made < c_food_max + 30 then  // can build more food
         call SetBuildUnit( c_moon_well + 1, MOON_WELL )
     endif
     if c_wonders_done > 0 and (shop == null or not UnitAlive(shop)) then
         call SetShop()
     endif
+    call Buy_Item('spre', false,c_tree_etern_done > 0)
 endfunction
 
 //--------------------------------------------------------------------------------------------------
@@ -1074,14 +1108,16 @@ function MineCheck takes nothing returns nothing
     local unit m2 = null
     local unit h1 = null
     local unit h2 = null
+    local player p = null
     local integer i = 0
     local integer c = 0
-    call GroupEnumUnitsInRangeOfLoc(g, homeloc, 1800, null)
+    call GroupEnumUnitsInRangeOfLoc(g, homeloc, 2200, null)
     loop
       set u = FirstOfGroup(g)
       exitwhen u == null
       if UnitAlive(u) and not IsUnitHidden(u) then
-        if GetUnitTypeId(u) == 'egol' and GetOwningPlayer(u) == ai_player then
+        set p = GetOwningPlayer(u)
+        if GetUnitTypeId(u) == 'egol' and p == ai_player then
           if c < 3 then  //prevent all peon harvest mine , not peon harvest wood
             call HarvestMineFix(u)
           endif
@@ -1093,24 +1129,24 @@ function MineCheck takes nothing returns nothing
           elseif m2 == null then
             set m2 = u
           endif
-        elseif IsUnitType(u, UNIT_TYPE_TOWNHALL) and GetOwningPlayer(u) == ai_player then
-            if h1 == null then
-              set h1 = u
-            elseif h2 == null then
-              set h2 = u
-            endif
+        elseif IsUnitType(u, UNIT_TYPE_TOWNHALL) and p == ai_player then
+          if h1 == null then
+            set h1 = u
+          elseif h2 == null then
+            set h2 = u
+          endif
         endif
       endif
       call GroupRemoveUnit(g, u)
     endloop
     set HarvestFix = c + i > 0  // home_location no mine
     if GetRandomInt(0,2) == 1 and not TownThreatened() then
-        if c < 1 and i > 0 and h1 != null and m1 != null and GetUnitTypeId(h1) != OrderId("entangle") then
-            call IssueTargetOrder(h1, "entangle", m1)
-        endif
-        if c < 2 and i > 1 and h2 != null and m2 != null and GetUnitTypeId(h2) != OrderId("entangle") then
-            call IssueTargetOrder(h2, "entangle", m2)
-        endif
+      if c < 1 and i > 0 and h1 != null and m1 != null and GetUnitTypeId(h1) != OrderId("entangle") then
+        call IssueTargetOrder(h1, "entangle", m1)
+      endif
+      if c < 2 and i > 1 and h2 != null and m2 != null and GetUnitTypeId(h2) != OrderId("entangle") then
+        call IssueTargetOrder(h2, "entangle", m2)
+      endif
     endif
     call DestroyGroup(g)
     set g = null
@@ -1119,6 +1155,56 @@ function MineCheck takes nothing returns nothing
     set h1 = null
     set h2 = null
     set u = null
+    set p = null
+endfunction
+
+function TreeEntangleFix takes unit tree, group sg returns group
+    local group g = CreateGroup()
+    local unit u = null
+    local unit u_gold = null
+    local integer e_c = 0
+    local integer id = 0
+    call GroupEnumUnitsInRange(g, GetUnitX(tree), GetUnitY(tree), 1000, null)
+    call GroupRemoveUnit(g, tree)
+    loop
+      set u = FirstOfGroup(g)
+      exitwhen u == null
+      if UnitAlive(u) and not IsUnitHidden(u) then
+        set id = GetUnitTypeId(u)
+        if GetOwningPlayer(u) == ai_player then
+          if id == 'egol' then
+            set e_c = e_c + 1
+          endif
+          call GroupRemoveUnit(sg, u)
+        elseif id == 'ngol' then
+          set u_gold = u
+        endif
+      endif
+      call GroupRemoveUnit(g, u)
+    endloop
+    call DestroyGroup(g)
+    set g = null
+    if e_c == 0 and u_gold != null then  // if have mine , don't know which one to control , afraid destroying existing mine
+      call IssueTargetOrder(tree, "entangle", u_gold)
+    endif
+    set u_gold = null
+    return sg
+endfunction
+
+function TreeEntangleCheck takes nothing returns nothing
+    local group g = CreateGroup()
+    local unit u = null
+    call GroupEnumUnitsOfPlayer(g, ai_player, null)
+    loop
+      set u = FirstOfGroup(g)
+      exitwhen u == null
+      if IsUnitType(u, UNIT_TYPE_TOWNHALL) and UnitAlive(u) and not IsUnitHidden(u) then
+        set g = TreeEntangleFix(u, g)
+      endif
+      call GroupRemoveUnit(g, u)
+    endloop
+    call DestroyGroup(g)
+    set g = null
 endfunction
 
 function InitLaboratory takes nothing returns nothing
@@ -1145,7 +1231,7 @@ endfunction
 
 function BuyShredder takes integer c returns nothing
     local integer i = 0
-    if GetWood() > 200 and GetGold() > 800 and FoodSpace() > 5 and GetUnitCountDone('ngir') < 1 and c > GetRandomInt(0, 4) then
+    if GetWood() > 200 and c_gold > 800 and c_food_made - c_food_used > 5 and GetUnitCountDone('ngir') < 1 and c > GetRandomInt(0, 4) then
       loop
         exitwhen laboratory[i] == null or GetUnitCountDone('ngir') > 0
         if IsVisibleToPlayer(GetUnitX(laboratory[i]), GetUnitY(laboratory[i]), ai_player) then
@@ -1167,15 +1253,15 @@ function peon_assignment takes nothing returns nothing
             if c == 0 then
                 call MineCheck()
             endif
-            set c = c + 1
-            if c > 6 then
-                set c = 0
-            endif
         else
             call HarvestGold(T,4)
             call HarvestWood(0,1)
             call HarvestGold(T,1)
             call HarvestWood(0,2)
+        endif
+        set c = c + 1
+        if c > 6 then
+            set c = 0
         endif
         if c_mines_done > 1 then
             call HarvestGold(T+1,5)
@@ -1184,6 +1270,9 @@ function peon_assignment takes nothing returns nothing
 
         call build_sequence()
         call BuyShredder(c)
+        if not HarvestFix and c == 0 and c_tree_life_done > GetUnitCount('egol') then  // mabe some tree no entangle goldmine
+            call TreeEntangleCheck()
+        endif
         call Sleep(GetRandomInt(1,3))
     endloop
 endfunction
