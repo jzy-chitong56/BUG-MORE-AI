@@ -26,6 +26,7 @@ globals
     integer c_crypt_done        = 0
     integer c_food_made         = 0
     integer c_food_used         = 0
+    integer c_food_max          = GetPlayerState(Player(GetAiPlayer()), PLAYER_STATE_FOOD_CAP_CEILING)
     integer c_garg              = 0
     integer c_garg_done         = 0
     integer c_ghoul_done        = 0
@@ -62,7 +63,8 @@ globals
     integer c_zif_done          = 0
     integer hero_id4            = 0
     integer array skills4
-    boolean HarvestFix          = true
+    boolean HarvestFix          = false
+    boolean BuildHelp          = false
     unit array laboratory
     unit array herounit
     unit shop = null
@@ -356,6 +358,7 @@ function setup_force takes nothing returns nothing
     call SetMeleeGroup( GARGOYLE    )
     call SetMeleeGroup( FROST_WYRM  )
     call SetMeleeGroup( OBS_STATUE  )
+    call SetMeleeGroup( SHADE       )
 
     if c_sphinx_done >= 1 then
         call SetMeleeGroup( BLK_SPHINX  )
@@ -506,7 +509,7 @@ function init_vars takes nothing returns nothing
     set c_banshee_done      = GetUnitCountDone(BANSHEE)
     set c_boneyard_done     = GetUnitCountDone(BONEYARD)
     set c_citadel_done      = GetUnitCountDone(NECROPOLIS_3)
-    set c_crypt_done        = GetUnitCount(CRYPT)
+    set c_crypt_done        = GetUnitCountDone(CRYPT)
     set c_fiend             = GetUnitCount(CRYPT_FIEND)
     set c_fiend_done        = GetUnitCountDone(CRYPT_FIEND) + GetUnitCountDone('ucrm')
     set c_garg              = TownCount(GARGOYLE)
@@ -548,6 +551,9 @@ function init_vars takes nothing returns nothing
     set c_zif_done          = GetUnitCountDone(ZIGGURAT_FROST)
     set c_food_made         = GetUnitCountDone(NECROPOLIS_1) * GetFoodMade(NECROPOLIS_1) + GetUnitCountDone(NECROPOLIS_2) * GetFoodMade(NECROPOLIS_2) + GetUnitCountDone(NECROPOLIS_3) * GetFoodMade(NECROPOLIS_3) + GetUnitCountDone(ZIGGURAT_1) * GetFoodMade(ZIGGURAT_1) + c_spirit_done * GetFoodMade(ZIGGURAT_2) + c_zif_done * GetFoodMade(ZIGGURAT_FROST)
     set c_food_used         = FoodUsed()
+    if c_food_made > c_food_max then
+      set c_food_made = c_food_max
+    endif
 
     set b_hero1_done        = b_hero1_done or GetUnitCountDone(hero_id)  >= 1
     set b_hero2_done        = b_hero2_done or GetUnitCountDone(hero_id2) >= 1
@@ -606,14 +612,14 @@ function SetShop takes nothing returns nothing
     set u = null
 endfunction
 
-function Buy_Item takes integer item_id, boolean stack returns nothing
+function Buy_Item takes integer item_id, boolean stack, boolean buyneed returns nothing
     local integer i = 1
     local integer c = 0
     local integer sum = 0
     local unit u = null
     local item t = null
     local location l = null
-    if GetGold() > 800 and not TownThreatened() and not CaptainInCombat(false) and shop != null and UnitAlive(shop) then
+    if buyneed and c_gold > 800 and not TownThreatened() and not CaptainInCombat(false) and shop != null and UnitAlive(shop) then
         loop
             exitwhen i > 4
             if herounit[i] != null and UnitAlive(herounit[i]) then
@@ -622,9 +628,13 @@ function Buy_Item takes integer item_id, boolean stack returns nothing
                     set t = UnitItemInSlot(herounit[i], c)
                     if t == null then
                         set sum = sum + 1
-                    elseif GetItemTypeId(t) == item_id and not stack then
-                        set sum = - 1
-                        set c = 5
+                    elseif GetItemTypeId(t) == item_id then
+                        if stack then
+                            set sum = sum + 1
+                        else
+                            set sum = - 1
+                            set c = 5
+                        endif
                     endif
                     set c = c + 1
                 endloop
@@ -639,9 +649,9 @@ function Buy_Item takes integer item_id, boolean stack returns nothing
         endloop
         if u != null then
             set l = GetUnitLoc(u)
-            if Distance_BetweenLoc_dk(GetUnitLoc(shop), l) < 350 then
+            if Distance_BetweenLoc_dk(GetUnitLoc(shop), l) < 550 then
                 call IssueTargetOrderById(shop, 'Aall', u)
-                call IssueTargetOrderById(shop, 'Aneu', u)
+                call Sleep(GetRandomInt(2,3))
                 call IssueNeutralImmediateOrderById(ai_player, shop, item_id)
             endif
             call RemoveLocation(l)
@@ -666,24 +676,23 @@ endfunction
 //--------------------------------------------------------------------------------------------------
 function do_upgrades takes nothing returns nothing
 
-    if c_crypt_done > 0 and c_fiend >= 1 and c_halls_done > 0 and c_grave_done > 0 then
-        call SetBuildUpgr( 1, UPG_BURROWING )
+    if c_crypt_done > 0 and c_fiend > 0 and c_halls_done > 0 and c_grave_done > 0 then
         call SetBuildUpgr( 1, UPG_FIEND_WEB)
+        call SetBuildUpgr( 1, UPG_BURROWING )
     endif
 
     if c_crypt_done > 0 and c_abom + c_ghoul_done > 4 then
         call SetBuildUpgr( 1, UPG_CANNIBALIZE)
     endif
 
-    if c_crypt_done > 0 and c_grave_done >= 1 and c_citadel_done >= 1 then
-        if c_garg >= 1 then
+    if c_crypt_done > 0 and c_grave_done > 0 and c_citadel_done > 0 then
+        if c_garg > 0 then
             call SetBuildUpgr( 1, UPG_STONE_FORM  )
         endif
-
         call SetBuildUpgr( 1, UPG_GHOUL_FRENZY  )
     endif
 
-    if c_boneyard_done >= 1 then
+    if c_boneyard_done > 0 then
         call SetBuildUpgr( 1, UPG_WYRM_BREATH )
     endif
 
@@ -711,19 +720,19 @@ function do_upgrades takes nothing returns nothing
         endif
     endif
 
-    if c_grave_done >= 1 then
+    if c_grave_done > 0 then
         call SetBuildUpgr( 1, UPG_CR_ATTACK     )
         call SetBuildUpgr( 1, UPG_CR_ARMOR      )
         call SetBuildUpgr( 1, UPG_UNHOLY_STR    )
         call SetBuildUpgr( 1, UPG_UNHOLY_ARMOR  )
 
-        if c_halls_done >= 1 then
+        if c_halls_done > 0 then
             call SetBuildUpgr( 2, UPG_CR_ATTACK     )
             call SetBuildUpgr( 2, UPG_CR_ARMOR      )
             call SetBuildUpgr( 2, UPG_UNHOLY_STR    )
             call SetBuildUpgr( 2, UPG_UNHOLY_ARMOR  )
 
-            if c_citadel_done >= 1 then
+            if c_citadel_done > 0 then
                 call SetBuildUpgr( 3, UPG_CR_ATTACK     )
                 call SetBuildUpgr( 3, UPG_CR_ARMOR      )
                 call SetBuildUpgr( 3, UPG_UNHOLY_STR    )
@@ -732,16 +741,16 @@ function do_upgrades takes nothing returns nothing
         endif
     endif
 
-    if c_slaughter_done >= 1 and c_citadel_done >= 1 then
-        if c_abom >= 1 then
+    if c_slaughter_done > 0 and c_citadel_done > 0 then
+        if c_abom > 0 then
             call SetBuildUpgr( 1, UPG_PLAGUE )
         endif
-        if c_statue >= 1 and c_tomb_done >= 1 then
+        if c_statue > 0 and c_tomb_done > 0 then
             call SetBuildUpgr( 1, UPG_BLK_SPHINX )
         endif
     endif
 
-//    if c_slaughter_done >= 1 and c_citadel_done >= 1 and c_wagon >= 1 and c_necro >= 1 then
+//    if c_slaughter_done >0  and c_citadel_done > 0 and c_wagon > 0 and c_necro > 0 then
 //        call SetBuildUpgr( 1, UPG_EXHUME )
 //    endif
 endfunction
@@ -749,26 +758,68 @@ endfunction
 //--------------------------------------------------------------------------------------------------
 //  build_sequence
 //--------------------------------------------------------------------------------------------------
+function build_hero_fix takes integer heronum, boolean herodone, integer heroid, integer num returns nothing
+    local integer i = 0
+    if heronum < 1 and c_altar_done > 0 then
+      if herodone then  // resurrection no need wood, only can forcibly fix
+        set i = GetUnitGoldCost(heroid)
+        if herounit[num] != null and c_food_made - c_food_used >= 5 then
+          set i = Min(i * 4, Min(i * R2I(0.4 + 0.1 * (GetHeroLevel(herounit[num]) - 1)), 700))
+          if c_gold >= i then
+            set total_gold = Max(0, total_gold - i) // compensation
+            call SetProduce(1,heroid,-1)
+            return
+          endif
+        endif
+        if c_gold >= GetUnitGoldCost(heroid) and GetWood() >= GetUnitWoodCost(heroid) then  // Prevent StartUnit function interruptions
+          call SetBuildUnit(1, heroid)  // only can add sequence
+        endif
+      else  // build
+        if num == 1 and c_food_made - c_food_used >= 5 then  // build first hero no need gold and wood -- just melee map , cannot custom map
+          call SetProduce(1,heroid,-1)
+          return
+        endif
+        call SetBuildUnit(1, heroid)  // only can add sequence
+      endif
+    endif
+endfunction
+
 function build_sequence takes nothing returns nothing
     local integer WG2
 
     call InitBuildArray()
+    if (BuildHelp or TownThreatened()) and c_neclis_done > 0 and c_acolyte > 4 then
+      call SetBuildUnit( 6, ACOLYTE )
+    endif
+    if BuildHelp then
+      call build_hero_fix(GetUnitCount(hero_id), b_hero1_done, hero_id, 1)
+      if c_zig > 0 then
+        call SetBuildUnit( 2, CRYPT   )
+      endif
+      if c_gold > 500 and c_zig > 0 then
+        call SetBuildUnit( 2, NECROPOLIS_1 )
+      endif
+      set WG2 = GetUnitCount(GHOUL)
+      if c_crypt_done > 0 and WG2 < 10 - c_halls_done * 2 then
+        call SetBuildNext( WG2 + 1, GHOUL   )
+      endif
+    endif
 
     if basic_opening then
         call MeleeTownHall( 0, NECROPOLIS_1 )
 
-        call SetBuildUnit(  1, ACOLYTE          )
+        call SetBuildUnit(  2, ACOLYTE          )
         call undead_mine(0)
-        //call SetBuildUnit(  1, UNDEAD_MINE      )
-        call SetBuildNext(  5, ACOLYTE          )
-        call SetBuildUnit(  1, CRYPT            )
-        call SetBuildUnit(  1, GHOUL            )
-        call SetBuildUnit(  1, ZIGGURAT_1       )
+        call SetBuildUnit(  1, UNDEAD_MINE      )
         call SetBuildUnit(  1, UNDEAD_ALTAR     )
+        call SetBuildNext(  5, ACOLYTE          )
+        call SetBuildUnit(  1, ZIGGURAT_1       )
+        call SetBuildUnit(  1, GHOUL            )
+        call SetBuildUnit(  1, CRYPT            )
         call SetBuildUnit(  2, GHOUL            )
         call SetBuildUnit(  2, ZIGGURAT_1       )
+        call build_hero_fix(GetUnitCount(hero_id), b_hero1_done, hero_id, 1)
         call SetBuildUnit(  3, GHOUL            )
-        call SetBuildUnit(  1, hero_id          )
         call SetBuildUnit(  6, GHOUL            )
         call SetBuildUpgr(  1, UPG_CANNIBALIZE  )
         call SetBuildUnit(  1, GRAVEYARD        )
@@ -791,7 +842,7 @@ function build_sequence takes nothing returns nothing
         call BasicExpansion( c_mines < 2, UNDEAD_MINE )
 
         if c_halls_done > 0 and MeleeDifficulty() != MELEE_NEWBIE then
-            call SetBuildUnit(  1, hero_id2     )
+            call build_hero_fix(GetUnitCount(hero_id2), b_hero2_done, hero_id2, 2)
         endif
         call SetBuildUpgr(  1, UPG_UNHOLY_STR    )
         call SetBuildUpgr(  1, UPG_UNHOLY_ARMOR  )
@@ -817,37 +868,42 @@ function build_sequence takes nothing returns nothing
     // need an acolyte or nothing will get built
     //
     if c_neclis_done >= 1 then
-        call SetBuildUnit( 1, ACOLYTE )
+        call SetBuildUnit( 2, ACOLYTE )
     endif
 
     // keep producing mines and acolytes to get gold
     //
     call undead_mine(0)
     call undead_mine(1)
-
-    if c_undead_mines >= 2 then
-        call SetBuildNext( 10, ACOLYTE )
-    elseif c_undead_mines == 1 then
-        call SetBuildNext(  5, ACOLYTE )
+    call MeleeTownHall( 0, NECROPOLIS_1 )
+    if c_neclis_done > 0 then
+        if c_undead_mines >= 2 then
+            call SetBuildNext( 10, ACOLYTE )
+        elseif c_undead_mines == 1 then
+            call SetBuildNext(  5, ACOLYTE )
+        endif
     endif
 
     // ghouls collect lumber
     //
     set WG2 = Max(0,10 - c_wood / 120)
-    if WG2 > 0 then
-        call SetBuildUnit(   1, CRYPT   )
-        call SetBuildNext( WG2, GHOUL   )
+    if c_crypt_done > 0 then
+        if WG2 > 0 then
+            call SetBuildUnit( WG2, GHOUL   )
+        else
+            call SetBuildUnit( 1, GHOUL   )
+        endif
     endif
 
     // get enough burrows to handle current food demand
     //
-    if c_food_used + 6 >= c_food_made then
+    if c_food_used + 6 >= c_food_made and c_food_made < c_food_max then
         call SetBuildUnit(  c_zig_done + 1, ZIGGURAT_1 )
     endif
 
     // if we have low gold in our mines then we need to expand
     //
-    if c_gold_owned < 2000 or (c_mines < 2 and c_acolyte > 5) then
+    if c_gold_owned < 2000 then
         call BasicExpansion( c_mines < 2, UNDEAD_MINE )
 
         call GuardSecondary( 1, 2, ZIGGURAT_1 )
@@ -861,19 +917,19 @@ function build_sequence takes nothing returns nothing
     // always rebuild heroes for defense
     //
     if c_altar_done >= 1 then
-        if b_hero1_done then
-            if b_hero2_done then
+        if c_hero1_done > 0 then
+            if c_hero2_done > 0 then
                 if b_hero3_done or c_citadel_done >= 1 then
-                    call SetBuildUnit( 1, hero_id3 )
-                    if b_hero4_done and GetUnitCount(hero_id4) == 0 then
-                        call SetBuildUnit( 1, hero_id4 )
-                    endif
+                    call build_hero_fix(GetUnitCount(hero_id3), b_hero3_done, hero_id3, 3)
+                endif
+                if b_hero4_done then
+                    call build_hero_fix(GetUnitCount(hero_id4), b_hero4_done, hero_id4, 4)
                 endif
             else
-                call SetBuildUnit( 1, hero_id2 )
+                call build_hero_fix(GetUnitCount(hero_id2), b_hero2_done, hero_id2, 2)
             endif
         else
-            call SetBuildUnit( 1, hero_id )
+            call build_hero_fix(GetUnitCount(hero_id), b_hero1_done, hero_id, 1)
         endif
     else
         call SetBuildUnit( 1, UNDEAD_ALTAR )
@@ -881,13 +937,42 @@ function build_sequence takes nothing returns nothing
 
     // minimum melee defense
     //
-    if GetUnitCount(NECROPOLIS_1) < 1 then
-        call SetBuildUnit( 1, NECROPOLIS_1 )
-    endif
-    if GetUnitCount(NECROPOLIS_2) < 1 and GetUnitCountDone(NECROPOLIS_1) > 0 then
+    if TownCount(NECROPOLIS_2) < 1 and GetUnitCountDone(NECROPOLIS_1) > 0 then
         call SetBuildUnit( 1, NECROPOLIS_2 )
     endif
-    call SetBuildUnit( 1, CRYPT             )
+    call BuildFactory( CRYPT            )
+
+    if c_slaughter_done >= 1 and c_citadel_done >= 1 then
+        call SetBuildUnit( 4, ABOMINATION )
+    elseif c_crypt_done > 0 then
+        call SetBuildUnit( WG2+6, GHOUL )
+    endif
+    //call SetBuildUnit( 1, SHADE )
+
+    // minimum ranged/air defense
+    //
+    if c_crypt_done > 0 and c_grave_done > 0 then
+        if c_halls_done >= 1 then
+            call SetBuildUnit( 5, GARGOYLE      )
+        endif
+        call SetBuildUnit( 5, CRYPT_FIEND   )
+    endif
+
+    // siege attackers
+    //
+    if c_boneyard_done >= 1 then
+        call SetBuildUnit( 2, FROST_WYRM )
+
+    endif
+    if c_slaughter_done >= 1 then
+        call SetBuildUnit( 2, MEAT_WAGON )
+    //else
+        //call MeleeTownHall( 0, NECROPOLIS_1 )
+        //call SetBuildUnit ( 1, NECROPOLIS_1 )
+        //call SetBuildUnit( 1, NECROPOLIS_2      )
+        //call SetBuildUnit( 2, MEAT_WAGON        )
+    endif
+
     call SetBuildUnit( 1, GRAVEYARD         )
     call SetBuildUnit( 1, TOMB_OF_RELICS   )
     if c_halls_done > 0 then
@@ -897,40 +982,9 @@ function build_sequence takes nothing returns nothing
     if b_hero2_done and GetUnitCount(NECROPOLIS_3) < 1 and GetUnitCountDone(NECROPOLIS_2) > 0 then
         call SetBuildUnit( 1, NECROPOLIS_3      )
     endif
-    if GetUnitCountDone(NECROPOLIS_3) > 0 then
+    if c_citadel_done > 0 then
         call SetBuildUnit( 1, SAC_PIT           )
         call SetBuildUnit( 1, BONEYARD          )
-    endif
-    if c_slaughter_done >= 1 and c_citadel_done >= 1 then
-        call SetBuildNext( 2, ABOMINATION )
-    else
-        call SetBuildUnit(     1, CRYPT )
-        call SetBuildNext( WG2+6, GHOUL )
-    endif
-
-    // minimum ranged/air defense
-    //
-    if c_crypt_done > 0 then
-        if c_halls_done >= 1 and c_grave_done > 0 then
-            call SetBuildNext( 4, GARGOYLE )
-            call SetBuildNext( 2, CRYPT_FIEND   )
-        elseif c_grave_done > 0 then
-            call SetBuildNext( 3, CRYPT_FIEND   )
-        endif
-    endif
-
-    // siege attackers
-    //
-    if c_boneyard_done >= 1 then
-        call SetBuildNext( 2, FROST_WYRM )
-
-    elseif c_slaughter_done >= 1 then
-        call SetBuildNext( 2, MEAT_WAGON )
-    //else
-        //call MeleeTownHall( 0, NECROPOLIS_1 )
-        //call SetBuildUnit ( 1, NECROPOLIS_1 )
-        //call SetBuildUnit( 1, NECROPOLIS_2      )
-        //call SetBuildNext( 2, MEAT_WAGON        )
     endif
 
     // if we have a lot of gold then advance the tech tree
@@ -946,12 +1000,13 @@ function build_sequence takes nothing returns nothing
         //call SetBuildUnit( 1, NECROPOLIS_2      )
 
         //call SetBuildNext( Min(c_neclis_done,c_halls_done+1), NECROPOLIS_2 )
-        call SetBuildNext( Min(c_zig_done,c_spirit_done+1),   ZIGGURAT_2   )
+        if c_zig_done - c_spirit - c_zif > 0 and c_zif >= c_mines then
+            call SetBuildNext( Min(c_zig_done,c_spirit_done+1),   ZIGGURAT_2   )
+        endif
 
         call do_upgrades()
 
         if c_gold > 2000 then
-            call BuildFactory( CRYPT            )
             call BuildFactory( DAMNED_TEMPLE    )
             call BuildFactory( SLAUGHTERHOUSE   )
             call BuildFactory( BONEYARD         )
@@ -979,8 +1034,10 @@ function build_sequence takes nothing returns nothing
     endif
 
     if c_temple_done >= 1 then
-        call SetBuildUnit( 4, NECRO     )
+        call SetBuildUnit( 2, NECRO     )
         call SetBuildUnit( 2, BANSHEE   )
+        call SetBuildNext( 1, NECRO     )
+        call SetBuildNext( 1, BANSHEE   )
     endif
 
     if c_statue_done >= 1 and b_sphinx_ok then
@@ -1077,15 +1134,17 @@ function MineCheck takes nothing returns nothing
     local unit m = null
     local unit um = null
     local unit w = null
+    local player p = null
     local integer i = 0
     local integer c = 0
-    local integer x = 0
-    call GroupEnumUnitsInRangeOfLoc(g, homeloc, 1800, null)
+    call GroupEnumUnitsInRangeOfLoc(g, homeloc, 2200, null)
+    set BuildHelp = false
     loop
       set u = FirstOfGroup(g)
       exitwhen u == null
       if UnitAlive(u) and not IsUnitHidden(u) then
-        if GetUnitTypeId(u) == 'ugol' and GetOwningPlayer(u) == ai_player then
+        set p = GetOwningPlayer(u)
+        if GetUnitTypeId(u) == 'ugol' and p == ai_player then
           call HarvestMineFix(u)
           if um == null then
             set um = u
@@ -1096,26 +1155,29 @@ function MineCheck takes nothing returns nothing
           if m == null then
             set m = u
           endif
-        elseif GetOwningPlayer(u) == ai_player and IsUnitType(u, UNIT_TYPE_PEON) then
+        elseif p == ai_player and IsUnitType(u, UNIT_TYPE_PEON) then
           if w == null and (GetUnitCurrentOrder(u) == OrderId("harvest") or GetUnitCurrentOrder(u) == 0) then
             set w = u
           endif
           if GetUnitCurrentOrder(u) == 'ugol' then
             set c = c + 1
           endif
+        elseif IsPlayerEnemy(p, ai_player) then
+          set BuildHelp = true
         endif
       endif
       call GroupRemoveUnit(g, u)
     endloop
     set HarvestFix = i + c > 0  // home_location no mine
-    if (c == 0 or (GetResourceAmount(um) < 2000 and c < 2)) and i > 0 and w != null and m != null and GetUnitCurrentOrder(w) != 'ugol' and not TownThreatened() then
-       call IssueTargetOrderById(w, 'ugol', m)
+    if w != null and not TownThreatened() and (c == 0 or (GetResourceAmount(um) < 2000 and c < 2)) and i > 0 and m != null and GetUnitCurrentOrder(w) != 'ugol' then
+      call IssueTargetOrderById(w, 'ugol', m)
     endif
     call DestroyGroup(g)
     set g = null
     set m = null
     set um = null
     set w = null
+    set p = null
 endfunction
 
 function InitLaboratory takes nothing returns nothing
@@ -1142,7 +1204,7 @@ endfunction
 
 function BuyShredder takes nothing returns nothing
     local integer i = 0
-    if GetWood() > 200 and GetGold() > 800 and FoodSpace() > 5 and GetUnitCountDone('ngir') < 1 and 3 > GetRandomInt(0, 4) then
+    if GetWood() > 200 and c_gold > 800 and c_food_made - c_food_used > 5 and GetUnitCountDone('ngir') < 1 and 3 > GetRandomInt(0, 4) then
       loop
         exitwhen laboratory[i] == null or GetUnitCountDone('ngir') > 0
         if IsVisibleToPlayer(GetUnitX(laboratory[i]), GetUnitY(laboratory[i]), ai_player) then
