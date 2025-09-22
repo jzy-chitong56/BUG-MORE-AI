@@ -216,7 +216,7 @@ function CheckDefeated takes nothing returns nothing
   local integer gold = GetGold()
   local integer mines = GetMinesOwned()
   local integer agg = p_surrender[profile]
-  local group g = CreateGroup()
+  local group g = null
   local unit u = null
   local player p = null
   local real enemy_sum = 0
@@ -261,6 +261,7 @@ function CheckDefeated takes nothing returns nothing
   if town_threatened and most_threatened_town >= 0 and town_threat_army[most_threatened_town] >= 0 then
     set enemy_sum = army_strength[town_threat_army[most_threatened_town]]
   else
+    set g = CreateGroup()
     call GroupEnumUnitsInRange(g,GetLocationX(home_location),GetLocationY(home_location),front_base_distance,null)
     loop
       set u = FirstOfGroup(g)
@@ -271,9 +272,9 @@ function CheckDefeated takes nothing returns nothing
       endif
       call GroupRemoveUnit(g,u)
     endloop
+    call DestroyGroup(g)
+    set g = null
   endif
-  call DestroyGroup(g)
-  set g = null
 
   loop
     exitwhen i >= c_ally_total
@@ -380,6 +381,7 @@ function DetectDefeatJob takes nothing returns nothing
   local integer t = -1
   local player p = null
   local race r = GetPlayerRace(ai_player)
+  local string s = Int2Str(OVER_CONTROL)
   call DisplayToAllJobDebug("DETECT_DEFEAT Job Start")
   set no_ai_ally = true
   set humanPlayerAllys = false
@@ -398,7 +400,7 @@ function DetectDefeatJob takes nothing returns nothing
       endif
     elseif t < 0 and GetPlayerController(p) == MAP_CONTROL_USER and r == GetPlayerRace(p) and not over_control_state[GetPlayerId(p)] then  // one time check one ally
       set t = GetPlayerId(p)
-      if GetStoredBoolean(amaiCache, Int2Str(OVER_CONTROL), Int2Str(t)) then
+      if GetStoredBoolean(amaiCache, s, Int2Str(t)) then
         set over_control_state[t] = true  // other ally take control
         set t = -1
       endif
@@ -425,5 +427,6 @@ function DetectDefeatJob takes nothing returns nothing
   endif
   set p = null
   set r = null
+  set s = null
 endfunction
 #ENDIF

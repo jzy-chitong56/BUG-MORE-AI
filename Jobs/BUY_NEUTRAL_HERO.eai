@@ -16,7 +16,7 @@ function ResetBuyNeutralHero takes integer nn, integer id returns unit
   set neutral_sent[nn] = null
   set u = null
   set neutral_ordered[nn] = false
-  set AwakenHeroLock = 2
+  set AwakenHeroLock = 0
   set buy_time_large[nn] = -1
   set buy_time_small[nn] = -1
   return null
@@ -42,16 +42,12 @@ function BuyNeutralHero takes integer id returns nothing
   call DisplayToAllJobDebug("BUY_NEUTRAL_HERO JOB START")
 
   //call Trace("Get Tavern Hero Job")
-  if buy_type[id] == BT_HERO then
-    set nn = NEUTRAL_TAVERN
-    set tavern = nearest_neutral[nn]
-    set place_guarded = neutral_guarded[nn]
-  endif
   if TownCount(id) >= neutral_wanted[nn] or tavern == null or not neutral_available[nn] then
     set tavern = ResetBuyNeutralHero(nn, id)
     return
   endif
   if neutral_sent[nn] == null or not UnitAlive(neutral_sent[nn]) or GetOwningPlayer(neutral_sent[nn]) != ai_player or not IsStandardUnit(neutral_sent[nn]) then
+    set AwakenHeroLock = AwakenHeroLock + 1
     if neutral_sent[nn] != null then
       call GroupRemoveUnit(unit_buying_tavern, neutral_sent[nn])
     endif
@@ -85,7 +81,7 @@ function BuyNeutralHero takes integer id returns nothing
           call IssueImmediateOrder(neutral_sent[nn], "holdposition")  // stop will let panda cancel element clone
         endif
         call IssueNeutralImmediateOrderById(ai_player, tavern, old_id[id])
-        if AwakenHeroLock == 1 then  // try Resurrect all hero
+        if AwakenHeroLock > 0 then  // try Resurrect all hero
           call AwakenHero(tavern, 1)
           call AwakenHero(tavern, 2)
           call AwakenHero(tavern, 3)

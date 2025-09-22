@@ -22,6 +22,7 @@ function AncientExpansionCheck takes nothing returns nothing
 				set ancient_exp_loc = GetBuildLocationInDistanceFromLoc_d(old_id[racial_expansion], GetUnitLoc(not_taken_expansion), race_max_expa_mine_distance, true)
 				set ancient_exp_mine = not_taken_expansion
 				set ancient_expanding = true
+				set exp_time_count = ai_time
 				call TQAddJob(1, ANCIENT_EXPANSION, 0)
 			endif
 			//set u = null

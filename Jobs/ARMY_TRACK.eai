@@ -320,6 +320,7 @@ function UpdateTownThreat takes nothing returns nothing
     if i > 0 and ModuloInteger(i, 10) == 0 then
       call Sleep(0.01)  // This can take along time, but this could cause most threatened town to be wrong in other processes, so sleep so at least no other jobs can use this yet
     endif
+    set town_threat_army[i] = -1
     if GetPlayerSlotState(Player(town_owner[i])) == PLAYER_SLOT_STATE_PLAYING and GetPlayerStructureCount(Player(town_owner[i]), false) > 0 then
       call UpdateSpecificTownThreat(i)
     else
@@ -338,7 +339,6 @@ function UpdateTownThreat takes nothing returns nothing
       if max_value_town == i then
         set max_value_town = -1
       endif
-      set town_threat_army[i] = -1
     endif
     set i = i + 1
   endloop
@@ -352,10 +352,18 @@ function UpdateTownThreat takes nothing returns nothing
       endif
       set playerthreat = ApplyFleeStrengthModifier(distance_threat_mult * army_strength[main_army] / playerthreat, false) // Converts the players total strength into threat
     endif
+    set i = 0
+    loop
+      exitwhen i >= army_num
+      if IsPlayerAlly(Player(army_owner[i]), ai_player) then
+        set playerthreat = playerthreat + army_strength[i]
+      endif
+      set i = i + 1
+    endloop
     if most_threatened_town >= 0 and town_threat[most_threatened_town] > 0 then
       call Trace("ThreatenedTownThreat: " + Real2Str(town_threat[most_threatened_town]) + " AcceptedThreatLevel: " + Real2Str(accepted_threat_level))
     endif
-    if most_threatened_player_town >= 0 and town_threat[most_threatened_player_town] > 0 then
+    if most_threatened_player_town >= 0 and town_threat[most_threatened_player_town] > 0 and town_threat[most_threatened_player_town] <= playerthreat then
       call Trace("PlayerThreatenedTownThreat: " + Real2Str(town_threat[most_threatened_player_town]) + " AcceptedThreatLevel: " + Real2Str(accepted_threat_level))
     endif
     if most_threatened_player_town >= 0 and town_threat[most_threatened_player_town] > accepted_threat_level then //and town_threat[most_threatened_town] > (I2R(c_ally_total + 1) / c_enemy_total) * town_threat[most_threatened_enemy_town] then
@@ -370,7 +378,7 @@ function UpdateTownThreat takes nothing returns nothing
       endif
       set captain_home = town_loc[most_threatened_player_town]
       set captain_tp = town_can_tp[most_threatened_player_town]
-    elseif most_threatened_town >= 0 and town_threat[most_threatened_town] > accepted_threat_level * 1.05 then
+    elseif most_threatened_town >= 0 and town_threat[most_threatened_town] > accepted_threat_level * 1.05 and town_threat[most_threatened_town] <= playerthreat then
       set town_threatened = true
       set town_threat_count = 0
       set enemy_army = town_threat_army[most_threatened_town]
@@ -389,7 +397,6 @@ function UpdateTownThreat takes nothing returns nothing
         set town_threatened = false
         call SetCaptainHome(BOTH_CAPTAINS, GetLocationX(town_loc[most_threatened_player_town]), GetLocationY(town_loc[most_threatened_player_town]))
       endif
-      set most_threatened_town = most_threatened_player_town
       set captain_home = town_loc[most_threatened_player_town]
       set captain_tp = town_can_tp[most_threatened_player_town]
     elseif most_threatened_town >= 0 and town_threat[most_threatened_town] > 0 and town_threat[most_threatened_town] <= playerthreat then

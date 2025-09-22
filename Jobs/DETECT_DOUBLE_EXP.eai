@@ -85,20 +85,20 @@ function CheckDoubleExpansionsClaimedInArea takes real tx, real ty, boolean isBu
         if IsValidMineClaimed(u) then
           set claimedMines = claimedMines + 1
         endif
-        if p != Player(PLAYER_NEUTRAL_PASSIVE) then
+        if IsPlayerAlly(ai_player, p) then
           if p == ai_player then
             set double_own_present = true
-          elseif IsPlayerAlly(ai_player, p) then
+          elseif p != Player(PLAYER_NEUTRAL_PASSIVE) then
             set double_expansion_ally_present = true
             if GetPlayerController(p) == MAP_CONTROL_USER then
               set double_expansion_allyhuman_present = true
             endif
-          else
-            if double_expansion_target == null and not IsUnitHidden(u) then
-              set double_expansion_target = u
-            endif
-            set double_expansion_enemy_present = true
           endif
+        else
+          if double_expansion_target == null and not IsUnitHidden(u) then
+            set double_expansion_target = u
+          endif
+          set double_expansion_enemy_present = true
         endif
         if not IsUnitType(u, UNIT_TYPE_TOWNHALL) then
           set minecount = minecount + 1
@@ -214,7 +214,7 @@ function CheckDoubleExpansion takes nothing returns nothing
       endif
       if invisible_enemy_expansion then
         call Trace("Enemy invisible enemy detected on expansion")
-        if invisible_expansion == null then // Deal with one at a time
+        if invisible_expansion == null then  // Deal with one at a time
           set invisible_expansion = u
         endif
       elseif invisible_expansion == u then

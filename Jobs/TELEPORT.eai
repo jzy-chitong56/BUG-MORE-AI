@@ -16,10 +16,14 @@ function TeleportJob takes unit hu returns nothing
   if current_order >= 852008 and current_order <= 852013 then
     if GetItemTypeId(UnitItemInSlot(hu, current_order - 852008)) != old_id[tp_item] then
       set teleporting = false
+      call ClearCaptainTargets()
+      call TeleportCaptain(GetUnitX(hu), GetUnitY(hu))
       return
     endif
   elseif current_order != OrderId("massteleport") then
     set teleporting = false
+    call ClearCaptainTargets()
+    call TeleportCaptain(GetUnitX(hu), GetUnitY(hu))
     return
   endif
   set g = CreateGroup()

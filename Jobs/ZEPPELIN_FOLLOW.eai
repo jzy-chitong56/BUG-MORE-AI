@@ -8,41 +8,42 @@ function ZeppelinFollowJob takes nothing returns nothing
   local unit u = null
   local location heroloc = null
   call DisplayToAllJobDebug("ZEPPELIN_FOLLOW Start")
-  if GetUnitCountDone(old_id[neutral_zeppelin]) + GetUnitCountDone('uarb') > 0 then
-    set g = CreateGroup()
-    call GroupEnumUnitsOfPlayer(g, ai_player, null)
-    call GroupRemoveUnit(g, follow_zeppelin)
-    call GroupRemoveUnit(g, build_zeppelin)
-    set g = SelectByIdOr(g, old_id[neutral_zeppelin], 'uarb', true)
-    //set g = SelectByOrderOr(g, 0, order_attack, true)
-    set g = SelectByAlive(g, true)
-    set g = SelectByHidden(g, false)
-    set g = SelectByUnitStandard(g, true)
-    set g = SelectByUnitFree(g, true)
-    set cg = CopyGroup(g, cg)
-    if follow_zeppelin == null or not UnitAlive(follow_zeppelin) or IsUnitBuying(follow_zeppelin) or IsUnitInGroup(follow_zeppelin, unit_rescueing) or IsUnitInGroup(follow_zeppelin, unit_zepplin_move) then
-      if major_hero != null and UnitAlive(major_hero) then
-        set heroloc = GetUnitLoc(major_hero)
-        set follow_zeppelin = GetNearestOfGroup(follow_zeppelin, g, heroloc)
-        call RemoveLocation(heroloc)
-        set heroloc = null
-      endif
-    endif
-    loop
-      set u = FirstOfGroup(cg)
-      exitwhen u == null
-      if GetUnitCurrentOrder(u) == 0 or GetUnitCurrentOrder(u) == OrderId("stop") then  // Prevent stuck in can not repair areas or other unknown situations
-        call RecycleGuardPosition(u)
-        call IssuePointOrder(u, "unloadall", GetUnitX(u) + ISign() * GetRandomReal(100,200), GetUnitY(u) + ISign() * GetRandomReal(100,200))
-      endif
-      call GroupRemoveUnit(cg, u)
-    endloop
-    call DestroyGroup(cg)
-    set cg = null
-    call DestroyGroup(g)
-    set g = null
-  endif
   if follow_zeppelin == null or not UnitAlive(follow_zeppelin) or IsUnitBuying(follow_zeppelin) or IsUnitInGroup(follow_zeppelin, unit_rescueing) or IsUnitInGroup(follow_zeppelin, unit_zepplin_move) then
+    set follow_zeppelin = null
+    if major_hero != null and UnitAlive(major_hero) and GetUnitCountDone(old_id[neutral_zeppelin]) + GetUnitCountDone('uarb') > 0 then
+      set g = CreateGroup()
+      set cg = CreateGroup()
+      call GroupEnumUnitsOfPlayer(g, ai_player, null)
+      call GroupRemoveUnit(g, build_zeppelin)
+      //set g = SelectByIdOr(g, old_id[neutral_zeppelin], 'uarb', true)
+      //set g = SelectByOrderOr(g, 0, order_attack, true)
+      //set g = SelectByAlive(g, true)
+      //set g = SelectByHidden(g, false)
+      //set g = SelectByUnitStandard(g, true)
+      //set g = SelectByUnitFree(g, true)
+      loop
+        set u = FirstOfGroup(g)
+        exitwhen u == null
+        if (GetUnitTypeId(u) == old_id[neutral_zeppelin] or GetUnitTypeId(u) == 'uarb') and UnitAlive(u) and not IsUnitHidden(u) and IsStandardUnit(u) and not IsUnitBuying(u) then
+          if GetUnitCurrentOrder(u) == 0 or GetUnitCurrentOrder(u) == OrderId("stop") then  // Prevent stuck in can not repair areas or other unknown situations
+            call RecycleGuardPosition(u)
+            call IssuePointOrder(u, "unloadall", GetUnitX(u) + ISign() * GetRandomReal(100,200), GetUnitY(u) + ISign() * GetRandomReal(100,200))
+          endif
+          call GroupAddUnit(cg, u)
+        endif
+        call GroupRemoveUnit(g, u)
+      endloop
+      set heroloc = GetUnitLoc(major_hero)
+      set follow_zeppelin = GetNearestOfGroup(follow_zeppelin, cg, heroloc)
+      call RemoveLocation(heroloc)
+      set heroloc = null
+      call DestroyGroup(cg)
+      set cg = null
+      call DestroyGroup(g)
+      set g = null
+    endif
+  endif
+  if follow_zeppelin == null then
     set follow_zeppelin = null
     call TQAddJob(10, ZEPPELIN_FOLLOW, 0)
     set zeppelin_following = false
