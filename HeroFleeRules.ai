@@ -23,8 +23,8 @@
   call ActionRule(town_threatened, ACTION_TP, -100000) // town threatened handled outside of these rules
 
   if armyOfHero >= 0 then
-    call ActionRule( army_strength[armyOfHero] < teleport_army_min_strength  ,ACTION_TP, -10)
-    //call ActionRule( army_strength[armyOfHero] < enemy_strength_sum, ACTION_TP, -1000000)
+    call ActionRule(army_strength[armyOfHero] < teleport_army_min_strength, ACTION_TP, -10)
+    //call ActionRule(army_strength[armyOfHero] < enemy_strength_sum, ACTION_TP, -1000000)
   endif
   //call ActionRule3(true, ACTION_TP, (I2R(GetHeroLevel(hero_unit[hn]))*14)-20, ACTION_ZEPPELIN_HOME, I2R(GetHeroLevel(hero_unit[hn]))*8, ACTION_ZEPPELIN_FOUNTAIN, I2R(GetHeroLevel(hero_unit[hn]))*6)
 
