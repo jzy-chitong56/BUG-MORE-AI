@@ -54,8 +54,8 @@ function AncientExpansionReset takes nothing returns nothing
     //call RecycleGuardPosition(ancient_exp_wisp)
   endif
   if ancient_exp_unit != null and UnitAlive(ancient_exp_unit) then
-    call IssuePointOrder(ancient_exp_unit, "root", GetUnitX(ancient_exp_unit), GetUnitY(ancient_exp_unit))
-    call TQAddUnitJob(10, RESET_ANCIENT, -1, ancient_exp_unit)
+    call IssuePointOrder(ancient_exp_unit, "move", GetLocationX(home_location), GetLocationY(home_location))
+    call TQAddUnitJob(10, RESET_ANCIENT, -2, ancient_exp_unit)
     //call RecycleGuardPosition(ancient_exp_unit)
   endif
   call TreeGoSitu()
@@ -74,6 +74,7 @@ function GetAncient takes nothing returns nothing
   local unit u = null
   local unit tempu = null
   local unit tree = null
+  local unit tree2 = null
   local location l = null
   local location loc = GetUnitLoc(ancient_exp_mine)
   local group g = CreateGroup()
@@ -90,12 +91,18 @@ function GetAncient takes nothing returns nothing
         if d < dmax then
           set dmax = d
           set tree = u
+          if DistanceBetweenPoints(l, home_location) > 1300 then
+            set tree2 = u
+          endif
         endif
       endif
       call RemoveLocation(l)
     endif
     call GroupRemoveUnit(g, u)
   endloop
+  if tree2 != null then
+    set tree = tree2  // avoid take trees with home
+  endif
   set ancient_exp_unit = tree
   call CreateDebugTag("Expansion State 1: get expansion tree", 10, ancient_exp_unit, 3.00, 1.50)
   call DestroyGroup(g)
@@ -105,6 +112,7 @@ function GetAncient takes nothing returns nothing
   set l = null
   set tempu = null
   set tree = null
+  set tree2 = null
 endfunction
 
 function BuildAncient takes nothing returns nothing
@@ -152,7 +160,6 @@ if ancient_exp_mine == null or not UnitAlive(ancient_exp_mine) or ancient_exp_mi
   return
 endif
 
-set exp_time_count = ai_time
 if ancient_exp_state == 0 then
   call TraceAll("Ancient Exp 0: Await Build Order")  // Waiting for build code to trigger
   set i = TownCountDone(racial_expansion)
@@ -252,12 +259,19 @@ elseif ancient_exp_state == 2 then
   else
     call TreeAvoid()
   endif
+  call IssueImmediateOrder(ancient_exp_unit, "unroot")
   call IssuePointOrder(ancient_exp_unit, "move", GetUnitX(ancient_exp_mine), GetUnitY(ancient_exp_mine))
   call TQAddJob(6, ANCIENT_EXPANSION, 0)
 elseif ancient_exp_state == 3 then
   call CreateDebugTag("Expansion State 3: take expansion", 10, ancient_exp_unit, 3.00, 1.50)
-  if GetAncientCampStrength() > 0 then  // wait creep
+  if anc_retry > 10 then
+    call Trace("Expansion State 3 : retry too many , end job")
+    call AncientExpansionReset()
+    return
+  elseif GetAncientCampStrength() > 0 then  // wait creep
+    call IssueImmediateOrder(ancient_exp_unit, "unroot")
     call IssuePointOrder(ancient_exp_unit, "attack", GetUnitX(ancient_exp_mine), GetUnitY(ancient_exp_mine))
+    set anc_retry = anc_retry + 1
   elseif DistanceBetweenPoints_dd(GetUnitLoc(ancient_exp_unit), GetUnitLoc(ancient_exp_mine)) < 1000 then
     call IssueTargetOrder(ancient_exp_unit, "entangle", ancient_exp_mine)
     //call TQAddUnitJob(R2I(GetTimeToReachUnit(ancient_exp_unit, ancient_exp_mine)*2 + 5), RESET_GUARD_POSITION, 0, ancient_exp_unit)
@@ -266,6 +280,7 @@ elseif ancient_exp_state == 3 then
     call Trace("Expansion State 3 : exp done")
     return
   else
+    call IssueImmediateOrder(ancient_exp_unit, "unroot")
     call IssuePointOrder(ancient_exp_unit, "move", GetUnitX(ancient_exp_mine), GetUnitY(ancient_exp_mine))
   endif
   call TQAddJob(8, ANCIENT_EXPANSION, 0)  //  keep move

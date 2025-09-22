@@ -1,5 +1,6 @@
 #IFDEF GLOBAL
   boolean unloadpeon = false
+  unit wood_peon = null
 #ELSE
 function PeonMineCheck takes unit mine returns boolean
   local group g = CreateGroup()
@@ -34,21 +35,26 @@ function PeonMineCheck takes unit mine returns boolean
     if FoodSpace() <= 0 and FoodCap() < ver_food_limit and i >= 3 and unloadpeon == false and savewisp != null and peon <= 4 and peon == peond then  // no foodspace , no peon(at least keep 2 harvest mine) , need one harvest mine peon build Farms
       set delaywisps = 2  // Consistent with peon_assignment
       set unloadpeon = IssueTargetOrder(mine, "unload", savewisp)
-    elseif not hero_built[1] and peon < 8 then
+    elseif not hero_built[1] and peond < 8 then
       set delaywisps = ver_optimal_gold - 2
       set i = Min(i,delaywisps)
     endif
     if i < delaywisps then
       //set tempg = SelectUnittype(tempg, UNIT_TYPE_STRUCTURE, false)  //  Preventing Tree Transformation
-      set tempg = GetNearestSubGroupOfGroup(tempg, unitloc, delaywisps - i)
+      set tempg = GetNearestSubGroupOfGroup(tempg, unitloc, delaywisps)
       //call GroupRemoveGuardPositionInstant(g) // this gets wisps to come off the trees.
       //call GroupTargetOrder(g, "harvest", mine)
       loop  //use accurate quantity control , prevent any wips harvestmine , but mine no vacancies
         set u = FirstOfGroup(tempg)
-        exitwhen u == null or i >= delaywisps
-        call IssueTargetOrder(u, "harvest", mine)
-        call CreateDebugTag("PeonMineCheck - harvest", 10, u, 10.00, 8.00)
-        set i = i + 1
+        exitwhen u == null
+        if i < delaywisps then
+          call IssueTargetOrder(u, "harvest", mine)
+          call CreateDebugTag("PeonMineCheck - harvest gold", 10, u, 10.00, 8.00)
+          set i = i + 1
+        else
+          call IssueImmediateOrder(u, "autoharvestlumber")
+          call CreateDebugTag("PeonMineCheck - harvest wood", 10, u, 10.00, 8.00)
+        endif
         call GroupRemoveUnit(tempg, u)
       endloop
     endif
@@ -63,7 +69,7 @@ function PeonMineCheck takes unit mine returns boolean
     loop
       set u = FirstOfGroup(g)
       exitwhen u == null or i >= delaywisps
-      if GetUnitTypeId(u) == peon and UnitAlive(u) and not IsUnitHidden(u) then
+      if GetUnitTypeId(u) == peon and UnitAlive(u) and not IsUnitHidden(u) and not IsUnitLoaded(u) and not IsUnitBuying(u) then
         if GetUnitCurrentOrder(u) == OrderId("harvest") and DistanceBetweenPoints_dk(GetUnitLoc(u),unitloc) < 300 then  // UD harvest gold max standard distance is 221
           set i = i + 1
         elseif GetUnitCurrentOrder(u) == 0 and not IsUnitBuying(u) then
@@ -100,7 +106,7 @@ function PeonMineCheck takes unit mine returns boolean
     loop
       set u = FirstOfGroup(g)
       exitwhen u == null or i >= peon
-      if UnitAlive(u) and (GetUnitCurrentOrder(u) == 0 or GetUnitCurrentOrder(u) == OrderId("harvest")) and not IsUnitHidden(u) and not IsUnitBuying(u) then  // no get other order peon , maybe the peon go buy unit or build some
+      if UnitAlive(u) and (GetUnitCurrentOrder(u) == 0 or GetUnitCurrentOrder(u) == OrderId("harvest")) and not IsUnitHidden(u) and not IsUnitLoaded(u) and not IsUnitBuying(u) then  // no get other order peon , maybe the peon go buy unit or build some
         call IssueTargetOrder(u, "harvest", mine)
         call CreateDebugTag("PeonMineCheck - harvest", 10, u, 10.00, 8.00)
         set i = i + 1
@@ -121,6 +127,44 @@ function PeonMineCheck takes unit mine returns boolean
   return i < delaywisps
 endfunction
 
+function PeonWoodCheck takes nothing returns nothing
+  local group g = null
+  local unit u = null
+  if wood_peon == null or not UnitAlive(wood_peon) or IsUnitLoaded(wood_peon) or GetOwningPlayer(wood_peon) != ai_player or IsUnitBuying(wood_peon) then
+    set g = CreateGroup()
+    call GroupEnumUnitsInRangeOfLoc(g, home_location, expansion_taken_radius, null)
+    call GroupRemoveUnit(g, wood_peon)
+    loop
+      set u = FirstOfGroup(g)
+      exitwhen u == null
+      if GetUnitTypeId(u) == old_id[racial_ghoul] and not IsUnitLoaded(u) and UnitAlive(u) and not IsUnitHidden(u) and not IsUnitBuying(u) then
+        call RemoveGuardPosition(u)
+        if IssueImmediateOrder(u, "autoharvestlumber") then
+          call CreateDebugTag("PeonWoodCheck - harvest wood", 10, u, 10.00, 8.00)
+          call TQAddUnitJob(100, RESET_GUARD_POSITION, 0, u)
+          set wood_peon = u
+          exitwhen true
+        else
+          call RecycleGuardPosition(u)
+        endif
+      endif
+      call GroupRemoveUnit(g, u)
+    endloop
+    call DestroyGroup(g)
+    set g = null
+    set u = null
+  elseif GetUnitCurrentOrder(wood_peon) != OrderId("harvest") then
+    call RemoveGuardPosition(wood_peon)
+    if IssueImmediateOrder(wood_peon, "autoharvestlumber") then
+      call CreateDebugTag("PeonWoodCheck - keep harvest wood", 10, wood_peon, 10.00, 8.00)
+      call TQAddUnitJob(100, RESET_GUARD_POSITION, 0, wood_peon)
+    else
+      call RecycleGuardPosition(wood_peon)
+      set wood_peon = null
+    endif
+  endif
+endfunction
+
 function HarvestCheckJob takes nothing returns nothing
   local group g = null
   local unit u = null
@@ -128,14 +172,16 @@ function HarvestCheckJob takes nothing returns nothing
   local integer timeifx = 0
   local boolean mines_not_full = true
   //  call DisplayToAll("Harvest Start")
+  call DisplayToAllJobDebug("HARVEST CHECK Job Start")
   if first_town_mine == -1 then
     return  // home_location no more mine , ORC and HUMAN no need run
+  elseif race_has_ghouls and (first_town_mine == 1 or first_town_mine == 2 or TownThreatened()) and GetWood() < 200 then
+    call PeonWoodCheck()  //  Forced Harvest Wood
   endif
   if (GetGold() > 1600 or (GetWood() < 300 and hero_built[1]) or GetWood() < 80) and not race_manual_loading and not race_uses_mine_expansion then  // human and orc
     call TQAddJob(32, HARVEST_CHECK, 0)  // Prevent too many peon harvest
     return
   endif
-  call DisplayToAllJobDebug("HARVEST CHECK Job Start")
   set unloadpeon = false  // if no food , race_manual_loading need peon unload mine , but just need once unload
   set g = CreateGroup()
   if race_manual_loading then
