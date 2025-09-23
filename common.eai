@@ -15510,7 +15510,7 @@ function ForcedHarvest takes nothing returns boolean
     endloop
     // call Trace("Forced Harvest mine total : " + Int2Str(m))
   endif
-  if (not b and m > 0 and GetGold() < 1200) or (Forced_Harvest_total > 3 and c > 1) or Forced_Harvest_total > 6 then
+  if (not b and m > 0 and GetGold() < 1200) or (Forced_Harvest_total > 4 and c > 1) or Forced_Harvest_total > 7 then
     set Forced_Harvest_total = 0  //Prevent peon excessive harvest
   else
     set Forced_Harvest_total = Forced_Harvest_total + 1
@@ -15588,19 +15588,18 @@ function universal_peon_assignment takes nothing returns nothing
   call HarvestWood(0,swh)
 
   set T = Max(T + 3,TownCountDone(racial_expansion))
-  if not ForcedHarvest() then
-    loop
-      exitwhen i > T
-      if T != i and TownHasMine(i) and TownCountEx(racial_expansion,true,i) > 0 then
-        if gdivw < 3.0 or g < 300 then
-          call HarvestGold(i,ver_optimal_gold)
-        else
-          call HarvestGold(i,ver_optimal_gold - 2)
-        endif
+  call ForcedHarvest()
+  loop
+    exitwhen i > T
+    if T != i and TownHasMine(i) and TownCountEx(racial_expansion,true,i) > 0 then
+      if gdivw < 3.0 or g < 300 then
+        call HarvestGold(i,ver_optimal_gold)
+      else
+        call HarvestGold(i,ver_optimal_gold - 2)
       endif
-      set i = i + 1
-    endloop
-  endif
+    endif
+    set i = i + 1
+  endloop
   call HarvestWood(0,20)
 endfunction
 
