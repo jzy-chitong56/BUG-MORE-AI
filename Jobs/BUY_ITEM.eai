@@ -169,7 +169,7 @@ function BuyItemJob takes integer id returns nothing
     endif
     call GroupAddUnit(unit_buying_item, shop_sent)
   endif
-    if (not itemstacking and GetItemNumberOnUnit(id, shop_sent) > 0) or (itemstacking and GetItemNumber(id) >= shop_wanted) then
+  if (not itemstacking and GetItemNumberOnUnit(id, shop_sent) > 0) or (itemstacking and GetItemNumber(id) >= shop_wanted) then
     call CreateDebugTag("BUY_ITEM: this item too much", 10, shop_sent, 3.00, 1.50)
     call ResetBuyItem()
     return
