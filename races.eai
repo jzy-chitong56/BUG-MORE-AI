@@ -722,18 +722,17 @@ function peon_assignment takes nothing returns nothing
     elseif ((FoodSpace() <= 0 and FoodCap() < ver_food_limit) or not hero_built[1]) and peon < 8 then  // Scenario B , game just started , but maybe use random hero
       call HarvestGold(0, 3)  // need more wisp HarvestWood , avoidance no wood cannot build and AI stop construction
       //call HarvestWood(0, 2)  //seize a seat
-    else  //Scenario C
-      call HarvestGold(0, ver_optimal_gold)
+    //else  //Scenario C , do not use
+      //call HarvestGold(0, ver_optimal_gold)
     endif
     // seize a seat is must be retained , use tell AI have ver_optimal_gold peon harvest gold
     // if delete seize a seat , when AI From A or B to Scenario C ，will have one or two peon cannot harvest , because no vacancy in the mine , but the peon order is harvest gold , the peon not controlled by HarvestWood
   else
-    if not ForcedHarvest() then
-      call harvest_gold(0)
-      call harvest_gold(1)
-      call harvest_gold(2)
-      call harvest_gold(3)
-    endif
+    call ForcedHarvest()
+    call harvest_gold(0)
+    call harvest_gold(1)
+    call harvest_gold(2)
+    call harvest_gold(3)
   endif
   if race_has_ghouls then
     call HarvestWood(0, Max(harvesting_ghouls,1))
