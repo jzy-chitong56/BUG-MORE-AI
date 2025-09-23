@@ -40,10 +40,10 @@ jobs:
     - name: 上传战网版脚本压缩包
       uses: actions/upload-artifact@v4
       with:
-        name: bug_more_ai_REFORGED_Scripts
+        name: bug_more_ai_战网版_REFORGED
         path: ./ZIP/REFORGED
     - name: 上传经典版脚本压缩包
       uses: actions/upload-artifact@v4
       with:
-        name: bug_more_ai_TFT_Scripts
+        name: bug_more_ai_低版本_TFT
         path: ./ZIP/TFT
