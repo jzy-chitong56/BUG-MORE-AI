@@ -8,7 +8,7 @@ function InitAI takes nothing returns nothing
   set ai_player = Player(GetAiPlayer())
   set sleep_seconds = 0
   call InitAiUnits()  // This function makes all unit ids go back to there originals
-  call GetPatchVersion()
+  call VersionCheck()
   call InitGlobalSettings()
   if debugging > 0 and IsPlayerObserver(GetLocalPlayer()) then
     call SetPlayerAlliance(ai_player, GetLocalPlayer(), ALLIANCE_HELP_REQUEST,  true)
@@ -1249,7 +1249,7 @@ function GetAllyCount takes player whichPlayer returns integer
             endif
         endif
         set playerIndex = playerIndex + 1
-        exitwhen playerIndex >= PLAYERAGGRESSIVE
+        exitwhen playerIndex >= GetBJMaxPlayers()
     endloop
     set indexPlayer = null
     return count
