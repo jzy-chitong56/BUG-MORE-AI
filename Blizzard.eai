@@ -129,6 +129,7 @@
     unit array W3CMines
     group array W3CWorkerMine
     texttag array W3CWorkTextTag
+    texttag array W3CMineTextTag
     integer array W3CWorkers
     integer W3CMind_Length = 0
 
@@ -603,9 +604,16 @@ endfunction
 //===========================================================================
 function updateMineText takes integer i returns nothing
   local player p = GetTriggerPlayer()
+  local real c = GetCameraField(CAMERA_FIELD_TARGET_DISTANCE)
+  local real x = GetUnitX(W3CMines[i]) - 60 -(c - 2000) * 4 / 100
+  local real y = GetUnitY(W3CMines[i]) - 120
+  local real h = 0.02 - c / 1000000
+  local string s = "|cffffff00gold:" + I2S(GetResourceAmount(W3CMines[i])) + "|r|n|n"
   if p != null and p == GetLocalPlayer() and W3CWorkTextTag[i] != null then
-    call SetTextTagTextBJ(W3CWorkTextTag[i], I2S(W3CWorkers[i]) + "/5", 13)
-    call SetTextTagPos(W3CWorkTextTag[i], GetUnitX(W3CMines[i]) - 30, GetUnitY(W3CMines[i]) - 140, 0)
+    call SetTextTagText(W3CWorkTextTag[i], I2S(W3CWorkers[i]) + "/5", h)
+    call SetTextTagPos(W3CWorkTextTag[i], x, y, 0)
+    call SetTextTagText(W3CMineTextTag[i], s, h)
+    call SetTextTagPos(W3CMineTextTag[i], x, y, 30)
     if W3CWorkers[i] == 5 then
       call SetTextTagColorBJ(W3CWorkTextTag[i], 0, 100, 0, 100)
     elseif W3CWorkers[i] > 5 then
@@ -615,9 +623,11 @@ function updateMineText takes integer i returns nothing
     endif
     if W3CWorkers[i] > 0 then
       call SetTextTagVisibility(W3CWorkTextTag[i], IsPlayerObserver(GetLocalPlayer()) or (W3CWorkerCount and IsPlayerAlly(p, GetLocalPlayer())))
+      call SetTextTagVisibility(W3CMineTextTag[i], IsPlayerObserver(GetLocalPlayer()) or (W3CWorkerCount and IsPlayerAlly(p, GetLocalPlayer())))
     endif
   endif
   set p = null
+  set s = null
 endfunction
 
 function addMineExist takes unit u returns integer
@@ -625,6 +635,8 @@ function addMineExist takes unit u returns integer
   set W3CMines[W3CMind_Length] = u
   set W3CWorkers[W3CMind_Length] = 0
   set W3CWorkTextTag[W3CMind_Length] = CreateTextTag()
+  set W3CMineTextTag[W3CMind_Length] = CreateTextTag()
+  call SetTextTagColor(W3CMineTextTag[W3CMind_Length], 255, 255, 77, 255)
   set W3CMind_Length = W3CMind_Length + 1
   return W3CMind_Length - 1
 endfunction
@@ -670,12 +682,14 @@ function W3CWorker_lossOfMine takes nothing returns nothing
     if i >= 0 then
       call DestroyGroup(W3CWorkerMine[i])
       call DestroyTextTag(W3CWorkTextTag[i])
+      call DestroyTextTag(W3CMineTextTag[i])
       loop
         exitwhen i >= W3CMind_Length
         set W3CWorkers[i] = W3CWorkers[i + 1]
         set W3CMines[i] = W3CMines[i + 1]
         set W3CWorkerMine[i] = W3CWorkerMine[i + 1]
         set W3CWorkTextTag[i] = W3CWorkTextTag[i + 1]
+        set W3CMineTextTag[i] = W3CMineTextTag[i + 1]
         set i = i + 1
       endloop
       set W3CMind_Length = W3CMind_Length - 1
@@ -683,6 +697,7 @@ function W3CWorker_lossOfMine takes nothing returns nothing
       set W3CMines[W3CMind_Length] = null
       set W3CWorkerMine[W3CMind_Length] = null
       set W3CWorkTextTag[W3CMind_Length] = null
+      set W3CMineTextTag[W3CMind_Length] = null
     endif
   endif
   set u = null
@@ -758,8 +773,13 @@ function W3CWorker_chat takes nothing returns nothing
     endif
     loop
       exitwhen i >= W3CMind_Length
-      if W3CWorkTextTag[i] != null and W3CWorkers[i] > 0 then
-        call SetTextTagVisibility(W3CWorkTextTag[i], IsPlayerObserver(GetLocalPlayer()) or (W3CWorkerCount and IsPlayerAlly(p, GetLocalPlayer())))
+      if W3CWorkers[i] > 0 then
+        if W3CWorkTextTag[i] != null then
+          call SetTextTagVisibility(W3CWorkTextTag[i], IsPlayerObserver(GetLocalPlayer()) or (W3CWorkerCount and IsPlayerAlly(p, GetLocalPlayer())))
+        endif
+        if W3CMineTextTag[i] != null then
+          call SetTextTagVisibility(W3CMineTextTag[i], IsPlayerObserver(GetLocalPlayer()) or (W3CWorkerCount and IsPlayerAlly(p, GetLocalPlayer())))
+        endif
       endif
       set i = i + 1
     endloop
@@ -2290,8 +2310,8 @@ function Commander takes nothing returns nothing
     return
   elseif Comp != Player(PLAYER_NEUTRAL_AGGRESSIVE) then
     if GetPlayerController(Comp) != MAP_CONTROL_COMPUTER then
-       call DisplayToTP(not_specified_computer)
-       set Comp = null
+      call DisplayToTP(not_specified_computer)
+      set Comp = null
       return
     elseif not IsPlayerAlly(GetTriggerPlayer(), Comp) then
       call DisplayFromPlayer(Comp, chat_no_ally)

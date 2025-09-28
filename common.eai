@@ -10028,6 +10028,12 @@ function InitHeroInfo takes integer hn returns nothing
   set hero_enemy_loc[hn] = Location(0,0)
   set hero_ally_loc[hn] = Location(0,0)
   set hero_hp[hn] = 1
+  if old_id[hero[hn]] == 'Hblm' then
+    set ACTION_MANA_SUPPLY = hn
+  endif
+  if AatpAbility and old_id[hero[hn]] == 'Nbrn' then
+    set ACTION_LIFE_SUPPLY = hn
+  endif
   call GetHeroSkin(hn)
 endfunction
 
@@ -10853,7 +10859,6 @@ function InitHarass takes nothing returns nothing
     endloop
   endif
   //call Trace("InitHarassEnd")
-  set distraction_group = 0
   set resetharass = false
 endfunction
 
@@ -13876,6 +13881,8 @@ function AttackMoveTowerRush takes nothing returns nothing
 		if tower_attack_run != true and (GetUnitCountDone(old_id[hero[1]]) + GetUnitCountDone(old_id[hero[2]]) + GetUnitCountDone(old_id[hero[3]])) > 0 and (race_tower_item_must != true or (race_tower_item_must == true and (builder[0] != null or tower_used_item))) then
 			set tower_attack_run = true
 			set attack_running = true
+			call FormGroupAM(0)
+			set attack_length_counter = 0
 			if not town_threatened then
 				call SetAllianceTargetIfLead(builder[10])
 			endif
@@ -13904,6 +13911,7 @@ function AttackMoveTowerRush takes nothing returns nothing
 			if mine != null and u != null and GetPlayerStrength(rushedplayer) < 3 and towers_built > 3 then
 				call CreateDebugTag("TRush: take mine", 10, u, 4.00, 2.00)
 				call Trace("TR : take mine" )
+				call FormGroupAM(0)
 				call AttackMoveKillCreep(u, false)
 				call ClearCaptainTargets()
 				set u = null
@@ -14507,14 +14515,13 @@ endfunction
 //============================================================================
 function Militia_Expansion takes integer m returns nothing
   local group g = null
-  local group cg = null
+  local group cg = CreateGroup()
   local unit u = null
   local unit efoe = null
   local integer t = 0
-  if IsUnitInGroup(not_taken_expansion,water_expansion) then  //is WaterExpansion
-    return
-  endif
-  set cg = CreateGroup()
+  // if IsUnitInGroup(not_taken_expansion,water_expansion) then  //is WaterExpansion
+  //   return
+  // endif
   call GroupEnumUnitsInRange(cg, GetUnitX(not_taken_expansion), GetUnitY(not_taken_expansion), 1300, null)
   call GroupRemoveUnit(cg, not_taken_expansion)
   loop
