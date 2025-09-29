@@ -124,13 +124,15 @@ function UpdateW3CClock takes nothing returns nothing
   local integer timeHour = 0
   local integer timeMin = 0
   local integer timeSec = 0
+  local integer time = 0
   set GameTimeSec = GameTimeSec + 1
   if GameTimeSec >= 360000 then  // 5999 minutes in seconds
     set GameTimeSec = 359999  // Cap at 999:59:59
   endif
   set timeHour = GameTimeSec / 3600
-  set timeMin = (GameTimeSec - (timeHour * 3600)) / 60
-  set timeSec = GameTimeSec - (timeHour * 3600) - (timeMin * 60)
+  set time = GameTimeSec - timeHour * 3600
+  set timeMin = time / 60
+  set timeSec = time - (timeMin * 60)
   // set timeMin = GameTimeSec / 60
   // set timeSec = GameTimeSec - (timeMin * 60)
   if timeHour < 10 then

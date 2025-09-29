@@ -144,6 +144,7 @@ globals
     constant integer BLOC_OBSERVATORY = 4
     constant integer BLOC_MERC_CAMP = 5
     constant integer BLOC_DRAGON_ROOST = 6
+    constant integer BLOC_SACRIFICE = 7
     integer NEUTRAL_BUILD_LOCK = 24
 
     constant integer NOT_ENOUGH_RES = 1
@@ -10598,6 +10599,10 @@ function BuildAtNeutral_D takes integer qty, integer unitid, integer prio return
   call SetBuildAllAM(BUILD_UNIT, qty, unitid, -1, BLOC_DRAGON_ROOST, prio)
 endfunction
 
+function BuildSacrifice takes integer qty, integer unitid, integer prio returns nothing
+  call SetBuildAllAM(BUILD_UNIT, qty, unitid, -1, BLOC_SACRIFICE, prio)
+endfunction
+
 //============================================================================
 // Unlike other build commands priority works backwards so it always builds first units at prio specified then works backwards. This is because otherwise its unknown how many units it will build as its first units will build at variable priority based on number of units it actually builds.
 // Min value is in addition to the number built within the food use.
@@ -11408,6 +11413,64 @@ function UpgradeBuilding takes integer qty, integer unitid, integer town, intege
 endfunction
 
 //============================================================================
+function BuildAtSacrifice takes integer unitid returns integer
+  local unit u = null
+  local unit su = null
+  local unit bu = null
+  local group g = CreateGroup()
+  local group cg = CreateGroup()
+  local real d = 0.0
+  local real dist = 1000000.0
+  local integer id = 0
+  local integer id1 = old_id[needed1[unitid]]
+  local integer id2 = old_id[needed2[unitid]]
+  call GroupEnumUnitsOfPlayer(g, ai_player, null)
+  call GroupRemoveUnit(g, expansion_peon)
+  call GroupRemoveUnit(g, ancient_exp_wisp)
+  loop
+    set u = FirstOfGroup(g)
+    exitwhen u == null
+    if UnitAlive(u) and not IsUnitHidden(u) and not IsUnitLoaded(u) and not IsUnitBuying(u) then
+      set id = GetUnitTypeId(u)
+      if id == id1 then
+        call GroupAddUnit(cg,u)
+      endif
+      if bu == null and id == id2 then
+        set bu = u
+      endif
+    endif
+    call GroupRemoveUnit(g,u)
+  endloop
+  if bu != null then
+    loop
+      set u = FirstOfGroup(cg)
+      exitwhen u == null
+      set d = DistanceBetweenPoints_dd(GetUnitLoc(u), GetUnitLoc(bu))
+      if d < dist then
+        set dist = d
+        set su = u
+        exitwhen d < 1200
+      endif
+      call GroupRemoveUnit(cg,u)
+    endloop
+    if su != null then
+      set id = -1
+    endif
+  endif
+  if id == -1 then
+    call IssueTargetOrderById(bu, 852205, su)
+  endif
+  call DestroyGroup(cg)
+  set cg = null
+  call DestroyGroup(g)
+  set g = null
+  set u = null
+  set su = null
+  set bu = null
+  return BUILT_SOME
+endfunction
+
+//============================================================================
 function BuildAtSpecialLoc takes integer unitid, integer town, integer bloc returns integer
   local unit u = null
   local unit spaceunit = null
@@ -11751,6 +11814,9 @@ function StartUnitAM takes integer ask_qty, integer unitid, integer town, intege
     //endif
 
     if bloc != BLOC_STD then
+      if bloc == BLOC_SACRIFICE then
+        return BuildAtSacrifice(unitid)
+      endif
       if BuildAtSpecialLoc(unitid, town, bloc) != CANNOT_BUILD then   // This only occurs if no peon could be obtained
         return BUILT_SOME
       endif
