@@ -299,7 +299,7 @@ function ExecuteSaveHero takes integer hn, integer a, unit healer returns nothin
   endif
   if a == ACTION_HEALER then
     set s = GetUnitState(hero_unit[hn], UNIT_STATE_LIFE) / GetUnitState(hero_unit[hn], UNIT_STATE_MAX_LIFE)
-    if ACTION_LIFE_SUPPLY > 0 and s <= 0.65 and not teleporting and not isfleeing and enemy_density < 6 then
+    if ACTION_LIFE_SUPPLY > 0 and ACTION_LIFE_SUPPLY != hn and s <= 0.65 and not teleporting and not isfleeing and enemy_density < 6 and GetUnitCurrentOrder(u) != 852487 then
       set u = hero_unit[ACTION_LIFE_SUPPLY]
       if GetUnitState(u, UNIT_STATE_LIFE) > 0.45 * GetUnitState(u, UNIT_STATE_MAX_LIFE) and IsStandardUnit(u) and not IsUnitBuying(u) and DistanceBetweenUnits(u, hero_unit[hn]) < 1000 then
         call IssueTargetOrderById(u, 852487, hero_unit[hn])
@@ -524,7 +524,7 @@ function MicroHeroJob takes integer hn returns nothing
       endif
     endif
     if not teleporting and not isfleeing and enemy_density < 6 then
-      if ACTION_MANA_SUPPLY > 0 and GetUnitState(hero_unit[hn], UNIT_STATE_MANA) < 0.45 * GetUnitState(hero_unit[hn], UNIT_STATE_MAX_MANA) then
+      if ACTION_MANA_SUPPLY > 0 and ACTION_MANA_SUPPLY != hn and GetUnitState(hero_unit[hn], UNIT_STATE_MANA) < 0.45 * GetUnitState(hero_unit[hn], UNIT_STATE_MAX_MANA) and GetUnitCurrentOrder(u) != 852487 then
         set u = hero_unit[ACTION_MANA_SUPPLY]
         if UnitAlive(u) and GetUnitState(u, UNIT_STATE_MANA) > 0.40 * GetUnitState(u, UNIT_STATE_MAX_MANA) and IsStandardUnit(u) and not IsUnitBuying(u) and DistanceBetweenUnits(u, hero_unit[hn]) < 1200 then
           call IssueTargetOrderById(u, 852487, hero_unit[hn])
