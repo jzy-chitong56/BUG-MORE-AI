@@ -1001,15 +1001,19 @@ function W3CDenyTip takes nothing returns nothing
   local player p1 = GetOwningPlayer(u1)
   local player p2 = GetOwningPlayer(u2)
   local texttag t = null
-  local string s = cs2s("!",GetPlayerColor(p2))
+  local string s = null
+  local real h = 0.02 - GetCameraField(CAMERA_FIELD_TARGET_DISTANCE) / 1000000
   if p1 == GetLocalPlayer() and p2 == GetLocalPlayer() and not (IsUnitType(u1,UNIT_TYPE_STRUCTURE) and GetUnitTypeId(u2) == 'uaco') and GetUnitTypeId(u2) != 'otot' and GetUnitTypeId(u2) != 'usap' and not IsUnitHidden(u1) then
     if (IsPlayerAlly(p1,p2) or p1 == Player(playermax) or p2 == Player(playermax)) and p1 != Player(playerpassive) then
+      set s = cs2s("!",GetPlayerColor(p2))
       if p2 == Player(playermax) then
         set s = "|cff323232!|r"
       elseif IsUnitType(u2,UNIT_TYPE_STRUCTURE) then
         set s = s + "|cff323232!|r"
       endif
-      set t = CreateTextTagUnitBJ(s, u1, -80, 13, 100, 100, 100, 0)
+      set t = CreateTextTag()
+      call SetTextTagText(t, s, h)
+      call SetTextTagPosUnit(t, u1, -80)
       call SetTextTagPermanent(t, false)
       call SetTextTagVelocity(t, 20, 90)
       call SetTextTagLifespan(t, 2)
@@ -1017,8 +1021,8 @@ function W3CDenyTip takes nothing returns nothing
       call SetTextTagVisibility(t, (W3CDenySign and IsUnitInvisible(u1, GetLocalPlayer()) and not IsUnitMasked(u1, GetLocalPlayer()) and not IsUnitFogged(u1, GetLocalPlayer())) or IsPlayerObserver(GetLocalPlayer()))
       set t = null
     endif
+    set s = null
   endif
-  set s = null
   set u1 = null
   set u2 = null
   set p1 = null
