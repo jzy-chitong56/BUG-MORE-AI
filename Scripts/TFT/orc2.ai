@@ -285,44 +285,37 @@ endfunction
 function SkillArraysfix takes nothing returns integer
     local integer level = GetHeroLevelAI()
     local integer id = GetHeroId()
+    local integer i = 0
+    local integer sk = 0
     if level > max_hero_level then
         set max_hero_level = level
     endif
-
-    if herounit[1] == null then
-        set herounit[1] = SetHeroUint(herounit[1], hero_id)
-    endif
-    if herounit[2] == null then
-        set herounit[2] = SetHeroUint(herounit[2], hero_id2)
-    endif
-    if herounit[3] == null then
-        set herounit[3] = SetHeroUint(herounit[3], hero_id3)
-    endif
-    if herounit[4] == null then
-        set herounit[4] = SetHeroUint(herounit[4], hero_id4)
-    endif
-    if herounit[1] != null and UnitAlive(herounit[1]) then
-        call SelectHeroSkill(herounit[1], skills1[level])
-    endif
-    if herounit[2] != null and UnitAlive(herounit[2]) then
-        call SelectHeroSkill(herounit[2], skills2[level])
-    endif
-    if herounit[3] != null and UnitAlive(herounit[3]) then
-        call SelectHeroSkill(herounit[3], skills3[level])
-    endif
-    if herounit[4] != null and UnitAlive(herounit[4]) then
-        call SelectHeroSkill(herounit[4], skills4[level])
-    endif
     if id == hero_id then
-        return skills1[level]
+        set i = 1
+        set sk = skills1[level]
     elseif id == hero_id2 then
-        return skills2[level]
+        set i = 2
+        set sk = skills2[level]
     elseif id == hero_id3 then
-        return skills3[level]
+        set i = 3
+        set sk = skills3[level]
     elseif id == hero_id4 then
-        return skills4[level]
+        set i = 4
+        set sk = skills4[level]
+    else
+        return 0
     endif
-    return 0
+
+    if herounit[i] == null then
+        set herounit[i] = SetHeroUint(herounit[i], id)
+    endif
+    if herounit[i] != null and UnitAlive(herounit[i]) then
+        call SelectHeroSkill(herounit[i], sk)
+        if level == 6 and id == DEATH_KNIGHT then
+            call SelectHeroSkill(herounit[i], 'AUa2')
+        endif
+    endif
+    return sk
 endfunction
 
 //--------------------------------------------------------------------------------------------------
@@ -1046,6 +1039,7 @@ function InitMineCheck takes nothing returns nothing
   set HarvestFix = c > p
   call DestroyGroup(g)
   set g = null
+  call ClearHarvestAI()
   call HarvestGold(0,3)
   call HarvestWood(0,2)  // Early triggering Harvest
 endfunction
@@ -1144,6 +1138,7 @@ endfunction
 function peon_assignment takes nothing returns nothing
     local integer T
     local integer c = 0
+    call InitMineCheck()  // if home_location distance 1500 have more mine , ELF and UD cannot harvest (old war3 version distance need 2200+ ), this can fix
     loop
         call ClearHarvestAI()
 
@@ -1177,7 +1172,6 @@ endfunction
 function main takes nothing returns nothing
     call PickMeleeHero(RACE_ORC)
     call set_skills()
-    call InitMineCheck()  // if home_location distance 1500 have more mine , ELF and UD cannot harvest (old war3 version distance need 2200+ ), this can fix
     call InitLaboratory()
     call StandardAI(function SkillArraysfix, function peon_assignment, function attack_sequence)
     call StartThread(function set_vars)
