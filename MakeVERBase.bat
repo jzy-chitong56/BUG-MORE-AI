@@ -9,6 +9,16 @@ if "%RESULTMAKEVER%"=="1" (
   pause
   exit /b %RESULTMAKEVER%
 )
+
+SET Y=%DATE:~0,4%
+SET MM=%DATE:~5,2%
+SET D=%DATE:~8,2%
+SET H=%TIME:~0,2%
+SET M=%TIME:~3,2%
+SET S=%TIME:~6,2%
+
+ECHO %Y%-%MM%-%D% %H%:%M%:%S% > ReleaseDate.txt
+
 mkdir Scripts\
 mkdir Scripts\%VER%\
 mkdir Scripts\%VER%\vsai\

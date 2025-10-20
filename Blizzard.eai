@@ -730,7 +730,7 @@ endfunction
 
 function SetW3CClock takes nothing returns nothing
   local player p = GetTriggerPlayer()
-  if p != null then
+  if p != null and p == GetLocalPlayer() then
     if W3CClock == false then
       set W3CClock = true
       call DisplayTimedTextToPlayer(p, 0, 0, 7.00, "Game time clock |cff00ff00[on]|r")
@@ -752,7 +752,7 @@ function CreateW3CClockDialog takes nothing returns nothing
   endif
 endfunction
 
-function CreateW3CClock takes nothing returns nothing
+function InitW3CClock takes nothing returns nothing
   local trigger t = CreateTrigger()
   local integer i = 0
   if ClockTimer == null then
@@ -776,12 +776,16 @@ endfunction
 //===========================================================================
 function updateMineText takes integer i returns nothing
   local player p = GetTriggerPlayer()
-  local real c = GetCameraField(CAMERA_FIELD_TARGET_DISTANCE)
-  local real x = GetUnitX(W3CMines[i]) - 60 -(c - 2000) * 4 / 100
-  local real y = GetUnitY(W3CMines[i]) - 120
-  local real h = 0.02 - c / 1000000
+  local real c = 0
+  local real x = 0
+  local real y = 0
+  local real h = 0
   local string s = "|cffffff00gold:" + I2S(GetResourceAmount(W3CMines[i])) + "|r|n|n"
   if p != null and p == GetLocalPlayer() and W3CWorkTextTag[i] != null then
+    set c = GetCameraField(CAMERA_FIELD_TARGET_DISTANCE)
+    set x = GetUnitX(W3CMines[i]) - 60 -(c - 2000) * 4 / 100
+    set y = GetUnitY(W3CMines[i]) - 120
+    set h = 0.02 - c / 1000000
     call SetTextTagText(W3CWorkTextTag[i], I2S(W3CWorkers[i]) + "/5", h)
     call SetTextTagPos(W3CWorkTextTag[i], x, y, 0)
     call SetTextTagText(W3CMineTextTag[i], s, h)
@@ -1041,7 +1045,7 @@ function SetW3CDenyTip takes nothing returns nothing
   endif
 endfunction
 
-function W3CDenyTipControl takes nothing returns nothing
+function InitW3CDenyTipControl takes nothing returns nothing
   local integer i = 0
   loop
     exitwhen i >= playermax
@@ -1266,79 +1270,83 @@ endfunction
 function InitRandomHeroAndHireUnit takes nothing returns nothing
   local integer i = 0
   local player p = null
-  if RandomHero and IsMapFlagSet(MAP_RANDOM_HERO) and Random_Hero == null then
-    set Random_HireUnit = CreateTrigger()
-    set Random_Hero = CreateTrigger()
-    set RandomHeroRun = true
-    call SetMapFlag(MAP_RANDOM_HERO, false)
-    set RandomHeroNum[0] = 'Nngs'
-    set RandomHeroNum[1] = 'Nbst'
-    set RandomHeroNum[2] = 'Nbrn'
-    set RandomHeroNum[3] = 'Nplh'
-    set RandomHeroNum[4] = 'Npbm'
-    set RandomHeroNum[5] = 'Ntin'
-    set RandomHeroNum[6] = 'Nfir'
-    set RandomHeroNum[7] = 'Nalc'
-    set RandomHeroNum[8] = 'Edem'
-    set RandomHeroNum[9] = 'Ekee'
-    set RandomHeroNum[10] = 'Emoo'
-    set RandomHeroNum[11] = 'Ewar'
-    set RandomHeroNum[12] = 'Obla'
-    set RandomHeroNum[13] = 'Ofar'
-    set RandomHeroNum[14] = 'Otch'
-    set RandomHeroNum[15] = 'Oshd'
-    set RandomHeroNum[16] = 'Udea'
-    set RandomHeroNum[17] = 'Udre'
-    set RandomHeroNum[18] = 'Ulic'
-    set RandomHeroNum[19] = 'Ucrl'
-    set RandomHeroNum[20] = 'Hamg'
-    set RandomHeroNum[21] = 'Hpal'
-    set RandomHeroNum[22] = 'Hmkg'
-    set RandomHeroNum[23] = 'Hblm'
-    set RandomHeroSound[0] = CreateSound("Units\\Naga\\LadyVashj\\LadyVashjReady1.wav", false, true, true, 10, 10, "HeroAcksEAX")
-    set RandomHeroSound[1] = CreateSound("Units\\Creeps\\Beastmaster\\OgreBeastMasterReady1.wav", false, true, true, 10, 10, "HeroAcksEAX")
-    set RandomHeroSound[2] = CreateSound("Units\\Creeps\\BansheeRanger\\DarkRangerReady1.wav", false, true, true, 10, 10, "HeroAcksEAX")
-    set RandomHeroSound[3] = CreateSound("Units\\Demon\\HeroPitLord\\HPitLordReady1.wav", false, true, true, 10, 10, "HeroAcksEAX")
-    set RandomHeroSound[4] = CreateSound("Units\\Creeps\\PandarenBrewmaster\\PandarenBrewmasterReady1.wav", false, true, true, 10, 10, "HeroAcksEAX")
-    set RandomHeroSound[5] = CreateSound("Units\\Creeps\\HeroTinker\\HeroTinkerReady1.wav", false, true, true, 10, 10, "HeroAcksEAX")
-    set RandomHeroSound[6] = CreateSound("Units\\Creeps\\HeroFlameLord\\HeroFireLordReady1.wav", false, true, true, 10, 10, "HeroAcksEAX")
-    set RandomHeroSound[7] = CreateSound("Units\\Creeps\\HEROGoblinALCHEMIST\\HeroAlchemistReady1.wav", false, true, true, 10, 10, "HeroAcksEAX")
-    set RandomHeroSound[8] = CreateSound("Units\\NightElf\\HeroDemonHunter\\HeroDemonHunterReady1.wav", false, true, true, 10, 10, "HeroAcksEAX")
-    set RandomHeroSound[9] = CreateSound("Units\\NightElf\\HeroKeeperOfTheGrove\\KeeperOfTheGroveReady1.wav", false, true, true, 10, 10, "HeroAcksEAX")
-    set RandomHeroSound[10] = CreateSound("Units\\NightElf\\HeroMoonPriestess\\HeroMoonPriestessReady1.wav", false, true, true, 10, 10, "HeroAcksEAX")
-    set RandomHeroSound[11] = CreateSound("Units\\NightElf\\HeroWarden\\HeroWardenReady1.wav", false, true, true, 10, 10, "HeroAcksEAX")
-    set RandomHeroSound[12] = CreateSound("Units\\Orc\\HeroBladeMaster\\HeroBladeMasterReady1.wav", false, true, true, 10, 10, "HeroAcksEAX")
-    set RandomHeroSound[13] = CreateSound("Units\\Orc\\HeroFarseer\\HeroFarseerReady1.wav", false, true, true, 10, 10, "HeroAcksEAX")
-    set RandomHeroSound[14] = CreateSound("Units\\Orc\\HeroTaurenChieftain\\HeroTaurenChieftainReady1.wav", false, true, true, 10, 10, "HeroAcksEAX")
-    set RandomHeroSound[15] = CreateSound("Units\\Orc\\HeroShadowHunter\\ShadowHunterReady1.wav", false, true, true, 10, 10, "HeroAcksEAX")
-    set RandomHeroSound[16] = CreateSound("Units\\Undead\\HeroDeathKnight\\DeathKnightReady1.wav", false, true, true, 10, 10, "HeroAcksEAX")
-    set RandomHeroSound[17] = CreateSound("Units\\Undead\\HeroDreadLord\\HeroDreadlordReady1.wav", false, true, true, 10, 10, "HeroAcksEAX")
-    set RandomHeroSound[18] = CreateSound("Units\\Undead\\HeroLich\\HeroLichReady1.wav", false, true, true, 10, 10, "HeroAcksEAX")
-    set RandomHeroSound[19] = CreateSound("Units\\Undead\\HeroCryptLord\\NerubianCryptLordReady1.wav", false, true, true, 10, 10, "HeroAcksEAX")
-    set RandomHeroSound[20] = CreateSound("Units\\Human\\HeroArchMage\\HeroArchMageReady1.wav", false, true, true, 10, 10, "HeroAcksEAX")
-    set RandomHeroSound[21] = CreateSound("Units\\Human\\HeroPaladin\\HeroPaladinReady1.wav", false, true, true, 10, 10, "HeroAcksEAX")
-    set RandomHeroSound[22] = CreateSound("Units\\Human\\HeroMountainKing\\HeroMountainKingReady1.wav", false, true, true, 10, 10, "HeroAcksEAX")
-    set RandomHeroSound[23] = CreateSound("Units\\Human\\HeroBloodElf\\BloodElfMageReady1.wav", false, true, true, 10, 10, "HeroAcksEAX")
-    set RandomHero_Max[playermax] = 0
-    loop
-      exitwhen i >= playermax
-      set p = Player(i)
-      if GetPlayerSlotState(p) == PLAYER_SLOT_STATE_PLAYING then
-        if GetPlayerController(p) != MAP_CONTROL_COMPUTER then
-          set RandomHero_Max[i] = 1
-          set RandomHero_Max[playermax] = RandomHero_Max[playermax] + 2
-          call DisplayTimedTextToPlayer(p, 0, 0, 7, "AMAI Real Player Random Hero and Random Hire Unit: |cff00ff00[on]|r")
-          call TriggerRegisterPlayerUnitEvent(Random_Hero, p, EVENT_PLAYER_UNIT_TRAIN_FINISH, filterMeleeTrainedUnitIsHeroBJ)
+  if IsMapFlagSet(MAP_RANDOM_HERO) then
+    if RandomHero and Random_Hero == null then
+      set Random_HireUnit = CreateTrigger()
+      set Random_Hero = CreateTrigger()
+      set RandomHeroRun = true
+      call SetMapFlag(MAP_RANDOM_HERO, false)
+      set RandomHeroNum[0] = 'Nngs'
+      set RandomHeroNum[1] = 'Nbst'
+      set RandomHeroNum[2] = 'Nbrn'
+      set RandomHeroNum[3] = 'Nplh'
+      set RandomHeroNum[4] = 'Npbm'
+      set RandomHeroNum[5] = 'Ntin'
+      set RandomHeroNum[6] = 'Nfir'
+      set RandomHeroNum[7] = 'Nalc'
+      set RandomHeroNum[8] = 'Edem'
+      set RandomHeroNum[9] = 'Ekee'
+      set RandomHeroNum[10] = 'Emoo'
+      set RandomHeroNum[11] = 'Ewar'
+      set RandomHeroNum[12] = 'Obla'
+      set RandomHeroNum[13] = 'Ofar'
+      set RandomHeroNum[14] = 'Otch'
+      set RandomHeroNum[15] = 'Oshd'
+      set RandomHeroNum[16] = 'Udea'
+      set RandomHeroNum[17] = 'Udre'
+      set RandomHeroNum[18] = 'Ulic'
+      set RandomHeroNum[19] = 'Ucrl'
+      set RandomHeroNum[20] = 'Hamg'
+      set RandomHeroNum[21] = 'Hpal'
+      set RandomHeroNum[22] = 'Hmkg'
+      set RandomHeroNum[23] = 'Hblm'
+      set RandomHeroSound[0] = CreateSound("Units\\Naga\\LadyVashj\\LadyVashjReady1.wav", false, true, true, 10, 10, "HeroAcksEAX")
+      set RandomHeroSound[1] = CreateSound("Units\\Creeps\\Beastmaster\\OgreBeastMasterReady1.wav", false, true, true, 10, 10, "HeroAcksEAX")
+      set RandomHeroSound[2] = CreateSound("Units\\Creeps\\BansheeRanger\\DarkRangerReady1.wav", false, true, true, 10, 10, "HeroAcksEAX")
+      set RandomHeroSound[3] = CreateSound("Units\\Demon\\HeroPitLord\\HPitLordReady1.wav", false, true, true, 10, 10, "HeroAcksEAX")
+      set RandomHeroSound[4] = CreateSound("Units\\Creeps\\PandarenBrewmaster\\PandarenBrewmasterReady1.wav", false, true, true, 10, 10, "HeroAcksEAX")
+      set RandomHeroSound[5] = CreateSound("Units\\Creeps\\HeroTinker\\HeroTinkerReady1.wav", false, true, true, 10, 10, "HeroAcksEAX")
+      set RandomHeroSound[6] = CreateSound("Units\\Creeps\\HeroFlameLord\\HeroFireLordReady1.wav", false, true, true, 10, 10, "HeroAcksEAX")
+      set RandomHeroSound[7] = CreateSound("Units\\Creeps\\HEROGoblinALCHEMIST\\HeroAlchemistReady1.wav", false, true, true, 10, 10, "HeroAcksEAX")
+      set RandomHeroSound[8] = CreateSound("Units\\NightElf\\HeroDemonHunter\\HeroDemonHunterReady1.wav", false, true, true, 10, 10, "HeroAcksEAX")
+      set RandomHeroSound[9] = CreateSound("Units\\NightElf\\HeroKeeperOfTheGrove\\KeeperOfTheGroveReady1.wav", false, true, true, 10, 10, "HeroAcksEAX")
+      set RandomHeroSound[10] = CreateSound("Units\\NightElf\\HeroMoonPriestess\\HeroMoonPriestessReady1.wav", false, true, true, 10, 10, "HeroAcksEAX")
+      set RandomHeroSound[11] = CreateSound("Units\\NightElf\\HeroWarden\\HeroWardenReady1.wav", false, true, true, 10, 10, "HeroAcksEAX")
+      set RandomHeroSound[12] = CreateSound("Units\\Orc\\HeroBladeMaster\\HeroBladeMasterReady1.wav", false, true, true, 10, 10, "HeroAcksEAX")
+      set RandomHeroSound[13] = CreateSound("Units\\Orc\\HeroFarseer\\HeroFarseerReady1.wav", false, true, true, 10, 10, "HeroAcksEAX")
+      set RandomHeroSound[14] = CreateSound("Units\\Orc\\HeroTaurenChieftain\\HeroTaurenChieftainReady1.wav", false, true, true, 10, 10, "HeroAcksEAX")
+      set RandomHeroSound[15] = CreateSound("Units\\Orc\\HeroShadowHunter\\ShadowHunterReady1.wav", false, true, true, 10, 10, "HeroAcksEAX")
+      set RandomHeroSound[16] = CreateSound("Units\\Undead\\HeroDeathKnight\\DeathKnightReady1.wav", false, true, true, 10, 10, "HeroAcksEAX")
+      set RandomHeroSound[17] = CreateSound("Units\\Undead\\HeroDreadLord\\HeroDreadlordReady1.wav", false, true, true, 10, 10, "HeroAcksEAX")
+      set RandomHeroSound[18] = CreateSound("Units\\Undead\\HeroLich\\HeroLichReady1.wav", false, true, true, 10, 10, "HeroAcksEAX")
+      set RandomHeroSound[19] = CreateSound("Units\\Undead\\HeroCryptLord\\NerubianCryptLordReady1.wav", false, true, true, 10, 10, "HeroAcksEAX")
+      set RandomHeroSound[20] = CreateSound("Units\\Human\\HeroArchMage\\HeroArchMageReady1.wav", false, true, true, 10, 10, "HeroAcksEAX")
+      set RandomHeroSound[21] = CreateSound("Units\\Human\\HeroPaladin\\HeroPaladinReady1.wav", false, true, true, 10, 10, "HeroAcksEAX")
+      set RandomHeroSound[22] = CreateSound("Units\\Human\\HeroMountainKing\\HeroMountainKingReady1.wav", false, true, true, 10, 10, "HeroAcksEAX")
+      set RandomHeroSound[23] = CreateSound("Units\\Human\\HeroBloodElf\\BloodElfMageReady1.wav", false, true, true, 10, 10, "HeroAcksEAX")
+      set RandomHero_Max[playermax] = 0
+      loop
+        exitwhen i >= playermax
+        set p = Player(i)
+        if GetPlayerSlotState(p) == PLAYER_SLOT_STATE_PLAYING then
+          if GetPlayerController(p) != MAP_CONTROL_COMPUTER then
+            set RandomHero_Max[i] = 1
+            set RandomHero_Max[playermax] = RandomHero_Max[playermax] + 2
+            call DisplayTimedTextToPlayer(p, 0, 0, 7, "AMAI Real Player Random Hero and Random Hire Unit: |cff00ff00[on]|r")
+            call TriggerRegisterPlayerUnitEvent(Random_Hero, p, EVENT_PLAYER_UNIT_TRAIN_FINISH, filterMeleeTrainedUnitIsHeroBJ)
+          endif
+          call SetStartHero_d(p, GetPlayerRace(p), GetStartLocationLoc(GetPlayerStartLocation(p)))  // first hero include AI
         endif
-        call SetStartHero_d(p, GetPlayerRace(p), GetStartLocationLoc(GetPlayerStartLocation(p)))  // first hero include AI
-      endif
-      set i = i + 1
-    endloop
-    call TriggerRegisterPlayerUnitEvent(Random_Hero, Player(playerpassive), EVENT_PLAYER_UNIT_SELL, filterMeleeTrainedUnitIsHeroBJ)
-    call TriggerRegisterPlayerUnitEventSimple(Random_HireUnit, Player(playerpassive), EVENT_PLAYER_UNIT_SELL)
-    set Random_Hero_Action = TriggerAddAction(Random_Hero, function SetOtherHero)
-    set Random_HireUnit_Action = TriggerAddAction(Random_HireUnit, function RandomHireUnit)
-    set p = null
+        set i = i + 1
+      endloop
+      call TriggerRegisterPlayerUnitEvent(Random_Hero, Player(playerpassive), EVENT_PLAYER_UNIT_SELL, filterMeleeTrainedUnitIsHeroBJ)
+      call TriggerRegisterPlayerUnitEventSimple(Random_HireUnit, Player(playerpassive), EVENT_PLAYER_UNIT_SELL)
+      set Random_Hero_Action = TriggerAddAction(Random_Hero, function SetOtherHero)
+      set Random_HireUnit_Action = TriggerAddAction(Random_HireUnit, function RandomHireUnit)
+      set p = null
+    endif
+  elseif RandomHero then
+    call DisplayToAll("Enable Random Hero on room options can use |cff00ff00ATR|r !")
   endif
 endfunction
 
@@ -1472,7 +1480,10 @@ function MapInit takes nothing returns nothing
 #ENDINCLUDE
 #ENDINCLUDE
   endif
-
+  call DisplayToAll(" ")  //  blank line
+#INCLUDETABLE <ReleaseDate.txt>
+  call DisplayToAll("|c00fafafaReleaseDate :|r |c0000ffff%1|r")
+#ENDINCLUDE
 endfunction
 
 //===========================================================================
@@ -2857,10 +2868,10 @@ endfunction
 #INCLUDE <$VER$\tmp\Blizzard5.j>
     call InitHCL()
     call InitCommander()
-    call CreateW3CClock()
+    call InitW3CClock()
     call InitZoom()
     call InitTP()
-    call W3CDenyTipControl()
+    call InitW3CDenyTipControl()
     call InitW3CWorkerCount()
     call InitRandomHeroAndHireUnit()
 #INCLUDE <$VER$\tmp\Blizzard6.j>

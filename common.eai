@@ -3664,7 +3664,7 @@ function Chat takes integer c returns nothing
     //call DisplayToAlliesImportant( GetCurrentStrategyReport() + GetCurrentDynamicReport() )
     //call DisplayToObserversImportant( GetCurrentStrategyReport() + GetCurrentDynamicReport() )
   else
-    if not (chatting or chat_important[c]) then
+    if not chatting then
       return
     endif
     call InitChatArrays() // Reset conditions checks to only use chats conditions are valid for
@@ -3991,6 +3991,64 @@ function countAllyEnemy takes nothing returns nothing
   set c_enemy_total = enemy
   set c_enemy_user_total = enemy_user
   set no_ai_ally = first_ai and next_ai == 0
+endfunction
+
+//===========================================================================
+function IsGameFFA takes nothing returns boolean
+  local boolean array team_exists
+  local integer i = 0
+  local integer tc = 0
+  local integer p = 0
+  local integer pmax = 0
+  local integer p1 = -1
+  local integer p2 = -1
+  loop
+    exitwhen i >= PLAYERAGGRESSIVE
+    set team_exists[i] = false
+    set i = i + 1
+  endloop
+  set i = 0
+  loop
+    exitwhen i >= PLAYERAGGRESSIVE
+    if Player(i) != null and GetPlayerSlotState(Player(i)) == PLAYER_SLOT_STATE_PLAYING then
+      set team_exists[GetPlayerTeam(Player(i))] = true
+    endif
+    set i = i + 1
+  endloop
+  set i = 0
+  loop
+    exitwhen i >= PLAYERAGGRESSIVE
+    if team_exists[i] then
+      loop
+        exitwhen p >= PLAYERAGGRESSIVE
+        if Player(p) != null and GetPlayerSlotState(Player(p)) == PLAYER_SLOT_STATE_PLAYING and GetPlayerTeam(Player(p)) == i then
+          if p1 < 0 then
+            set p1 = p
+          elseif p2 < 0 then
+            set p2 = p
+          endif
+        endif
+        if p1 >= 0 and p2 >= 0 then
+          if IsPlayerEnemy(Player(p1), Player(p2)) then  // team no set alliance
+            set tc = tc + 2
+            set pmax = 1
+          endif
+          set p1 = -1
+          set p2 = -1
+        endif
+        set p = p + 1
+      endloop
+      if pmax == 0 then
+        set tc = tc + 1
+      endif
+      set p = 0
+      set p1 = -1
+      set p2 = -1
+      set pmax = 0
+    endif
+    set i = i + 1
+  endloop
+  return tc > 3
 endfunction
 
 //==========================================================================
@@ -7652,7 +7710,7 @@ function ComputeFrontPoints takes nothing returns nothing
     set patherdone[i] = false
     set enemyplayers[i] = false
     set backuplocs[i] = null
-    if p != ai_player then
+    if p != null and p != ai_player then
       set l = GetPlayerStartLocationLoc(p)
       if l != null then
         set x = c + 5
@@ -9511,35 +9569,6 @@ function InitGlobalSettings takes nothing returns nothing
   if racial_lumber == 0 or race_no_wood_harvest then
     set front_base_distance = front_base_distance + 100
   endif
-endfunction
-
-//===========================================================================
-function IsGameFFA takes nothing returns boolean
-  local boolean array team_exists
-  local integer i = 0
-  local integer tc = 0
-  loop
-    exitwhen i >= PLAYERAGGRESSIVE
-    set team_exists[i] = false
-    set i = i + 1
-  endloop
-  set i = 0
-  loop
-    exitwhen i >= PLAYERAGGRESSIVE
-    if Player(i) != null and GetPlayerSlotState(Player(i)) == PLAYER_SLOT_STATE_PLAYING then
-      set team_exists[GetPlayerTeam(Player(i))] = true
-    endif
-    set i = i + 1
-  endloop
-  set i = 0
-  loop
-    exitwhen i >= PLAYERAGGRESSIVE
-    if team_exists[i] then
-      set tc = tc + 1
-    endif
-    set i = i + 1
-  endloop
-  return tc > 3
 endfunction
 
 //===========================================================================
@@ -12677,7 +12706,7 @@ set take_exp = false  // reset
 if first_town_mine > 1 and fixmine != null then
   set not_taken_expansion = fixmine  // let race Expansion stop
 endif
-if current_expansion == null or CheckExpansionTaken(current_expansion) then
+if current_expansion == null or CheckExpansionTaken(current_expansion) or GetResourceAmount(current_expansion) < 1.5 * GetUnitGoldCost2(racial_expansion) then
   call ChooseExpansion()
   if current_expansion == null then
     call Trace("ExpansionBuilder: No mine available")
@@ -15325,6 +15354,9 @@ function SkillArraysAM takes nothing returns integer
     if hero_unit[hn] != null and UnitAlive(hero_unit[hn]) then    //Assisted Hero Learning Skills , for war3 1.31 bug
       call SelectHeroSkill(hero_unit[hn], skills[(hn - 1) * HERO_LEVEL_NUMBER + level])
     endif
+  endif
+  if GetHeroId() == DEATH_KNIGHT and level == 6 then
+    call SelectHeroSkill(hero_unit[hn], 'AUa2')
   endif
   return skills[(hn - 1) * HERO_LEVEL_NUMBER + level]
 endfunction

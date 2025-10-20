@@ -1193,6 +1193,7 @@ function AnyPlayerAttack takes nothing returns nothing
     set hall = GetEnemyBase()
   endif
   if hall == null or not UnitAlive(hall) or IsUnitHidden(hall) then
+    set hall = null
     return
   endif
   call SetAllianceTarget(hall)
@@ -1214,8 +1215,8 @@ function ExpansionAttack takes nothing returns nothing
     endif
   else
       call AttackMoveKillA(creep)
+      set creep = null
   endif
-  set creep = null
 endfunction
 
 //============================================================================
@@ -1239,7 +1240,7 @@ function GetAllyCount takes player whichPlayer returns integer
 
     loop
         set indexPlayer = Player(playerIndex)
-        if whichPlayer != indexPlayer then
+        if indexPlayer != null and whichPlayer != indexPlayer then
             if GetPlayerAlliance(whichPlayer,indexPlayer,ALLIANCE_PASSIVE) then
                 if GetPlayerAlliance(indexPlayer,whichPlayer,ALLIANCE_PASSIVE) then
                     if GetPlayerStructureCount(indexPlayer,true) > 0 then
@@ -1558,46 +1559,47 @@ function UnsummonAll takes nothing returns nothing
         call Unsummon(bldg)
         call Sleep(2)
     endloop
+    set bldg = null
 endfunction
 
 //============================================================================
 //  SkillArrays
 //============================================================================
 function SkillArrays takes nothing returns integer
-  local integer i = GetHeroId()
-  local integer id = 0
-  local integer skillsx = 0
   local integer level = GetHeroLevelAI()
+  // Custom Fix for 1.31 standard AI
+  local integer id = GetHeroId()
+  local integer fixnum
+  local integer skillsx = 0
   if level > max_hero_level then
     set max_hero_level = level
   endif
-  if i == hero_id then
-    set i = 1
-    set id = hero_id
+  // Custom Fix for 1.31 standard AI which broke heroes learning any skills
+  if id == hero_id then
+    set fixnum = 1
     set skillsx = skills1[level]
-  elseif i == hero_id2 then
-    set i = 2
-    set id = hero_id2
+  elseif id == hero_id2 then
+    set fixnum = 2
     set skillsx = skills2[level]
-  elseif i == hero_id3 then
-    set i = 3
-    set id = hero_id3
+  elseif id == hero_id3 then
+    set fixnum = 3
     set skillsx = skills3[level]
   else
     return 0
   endif
 
   if skillfix == true then  // Fix for 1.31 which broke heroes learning any skills
-    if hero_unit[i] == null then
-      set hero_unit[i] = GetOneOfId(hero_unit[i], ai_player, id)
+    if hero_unit[fixnum] == null then
+      set hero_unit[fixnum] = GetOneOfId(hero_unit[fixnum], ai_player, id)
     endif
-    if hero_unit[i] != null and UnitAlive(hero_unit[i]) then
-      call SelectHeroSkill(hero_unit[i], skillsx)
+    if hero_unit[fixnum] != null and UnitAlive(hero_unit[fixnum]) then
+      call SelectHeroSkill(hero_unit[fixnum], skillsx)
       if level == 6 and GetHeroId() == DEATH_KNIGHT then
-        call SelectHeroSkill(hero_unit[i], 'AUa2')
+        call SelectHeroSkill(hero_unit[fixnum], 'AUa2')
       endif
     endif
   endif
+  // End fix
 
   return skillsx
 endfunction
