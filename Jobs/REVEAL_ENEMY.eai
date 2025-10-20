@@ -53,6 +53,13 @@ function RevealEnemy takes nothing returns nothing
     if CheckAllianceChange() then  // Prevent map change alliance settings
       call countAllyEnemy()
       call countEnemyReal()
+      if IsGameFFA() then
+        set game_is_ffa = true
+        set attacking_strategy = 5
+      else
+        set game_is_ffa = true
+        set attacking_strategy = 4
+      endif
     endif
   else
     call countEnemyReal()

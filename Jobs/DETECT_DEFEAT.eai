@@ -94,11 +94,21 @@ function RemoveFromOwnForce takes player p returns nothing
   endloop
 endfunction
 
+function Remove_Corses takes nothing returns nothing
+  local unit u = CreateUnit(ai_player, structid, GetLocationX(home_location), GetLocationY(home_location), 270.00)  // Trigger Melee defeat conditions
+  call RemoveUnitAM(u)  // remove CORPSES
+  set u = null
+endfunction
+
 function KillYourself takes boolean end_ai returns nothing
     local group g = null
     local unit u = null
     local integer i = 0
     local player p = null
+    if disable_surrender then
+      set desperation_assault = true
+      return
+    endif
     if not player_defeated and not (GetPlayerSlotState(ai_player) == PLAYER_SLOT_STATE_LEFT) then
       call Chat(C_AGG)
       call Chat(C_EGG)
@@ -114,6 +124,7 @@ function KillYourself takes boolean end_ai returns nothing
               call RemoveUnitAM(u)
             elseif GetResourceAmount(u) > 0 then  // mine
             elseif destroy_buildings_on_defeat or IsUnitType(u, UNIT_TYPE_HERO) then
+              call SetUnitExploded(u, true)
               call KillUnit(u)
             else
               call SetUnitOwner(u, Player(PLAYER_AMAI_NEUTRAL_VICTIM), true)
@@ -122,10 +133,9 @@ function KillYourself takes boolean end_ai returns nothing
           call GroupRemoveUnit(g, u )
         endloop
         if not destroy_buildings_on_defeat then
-          set u = CreateUnit(ai_player, structid, GetLocationX(home_location), GetLocationY(home_location), 270.00)  // Trigger Melee defeat conditions
-          call RemoveUnitAM(u)  // remove CORPSES
-          set u = null
+          call Remove_Corses()
         endif
+        call RemovePlayer(ai_player, PLAYER_GAME_RESULT_DEFEAT)
       else
         loop
           exitwhen i >= c_ally_total
@@ -156,6 +166,7 @@ function KillYourself takes boolean end_ai returns nothing
                 call RemoveUnitAM(u)
               elseif GetResourceAmount(u) > 0 then  // mine
               elseif IsUnitType(u, UNIT_TYPE_HERO) or destroy_buildings_on_defeat then
+                call SetUnitExploded(u, true)
                 call KillUnit(u)
               elseif sharedRacePlayer != null then
                 call SetUnitOwner(u, sharedRacePlayer, true)
@@ -191,7 +202,7 @@ function Defeated takes nothing returns nothing
       return
     endif
   endif
-  if p_surrender[profile] >= 3 and FoodUsed() < 15 and not (no_ai_ally and not humanPlayerAllys) then
+  if not disable_surrender and p_surrender[profile] >= 3 and FoodUsed() < 15 and not (no_ai_ally and not humanPlayerAllys) then
     call KillYourself(no_ai_ally) // If no resources, and easily surrender just give up
   else
     if SaveYourself() then
@@ -347,7 +358,6 @@ endfunction
 function TakeOverOfflineAlly takes player p returns nothing
   local group g = CreateGroup()
   local unit u = null
-  local integer i = 0
   call GroupEnumUnitsOfPlayer(g, p, null)
   loop
     set u = FirstOfGroup(g)
@@ -356,22 +366,20 @@ function TakeOverOfflineAlly takes player p returns nothing
       if IsUnitHidden(u) then
         call RemoveUnitAM(u)
       elseif IsUnitType(u, UNIT_TYPE_HERO) then
+        call SetUnitExploded(u, true)
         call KillUnit(u)
       else
         call SetUnitOwner(u, ai_player, true)
-        set i = 1
       endif
     endif
     call GroupRemoveUnit(g, u)
   endloop
-  if i > 0 then
-    call StoreBoolean(amaiCache, Int2Str(OVER_CONTROL), Int2Str(GetPlayerId(p)), true)
-    call SetPlayerState(ai_player,PLAYER_STATE_RESOURCE_GOLD,GetPlayerState(ai_player,PLAYER_STATE_RESOURCE_GOLD) + GetPlayerState(p,PLAYER_STATE_RESOURCE_GOLD))
-    call SetPlayerState(ai_player,PLAYER_STATE_RESOURCE_LUMBER,GetPlayerState(ai_player,PLAYER_STATE_RESOURCE_LUMBER) + GetPlayerState(p,PLAYER_STATE_RESOURCE_LUMBER))
-    call SetPlayerState(p,PLAYER_STATE_RESOURCE_GOLD,0)
-    call SetPlayerState(p,PLAYER_STATE_RESOURCE_LUMBER,0)
-    call DisplayToAlliesChat(cs2s(GetPlayerName(p), GetPlayerColor(p)) + " " + chat_over_control_ally)
-  endif
+  call StoreBoolean(amaiCache, Int2Str(OVER_CONTROL), Int2Str(GetPlayerId(p)), true)
+  call SetPlayerState(ai_player,PLAYER_STATE_RESOURCE_GOLD,GetPlayerState(ai_player,PLAYER_STATE_RESOURCE_GOLD) + GetPlayerState(p,PLAYER_STATE_RESOURCE_GOLD))
+  call SetPlayerState(ai_player,PLAYER_STATE_RESOURCE_LUMBER,GetPlayerState(ai_player,PLAYER_STATE_RESOURCE_LUMBER) + GetPlayerState(p,PLAYER_STATE_RESOURCE_LUMBER))
+  call SetPlayerState(p,PLAYER_STATE_RESOURCE_GOLD,0)
+  call SetPlayerState(p,PLAYER_STATE_RESOURCE_LUMBER,0)
+  call DisplayToAlliesChat(cs2s(GetPlayerName(p), GetPlayerColor(p)) + " " + chat_over_control_ally)
   call DestroyGroup(g)
   set g = null
 endfunction
@@ -386,6 +394,16 @@ function DetectDefeatJob takes nothing returns nothing
   set no_ai_ally = true
   set humanPlayerAllys = false
   set sharedRacePlayer = null
+  if not player_defeated and GetPlayerSlotState(ai_player) != PLAYER_SLOT_STATE_PLAYING then  // safety check
+    set player_defeated = true
+    if not destroy_buildings_on_defeat then
+      call Remove_Corses()
+    endif
+    call RemovePlayer(ai_player, PLAYER_GAME_RESULT_DEFEAT)
+    set r = null
+    set s = null
+    return
+  endif
   loop
     exitwhen i >= c_ally_total
     set p = ally_force[i]
@@ -398,12 +416,14 @@ function DetectDefeatJob takes nothing returns nothing
           set sharedRacePlayer = p
         endif
       endif
-    elseif t < 0 and GetPlayerController(p) == MAP_CONTROL_USER and r == GetPlayerRace(p) and not over_control_state[GetPlayerId(p)] then  // one time check one ally
+    elseif not desperation_assault and t < 0 and GetPlayerController(p) == MAP_CONTROL_USER and r == GetPlayerRace(p) and not over_control_state[GetPlayerId(p)] then  // one time check one ally
       set t = GetPlayerId(p)
       if GetStoredBoolean(amaiCache, s, Int2Str(t)) then
-        set over_control_state[t] = true  // other ally take control
         set t = -1
+      else
+        call TakeOverOfflineAlly(Player(t))
       endif
+      set over_control_state[t] = true  // own or other ally take control
     endif
     set i = i + 1
   endloop
@@ -412,19 +432,7 @@ function DetectDefeatJob takes nothing returns nothing
   if desperation_assault == true and (TownCount(race_manual_loading_mine) > 0 or not HallsCompleted(racial_expansion) or GetMinesOwned() > 0) then
     set desperation_assault = false
   endif
-  if not player_defeated then
-    if not desperation_assault and t >= 0 then
-      set over_control_state[t] = true  // own take control
-      call TakeOverOfflineAlly(Player(t))
-      call TQAddJob(1, DETECT_DEFEAT, 0)  // check next offline ally
-    else
-      if GetPlayerSlotState(ai_player) != PLAYER_SLOT_STATE_PLAYING then
-        set player_defeated = true
-      else
-        call TQAddJob(13 * sleep_multiplier, DETECT_DEFEAT, 0)
-      endif
-    endif
-  endif
+  call TQAddJob(13 * sleep_multiplier, DETECT_DEFEAT, 0)
   set p = null
   set r = null
   set s = null
