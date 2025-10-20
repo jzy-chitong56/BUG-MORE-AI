@@ -196,7 +196,7 @@ endfunction
 //===========================================================================
 // W3C MiniMapIcon
 //===========================================================================
-function CreateW3CMiniMapIcons takes nothing returns nothing
+function InitW3CMiniMapIcons takes nothing returns nothing
   // old war3 cannot use
 endfunction
 
