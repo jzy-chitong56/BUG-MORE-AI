@@ -49,20 +49,7 @@ function SetW3CMiniMapIcons takes nothing returns nothing
   endloop
 endfunction
 
-function W3CMiniMapIcons takes nothing returns nothing
-  local trigger t = CreateTrigger()
-  local integer i = 0
-  loop
-    exitwhen i >= GetBJMaxPlayers()
-    if GetPlayerController(Player(i)) != MAP_CONTROL_COMPUTER then
-      call TriggerRegisterPlayerChatEvent(t, Player(i), "-minimap", false)
-    endif
-    set i = i + 1
-  endloop
-  call TriggerAddAction(t, function SetW3CMiniMapIcons)
-endfunction
-
-function CreateW3CMiniMapIcons takes nothing returns nothing
+function InitW3CMiniMapIcons takes nothing returns nothing
   local unit u = null
   local group g = null
   local string t = null
@@ -75,9 +62,11 @@ function CreateW3CMiniMapIcons takes nothing returns nothing
   local real maxMinimapDist = RMaxBJ(GetCameraBoundMaxX() - GetCameraBoundMinX() + 768 , GetCameraBoundMaxY() - GetCameraBoundMinY() + 512) / 2
   local real xCenter = (GetCameraBoundMaxX() + GetCameraBoundMinX()) / 2
   local real yCenter = (GetCameraBoundMaxY() + GetCameraBoundMinY()) / 2
+  local trigger tri = null
   if W3CIcons == false or IsMapFlagSet(MAP_FOG_HIDE_TERRAIN) then
     return
   endif
+  set tri = CreateTrigger()
   set g = CreateGroup()
   call GroupEnumUnitsOfPlayer(g, Player(PLAYER_NEUTRAL_PASSIVE), null)
   loop
@@ -113,7 +102,15 @@ function CreateW3CMiniMapIcons takes nothing returns nothing
   set miniicons_length = i
   call DestroyGroup(g)
   set g = null
-  call W3CMiniMapIcons()
+  set i = 0
+  loop
+    exitwhen i >= GetBJMaxPlayers()
+    if GetPlayerController(Player(i)) != MAP_CONTROL_COMPUTER then
+      call TriggerRegisterPlayerChatEvent(tri, Player(i), "-minimap", false)
+    endif
+    set i = i + 1
+  endloop
+  call TriggerAddAction(tri, function SetW3CMiniMapIcons)
 endfunction
 
 //===========================================================================
@@ -147,27 +144,32 @@ function UpdateW3CClock takes nothing returns nothing
     set s = s + "0"
   endif
   set s = s + I2S(timeSec)
-  call BlzFrameSetText(clock, s)
+  call BlzFrameSetText(clock, s)  // this line will let game crash when load game save files
   set s = null
 endfunction
 
 function SetW3CClock takes nothing returns nothing
-  local integer i = GetPlayerId(GetTriggerPlayer())
-  if Player(i) == GetLocalPlayer() then
+  local player p = GetTriggerPlayer()
+  local integer i = 0
+  if p != null and p == GetLocalPlayer() then
+    set i = GetPlayerId(p)
     if W3CClock[i] == false then
       set W3CClock[i] = true
-      call DisplayTimedTextToForce(GetPlayersAll(), 7.00, "Game time clock |cff00ff00[on]|r")
+      call DisplayTimedTextToPlayer(p, 0, 0, 7.00, "Game time clock |cff00ff00[on]|r")
     else
       set W3CClock[i] = false
-      call DisplayTimedTextToForce(GetPlayersAll(), 7.00, "Game time clock |cfffd0000[off]|r")
+      call DisplayTimedTextToPlayer(p, 0, 0, 7.00, "Game time clock |cfffd0000[off]|r")
     endif
     call BlzFrameSetVisible(clock, W3CClock[i])
   endif
+  set p = null
 endfunction
 
-function CreateW3CClock takes nothing returns nothing
-  local trigger t = CreateTrigger()
+function InitW3CClock takes nothing returns nothing
+  local trigger t = null
   local integer i = 0
+  return  // BlzFrameSetText will let game crash , so now no use , wait war3 fixed
+  set t = CreateTrigger()
   if clock == null then
     set clock = BlzCreateFrameByType("TEXT", "GameTime", BlzGetOriginFrame(ORIGIN_FRAME_GAME_UI, 0), "", 0)
     call BlzFrameSetAbsPoint(clock, FRAMEPOINT_CENTER, 0.490, 0.561)  // w3c use 0.465, 0.563
@@ -230,7 +232,7 @@ function CreateW3CClockDialog takes nothing returns nothing
   endif
 endfunction
 
-function CreateW3CClock takes nothing returns nothing
+function InitW3CClock takes nothing returns nothing
   local trigger t = CreateTrigger()
   local integer i = 0
   if ClockTimer == null then
