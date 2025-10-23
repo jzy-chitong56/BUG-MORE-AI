@@ -3888,7 +3888,7 @@ function IsGameFFA takes nothing returns boolean
           endif
         endif
         if p1 >= 0 and p2 >= 0 then
-          if IsPlayerEnemy(Player(p1), Player(p2)) then  // team no set alliance
+          if IsPlayerEnemy(Player(p1), Player(p2)) or IsPlayerEnemy(Player(p2), Player(p1)) then  // team no set alliance
             set tc = tc + 2
             set pmax = 1
           endif
