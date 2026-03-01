@@ -73,7 +73,7 @@
     align-items: center;
     justify-content: center;
     max-width: 512px;
-    width: 50%;
+    width: 100%;
     height: auto;
     background-color: black;
     min-width: 200px;
@@ -105,7 +105,7 @@
     position: relative;
     font-size: 14pt;
     flex-grow: 1;
-    margin-right: 8px;
+    max-width: 500px;
   }
 
   .icon-handle {
