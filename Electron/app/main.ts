@@ -7,10 +7,10 @@ const ipcMain = require('electron').ipcMain;
 const cp = require('child_process');
 
 type Settings = {
-    TFT_PATH?: string | null;
-    ROC_PATH?: string | null;
-    REFORGED_PATH?: string | null;
-    [key: string]: any;
+  TFT_PATH?: string | null;
+  ROC_PATH?: string | null;
+  REFORGED_PATH?: string | null;
+  [key: string]: any;
 };
 
 let win: BrowserWindow = null;
