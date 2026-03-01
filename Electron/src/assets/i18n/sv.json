@@ -11,8 +11,7 @@
         "INCLUDE_COMMANDER_OFF": "Ingen befälhavare",
         "OPTIMISE": "Använd optimerade skript", 
         "FORCELANG": "Skriv över AI-chattspråk",
-        "CAN_NOT_GET_DEFAULT_PATH":"Kan inte få standardvägen",
-        "DEFAULT_PATH":"Standardväg: "
+        "BEST_GAME_VERSION": "Optimalt"
       },
       "APP": {
         "INSTALLING": "Installerar i {{path}}",
