@@ -18,11 +18,11 @@ export class AppComponent implements AfterViewChecked {
   public totalFiles = 0;
   public installingText = '';
 
-  @ViewChild('logareawrapper') private readonly logContainer: ElementRef; 
-    
-  ngAfterViewChecked() { this.scrollToBottom(); } 
-    
-  private scrollToBottom(): void { this.logContainer.nativeElement.scrollTop = this.logContainer.nativeElement.scrollHeight; } 
+  @ViewChild('logareawrapper') private readonly logContainer: ElementRef;
+
+  ngAfterViewChecked() { this.scrollToBottom(); }
+
+  private scrollToBottom(): void { this.logContainer.nativeElement.scrollTop = this.logContainer.nativeElement.scrollHeight; }
 
   constructor(
     private readonly electronService: ElectronService,
@@ -36,13 +36,13 @@ export class AppComponent implements AfterViewChecked {
 
     // Refresh app when language changes
     this.translate.onDefaultLangChange.subscribe((event: LangChangeEvent) => {
-      this.translate.get([t_('PAGES.HOME.TITLE'),t_('PAGES.ELECTRON.OPEN_MAP'), t_('PAGES.ELECTRON.OPEN_DIR'), t_('PAGES.ELECTRON.MAPFILE')]).subscribe((translations: { [key: string]: string } ) => {
+      this.translate.get([t_('PAGES.HOME.TITLE'), t_('PAGES.ELECTRON.OPEN_MAP'), t_('PAGES.ELECTRON.OPEN_DIR'), t_('PAGES.ELECTRON.MAPFILE')]).subscribe((translations: { [key: string]: string }) => {
         this.electronService.ipcRenderer.send('Trans', event.lang, translations);
       })
       this.cdr.detectChanges();
     });
     this.translate.onLangChange.subscribe((event: LangChangeEvent) => {
-      this.translate.get([t_('PAGES.HOME.TITLE'),t_('PAGES.ELECTRON.OPEN_MAP'), t_('PAGES.ELECTRON.OPEN_DIR'), t_('PAGES.ELECTRON.MAPFILE')]).subscribe((translations: { [key: string]: string } ) => {
+      this.translate.get([t_('PAGES.HOME.TITLE'), t_('PAGES.ELECTRON.OPEN_MAP'), t_('PAGES.ELECTRON.OPEN_DIR'), t_('PAGES.ELECTRON.MAPFILE')]).subscribe((translations: { [key: string]: string }) => {
         this.electronService.ipcRenderer.send('Trans', event.lang, translations);
       })
       this.cdr.detectChanges();
@@ -53,7 +53,7 @@ export class AppComponent implements AfterViewChecked {
 
       this.electronService.ipcRenderer.on('on-install-progress', (_, args: { current: number, total: number }) => {
         // console.log('totalFiles-in:', args.total, 'currentFile-in:', args.current);
-        if ( args.total > 0 && this.totalFiles < args.total) {
+        if (args.total > 0 && this.totalFiles < args.total) {
           this.totalFiles = args.total;
         }
         if (this.currentFile < this.totalFiles) {
@@ -119,6 +119,11 @@ export class AppComponent implements AfterViewChecked {
         this.cdr.detectChanges();
       });
 
+      this.electronService.ipcRenderer.on('on-install-console', (_, args) => {
+        console.log('args-install-console', args);  // just console
+        this.cdr.detectChanges();
+      });
+
       // TODO: add 'push notification'/'notification'
       this.electronService.ipcRenderer.on('on-install-error', (_, args) => {
         console.log('args-install-error', args);
@@ -138,7 +143,7 @@ export class AppComponent implements AfterViewChecked {
   }
 
   public closeCmd() {
-    if (this.couldClose) { 
+    if (this.couldClose) {
       this.active = false;
     }
   }
