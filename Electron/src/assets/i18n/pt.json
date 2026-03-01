@@ -11,8 +11,7 @@
         "INCLUDE_COMMANDER_OFF": "Sem Comandante",
         "OPTIMISE": "Usar scripts otimizados", 
         "FORCELANG": "Substituir a linguagem de conversação AI",
-        "CAN_NOT_GET_DEFAULT_PATH":"Can not get caminho padrão",
-        "DEFAULT_PATH":"caminho padrão: "
+        "BEST_GAME_VERSION": "Optimal"
       },
       "APP": {
         "INSTALLING": "Instalando em {{path}}",
