@@ -112,6 +112,7 @@
     align-items: center; /* 垂直居中 */
     height: 48px;
     margin-top: 1.4rem;
+    width: 100%;
   }
 
   .ContainerLattice-MoreSettings {
@@ -122,6 +123,7 @@
     align-items: center;
     height: 48px;
     margin-top: 1.8rem;
+    width: 100%;
   }
 
   @media (max-width: 800px) { /* 当屏幕宽度小于等于800px时，减小字体大小 */
