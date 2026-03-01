@@ -11,8 +11,7 @@
           "INCLUDE_COMMANDER_OFF": "No Commander",
           "OPTIMISE": "Use Optimised Scripts",
           "FORCELANG": "Override AI Chat Language",
-          "CAN_NOT_GET_DEFAULT_PATH":"Can not get default path",
-          "DEFAULT_PATH":"Default path: "
+          "BEST_GAME_VERSION": "Optimal"
       },
       "APP": {
         "INSTALLING": "Installing into {{path}}",
