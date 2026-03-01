@@ -30,12 +30,13 @@
 
   .ContainerLattice {
     display: flex;
-    text-align: center;
+    text-align: center;  
     justify-content: space-around;
     align-items: center;
+    max-width: inherit; /* 继承父元素（.center-container）的最大宽度 */
+    width: 100%;
     gap: 10px;
     margin-top: 1.8rem;
-    width: 100%;
   }
 
   .game-version-container{
