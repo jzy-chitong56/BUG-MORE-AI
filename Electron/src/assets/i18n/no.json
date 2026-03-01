@@ -11,8 +11,7 @@
         "INCLUDE_COMMANDER_OFF": "Ingen Kommandant",
         "OPTIMISE": "Bruk optimaliserte skript", 
         "FORCELANG": "Overskriv AI-samtalespråk",
-        "CAN_NOT_GET_DEFAULT_PATH":"Kan ikke få standardstien",
-        "DEFAULT_PATH":"Standardstiendeveis: "
+        "BEST_GAME_VERSION": "Optimal"
       },
       "APP": {
         "INSTALLING": "Installerer i {{path}}",
