@@ -11,8 +11,7 @@
         "INCLUDE_COMMANDER_OFF": "Без командира",
         "OPTIMISE": "Использовать оптимизированные скрипты", 
         "FORCELANG": "Скачать язык разговора",
-        "CAN_NOT_GET_DEFAULT_PATH":"Не удается получить путь по умолчанию",
-        "DEFAULT_PATH":"Nути по умолчанию: "
+        "BEST_GAME_VERSION": "Оптимальный"
       },
       "APP": {
         "INSTALLING": "Установка в {{path}}",
