@@ -11,8 +11,7 @@
         "INCLUDE_COMMANDER_OFF": "Sin Comandante",
         "OPTIMISE": "Usar scripts optimizados", 
         "FORCELANG": "Cubrir el lenguaje de chat de Ia",
-        "CAN_NOT_GET_DEFAULT_PATH":"No se puede obtener la ruta predeterminada",
-        "DEFAULT_PATH":"Ruta predeterminada: "
+        "BEST_GAME_VERSION": "Óptimo"
       },
       "APP": {
         "INSTALLING": "Instalando en {{path}}",
