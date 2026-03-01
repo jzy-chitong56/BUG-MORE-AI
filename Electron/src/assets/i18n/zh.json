@@ -11,8 +11,7 @@
       "INCLUDE_COMMANDER_OFF": "不安装控制台",
       "OPTIMISE": "使用优化脚本", 
       "FORCELANG": "覆盖AI聊天语言",
-      "CAN_NOT_GET_DEFAULT_PATH":"找不到默认路径",
-      "DEFAULT_PATH":"默认路径："
+      "BEST_GAME_VERSION": "最佳版本"
     },
     "APP": {
       "INSTALLING": "正在安装 {{path}}",
