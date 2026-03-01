@@ -37,7 +37,7 @@
     max-width: inherit; /* 继承父元素（.center-container）的最大宽度 */
     width: 100%;
     gap: 10px;
-    margin-top: 2rem;
+    margin-top: 1.8rem;
   }
 
   .AdvancedSettings,
@@ -75,9 +75,10 @@
     color: gold;
   }
 
-  /* 当屏幕宽度小于等于800px时，减小字体大小 */
-  @media (max-width: 800px) {
-    .headtitle-text, .subtitle-text {
+  @media (max-width: 800px) { /* 当屏幕宽度小于等于800px时，减小字体大小 */
+
+    .headtitle-text,
+    .subtitle-text {
       font-size: 1rem;
     }
 
@@ -90,6 +91,15 @@
     .reccomendations {
       font-size: 10pt;
     }
+
+    .underlined-path {
+      font-size: 10pt;
+    }
+
+    .icon-handle {
+      font-size: 10pt;
+    }
+
   }
 
   @media (max-width: 1600px) {
@@ -147,13 +157,12 @@
     max-width: 100%; /* 最大宽度 */
   }
 
-  /* 鼠标悬停样式 */
   .radio-btn:hover {
     color: #FFFFFF; /* 悬停时文字颜色 */
     background-color: #47A4F9; /* 悬停时背景色 */
   }
 
-  input[type="radio"]:checked + .radio-btn {
+  input[type="radio"]:checked+.radio-btn {
     background-color: rgb(33, 4, 251); /* 选中时背景色 */
     color: #FFFFFF; /* 选中时文字颜色 */
   }
@@ -184,7 +193,6 @@
     border-radius: 26px;
     -webkit-transition: .4s;
     transition: .4s;
-
     color: #ffffff;
     font-size: 1rem;
     font-weight: bold;
@@ -209,57 +217,71 @@
     transition: .4s;
   }
 
-  input:checked + .slider {
+  input:checked+.slider {
     background-color: #36b61a;
   }
 
-  input:checked + .slider:before {
+  input:checked+.slider:before {
     content: "";
     -webkit-transform: translateX(100%);
     -ms-transform: translateX(100%);
-     transform: translateX(100%);
-     margin-left: -1px;
+    transform: translateX(100%);
+    margin-left: -1px;
   }
 
-  .default-folder-container {
+  .game-path-item {
+    display: flex;
+    align-items: center; /* 垂直居中 */
+    justify-content: space-between; /* 两端对齐 */
+    padding: 0.6rem;
     width: 100%;
-    margin: 1.5rem 0;
-    padding: 0.2rem;
-    background-color: #000000;
-    border-radius: 0;
+    min-width: 200px;
+    max-width: 512px;
+    height: 60px;
+    background-color: black;
+    border-radius: 4px;
     color: white;
     cursor: pointer;
-    text-align: center;
-    transition: background-color 0.2s ease;
-    display: none;
-
-    &:has(.underlined-path) {
-      display: block;
-    }
-    
-    &:hover {
-      background-color: #47A4F9;
-    }
-    
-    .default-folder-text {
-      display: block;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
+    transition: all 0.2s ease;
+    position: relative;
+    overflow: hidden;
   }
-  
+
+  .game-path-item:hover {
+    background-color: rgb(33, 4, 251);
+  }
+
   .underlined-path {
     text-decoration: underline;
-    text-decoration-skip-ink: none;
-    text-underline-position: under;
-    text-decoration-thickness: 1px;
-    text-decoration-color: currentColor;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    max-width: 100%;
     display: inline-block;
-    vertical-align: middle;
+    position: relative;
+    font-size: 14pt;
+    flex-grow: 1;
+    margin-right: 8px;
   }
+
+  .game-version-container {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    max-width: 512px;
+    min-width: 200px;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+
+    &:hover {
+      border-color: #007bff;
+      box-shadow: 0 0 10px rgba(0, 123, 255, 0.3);
+    }
+  }
+
+  .icon-handle {
+    font-size: 14pt;
+    cursor: pointer;
+  }
+
 }
