@@ -1,7 +1,6 @@
-import { Component, OnInit, ViewChild, ElementRef, HostListener, Injectable } from '@angular/core';
+import { Component, OnInit, OnDestroy , ViewChild, ElementRef, HostListener, Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { ElectronService } from '../core/services/electron/electron.service';
-import { TranslateService, LangChangeEvent } from "@codeandweb/ngx-translate";
 
 @Injectable({
   providedIn: 'root'
@@ -13,82 +12,13 @@ import { TranslateService, LangChangeEvent } from "@codeandweb/ngx-translate";
   styleUrls: ['./home.component.scss']
 })
 export class HomeComponent implements OnInit {
-  defaultPath: string | null = null;
-  defaultPathText: string = '';
-
-  constructor(private electronService: ElectronService, private translate: TranslateService) {}
-
-  ngOnInit(): void {
-    console.log('HomeComponent INIT');
-    this.loadDefaultPath();
-  }
-
-  loadDefaultPath(): void {
-    if (this.electronService.isElectron) {
-      this.electronService.ipcRenderer.invoke('file-operations', {
-        operation: 'load-default-path'
-      }).then((path: string | null) => {
-        console.log('Loaded default path:', path);
-        this.defaultPath = path;
-        if (path) {
-          this.defaultPathText = this.formatPath(path);
-          this.defaultPath = path;
-        } else {
-          this.defaultPathText = '';
-          this.defaultPath = null;
-        }
-      }).catch(error => {
-        console.error('Error loading default path:', error);
-        this.defaultPathText = this.translate.instant('PAGES.HOME.CAN_NOT_GET_DEFAULT_PATH');
-      });
-    }
-  }
-
-  private formatPath(path: string, maxLength = 30): string {
-    if (path.length <= maxLength) return path;
-    
-    const parts = path.split(/[\\/]/);
-    if (parts.length <= 2) return path;
-    
-    const firstPart = parts[0];
-    const lastPart = parts[parts.length - 1];
-    const middleLength = maxLength - (firstPart.length + lastPart.length + 5);
-    
-    if (middleLength > 0) {
-      return `${firstPart}/.../${lastPart}`;
-    }
-    return `${firstPart}/...${lastPart}`;
-  }
-  async selectDefaultFolder(event: Event): Promise<void> {
-    event.stopPropagation();
-    try {
-      if (this.electronService.isElectron) {
-        console.log('try select folder');
-        const result = await this.electronService.ipcRenderer.invoke('file-operations', {
-          operation: 'select-folder',
-          payload: this.defaultPath
-        });
-        if (result && result.length > 0) {
-          this.defaultPath = result[0];
-          this.defaultPathText = this.formatPath(result[0]);
-          await this.electronService.ipcRenderer.invoke('file-operations', {
-            operation: 'save-default-path',
-            payload: result[0]
-          });
-          console.log('selected folder:', result[0]);
-        }
-      }
-    } catch (error) {
-      console.error('select folder fail:', error);
-    }
-  }
-
+  private pathUpdateListener: any;
   Images_ROC_Shown: boolean = false;
-  Images_TFT_Shown: boolean = false; 
-  Images_REF_Shown: boolean = false; 
-  ROCInstall: boolean = false; 
-  TFTInstall: boolean = false; 
-  REFInstall: boolean = false; 
+  Images_TFT_Shown: boolean = false;
+  Images_REF_Shown: boolean = false;
+  ROCInstall: boolean = false;
+  TFTInstall: boolean = false;
+  REFInstall: boolean = false;
   Mode_State: boolean = true;
   BJ_State: number = 1;
   isInteractive: boolean = true;
@@ -98,6 +28,87 @@ export class HomeComponent implements OnInit {
   optimize: boolean = true;
   forcelang: boolean = false;
   installEvent: string = 'install'
+  gamePaths = {
+    TFT: { 
+      PATH: null as string | null,
+      displayText: '--',
+    },
+    REFORGED: { 
+      PATH: null as string | null,
+      displayText: '--',
+    },
+    ROC: { 
+      PATH: null as string | null,
+      displayText: '--',
+    }
+  };
+
+  constructor(
+    private electronService: ElectronService, 
+  ) {}
+
+  ngOnInit(): void {
+    console.log('HomeComponent INIT');
+    void this.loadDefaultPath();
+    this.UpdateDefaultPath();
+  }
+
+  ngOnDestroy(): void {
+    if (this.pathUpdateListener) {
+      this.electronService.ipcRenderer.removeListener('path-updated', this.pathUpdateListener);
+    }
+  }
+
+  private UpdateDefaultPath(): void {
+    this.pathUpdateListener = (event: any, { pathver, path = '' }) => {
+      console.log(`Path updated for ${pathver} : `, path);
+      if (pathver in this.gamePaths) {
+        this.gamePaths[pathver].PATH = path || null;
+        this.gamePaths[pathver].displayText = this.formatPath(path);
+        console.log('updated ver Path to : ', this.gamePaths[pathver].PATH, 'Display:', this.gamePaths[pathver].displayText);
+      }
+    };
+    this.electronService.ipcRenderer.on('path-updated', this.pathUpdateListener);
+  }
+
+  private async loadDefaultPath(): Promise<void> {
+    const settings = await this.electronService.ipcRenderer.invoke('load-path');
+    if (settings) {
+      console.log('Loaded paths settings:', settings);
+      this.gamePaths.TFT.PATH = settings.TFT_PATH;
+      this.gamePaths.REFORGED.PATH = settings.REFORGED_PATH;
+      this.gamePaths.ROC.PATH = settings.ROC_PATH;
+      this.gamePaths.TFT.displayText = this.gamePaths.TFT.PATH ? this.formatPath(this.gamePaths.TFT.PATH) : '--';
+      this.gamePaths.REFORGED.displayText = this.gamePaths.REFORGED.PATH ? this.formatPath(this.gamePaths.REFORGED.PATH) : '--';
+      this.gamePaths.ROC.displayText = this.gamePaths.ROC.PATH ? this.formatPath(this.gamePaths.ROC.PATH) : '--';
+      console.log('REFORGED Path:', this.gamePaths.REFORGED.PATH, 'Display:', this.gamePaths.REFORGED.displayText);
+      console.log('TFT Path:', this.gamePaths.TFT.PATH, 'Display:', this.gamePaths.TFT.displayText);
+      console.log('ROC Path:', this.gamePaths.ROC.PATH, 'Display:', this.gamePaths.ROC.displayText);
+    } else {
+      console.error('Error loading paths:', settings);
+    }
+  }
+
+  private formatPath(path: string, maxLength = 20): string {
+    if (!path) return '--';
+    if (path.length <= maxLength) return path;
+    const parts = path.split(/[\\/]/);
+    if (parts.length <= 2) return path;
+    const firstPart = parts[0];
+    const lastPart = parts[parts.length - 1];
+    const middleLength = maxLength - (firstPart.length + lastPart.length + 5);
+    if (middleLength > 0) {
+      return `${firstPart}/.../${lastPart}`;
+    }
+    return `${firstPart}/...${lastPart}`;
+  }
+
+  async selectGameFolder(pathver: 'REFORGED' | 'TFT' | 'ROC') {
+    if (this.isInteractive) {
+      console.log(`Selecting folder for ${pathver}`);
+      this.electronService.ipcRenderer.send('set-path', pathver);
+    }
+  }
 
   @HostListener('mouseenter', ['$event', '$event.target.dataset.action'])
   onMouseEnter(event: MouseEvent, action: string) {
@@ -159,7 +170,7 @@ export class HomeComponent implements OnInit {
             this.REFInstall = false;
             this.ROCInstall = !this.ROCInstall;
             this.electronService.ipcRenderer.send(this.installEvent, 'ROC', this.Mode_State, this.BJ_State, this.optimize, this.forcelang);
-            console.log('message',this.message);
+            console.log('message', this.message);
           }
           break;
         case 'Tft':
@@ -172,7 +183,7 @@ export class HomeComponent implements OnInit {
             this.REFInstall = false;
             this.TFTInstall = !this.TFTInstall;
             this.electronService.ipcRenderer.send(this.installEvent, 'TFT', this.Mode_State, this.BJ_State, this.optimize, this.forcelang);
-            console.log('message',this.message);
+            console.log('message', this.message);
           }
           break;
         case 'Ref':
@@ -185,7 +196,7 @@ export class HomeComponent implements OnInit {
             this.TFTInstall = false;
             this.REFInstall = !this.REFInstall;
             this.electronService.ipcRenderer.send(this.installEvent, 'REFORGED', this.Mode_State, this.BJ_State, this.optimize, this.forcelang);
-            console.log('message',this.message);
+            console.log('message', this.message);
           }
           break;
       }
@@ -204,22 +215,22 @@ export class HomeComponent implements OnInit {
         case 'ModeSwitch':
           this.Mode_State = !this.Mode_State;
           this.modeState = this.Mode_State ? '-folder' : '-map';
-          console.log('mode',this.modeState,this.Mode_State);
+          console.log('mode', this.modeState, this.Mode_State);
           break;
         case 'BJoptionOn':
           this.bjState = '';
           this.BJ_State = 1;
-          console.log('BJ',this.bjState);
+          console.log('BJ', this.bjState);
           break;
         case 'BJoptionVsAI':
           this.bjState = '-vai';
           this.BJ_State = 2;
-          console.log('BJ',this.bjState);
+          console.log('BJ', this.bjState);
           break;
         case 'BJoptionOff':
           this.bjState = '-noc';
           this.BJ_State = 0;
-          console.log('BJ',this.bjState);
+          console.log('BJ', this.bjState);
           break;
         case 'Optimise':
           this.optimize = !this.optimize;
@@ -232,7 +243,7 @@ export class HomeComponent implements OnInit {
           if (this.forcelang) {
             this.optimize = false;
           }
-          break;     
+          break;
       }
     };
   }
