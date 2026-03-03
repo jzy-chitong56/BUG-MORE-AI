@@ -7,11 +7,12 @@
         "INSTALL_ON_FOLDER": "Instalar no diretório",
         "INSTALL_ON_MAP": "Instalar no mapa",
         "INCLUDE_COMMANDER": "Incluir comandante",
-        "INCLUDE_COMMANDER_VSAI": "Contra IA Vanilla", 
+        "INCLUDE_COMMANDER_VSAI": "Contra IA Vanilla",
         "INCLUDE_COMMANDER_OFF": "Sem Comandante",
-        "OPTIMISE": "Usar scripts otimizados", 
+        "OPTIMISE": "Usar scripts otimizados",
         "FORCELANG": "Substituir a linguagem de conversação AI",
-        "BEST_GAME_VERSION": "Optimal"
+        "BEST_GAME_VERSION": "Optimal",
+        "SELECT_PATH": "Alterar o caminho padrão e instalar"
       },
       "APP": {
         "INSTALLING": "Instalando em {{path}}",

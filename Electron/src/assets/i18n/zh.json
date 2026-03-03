@@ -9,9 +9,10 @@
       "INCLUDE_COMMANDER": "安装控制台",
       "INCLUDE_COMMANDER_VSAI": "AMAI VS 暴雪AI  控制台",
       "INCLUDE_COMMANDER_OFF": "不安装控制台",
-      "OPTIMISE": "使用优化脚本", 
+      "OPTIMISE": "使用优化脚本",
       "FORCELANG": "覆盖AI聊天语言",
-      "BEST_GAME_VERSION": "最佳版本"
+      "BEST_GAME_VERSION": "最佳版本",
+      "SELECT_PATH": "变更默认路径并安装"
     },
     "APP": {
       "INSTALLING": "正在安装 {{path}}",

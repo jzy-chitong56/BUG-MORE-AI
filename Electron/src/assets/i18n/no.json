@@ -7,11 +7,12 @@
         "INSTALL_ON_FOLDER": "Installer i katalog",
         "INSTALL_ON_MAP": "Installer på kart",
         "INCLUDE_COMMANDER": "Inkluder kommandant",
-        "INCLUDE_COMMANDER_VSAI": "Mot Vanilla AI", 
+        "INCLUDE_COMMANDER_VSAI": "Mot Vanilla AI",
         "INCLUDE_COMMANDER_OFF": "Ingen Kommandant",
-        "OPTIMISE": "Bruk optimaliserte skript", 
+        "OPTIMISE": "Bruk optimaliserte skript",
         "FORCELANG": "Overskriv AI-samtalespråk",
-        "BEST_GAME_VERSION": "Optimal"
+        "BEST_GAME_VERSION": "Optimal",
+        "SELECT_PATH": "Endre default sti og installer"
       },
       "APP": {
         "INSTALLING": "Installerer i {{path}}",

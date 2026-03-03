@@ -4,14 +4,15 @@
           "TITLE": "AMAI Installer",
           "CHOOSE_GAME_VERSION": "Choose Game Version",
           "ADVANCED_SETTING": "Advanced Settings",
-          "INSTALL_ON_FOLDER": "Install To Directory",      
+          "INSTALL_ON_FOLDER": "Install To Directory",
           "INSTALL_ON_MAP": "Install To Map",
           "INCLUDE_COMMANDER": "Install Commander",
           "INCLUDE_COMMANDER_VSAI": "Vs Vanilla AI",
           "INCLUDE_COMMANDER_OFF": "No Commander",
           "OPTIMISE": "Use Optimised Scripts",
           "FORCELANG": "Override AI Chat Language",
-          "BEST_GAME_VERSION": "Optimal"
+          "BEST_GAME_VERSION": "Optimal",
+          "SELECT_PATH": "Change default path and install"
       },
       "APP": {
         "INSTALLING": "Installing into {{path}}",

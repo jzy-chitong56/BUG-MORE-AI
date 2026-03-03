@@ -7,11 +7,12 @@
         "INSTALL_ON_FOLDER": "Установить в папку",
         "INSTALL_ON_MAP": "Установить на карту",
         "INCLUDE_COMMANDER": "Включить командира",
-        "INCLUDE_COMMANDER_VSAI": "Против Vanilla ИИ", 
+        "INCLUDE_COMMANDER_VSAI": "Против Vanilla ИИ",
         "INCLUDE_COMMANDER_OFF": "Без командира",
-        "OPTIMISE": "Использовать оптимизированные скрипты", 
+        "OPTIMISE": "Использовать оптимизированные скрипты",
         "FORCELANG": "Скачать язык разговора",
-        "BEST_GAME_VERSION": "Оптимальный"
+        "BEST_GAME_VERSION": "Оптимальный",
+        "SELECT_PATH": "Изменить путь по умолчанию и установить"
       },
       "APP": {
         "INSTALLING": "Установка в {{path}}",

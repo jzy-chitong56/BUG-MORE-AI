@@ -7,11 +7,12 @@
         "INSTALL_ON_FOLDER": "Installer dans le répertoire",
         "INSTALL_ON_MAP": "Installer sur la carte",
         "INCLUDE_COMMANDER": "Installer le commandant",
-        "INCLUDE_COMMANDER_VSAI": "Contre IA Vanilla", 
+        "INCLUDE_COMMANDER_VSAI": "Contre IA Vanilla",
         "INCLUDE_COMMANDER_OFF": "Pas de Commandant",
-        "OPTIMISE": "Utiliser des scripts optimisés", 
+        "OPTIMISE": "Utiliser des scripts optimisés",
         "FORCELANG": "Couvrir le langage de chat ai",
-        "BEST_GAME_VERSION": "Optimal"
+        "BEST_GAME_VERSION": "Optimal",
+        "SELECT_PATH": "Modifier le chemin par défaut et installer"
       },
       "APP": {
         "INSTALLING": "Installation dans {{path}}",
