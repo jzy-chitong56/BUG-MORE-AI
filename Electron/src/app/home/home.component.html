@@ -14,9 +14,12 @@
         <span>2.0.3+</span>
         <span class="reccomendations">{{ 'PAGES.HOME.BEST_GAME_VERSION' | translate }}: 2.0.4+</span>
       </div>
-      <div class="game-path-item" (click)="selectGameFolder('REFORGED')">
+      <div class="game-path-item" (click)="selectPathAndInstall('REFORGED')">
         <span class="underlined-path" [title]="gamePaths.REFORGED.PATH">{{gamePaths.REFORGED.displayText}}</span>
         <i class="material-icons icon-handle">edit</i>
+        <div class="tooltip">
+          {{ 'PAGES.HOME.SELECT_PATH' | translate }}<br>{{ gamePaths.REFORGED.displayText }}
+        </div>
       </div>
     </div>
     <div class="game-version-container">
@@ -29,9 +32,12 @@
         <span>1.24e+</span>
         <span class="reccomendations">{{ 'PAGES.HOME.BEST_GAME_VERSION' | translate }}: 1.24e ~ 1.28</span>
       </div>
-      <div class="game-path-item" (click)="selectGameFolder('TFT')">
+      <div class="game-path-item" (click)="selectPathAndInstall('TFT')">
         <span class="underlined-path" [title]="gamePaths.TFT.PATH">{{gamePaths.TFT.displayText}}</span>
         <i class="material-icons icon-handle">edit</i>
+          <div class="tooltip">
+            {{ 'PAGES.HOME.SELECT_PATH' | translate }}<br>{{ gamePaths.TFT.displayText }}
+          </div>
       </div>
     </div>
     <div class="game-version-container">
@@ -44,9 +50,12 @@
         <span>1.24e+ ~ 1.31</span>
         <span class="reccomendations">{{ 'PAGES.HOME.BEST_GAME_VERSION' | translate }}: 1.24e ~ 1.31</span>
       </div>
-      <div class="game-path-item" (click)="selectGameFolder('ROC')">
+      <div class="game-path-item" (click)="selectPathAndInstall('ROC')">
         <span class="underlined-path" [title]="gamePaths.ROC.PATH">{{gamePaths.ROC.displayText}}</span>
         <i class="material-icons icon-handle">edit</i>
+        <div class="tooltip">
+          {{ 'PAGES.HOME.SELECT_PATH' | translate }}<br>{{ gamePaths.ROC.displayText }}
+        </div>
       </div>
     </div>
   </div>

@@ -103,10 +103,10 @@ export class HomeComponent implements OnInit {
     return `${firstPart}/...${lastPart}`;
   }
 
-  async selectGameFolder(pathver: 'REFORGED' | 'TFT' | 'ROC') {
+  async selectPathAndInstall(pathver: 'REFORGED' | 'TFT' | 'ROC') {
     if (this.isInteractive) {
-      console.log(`Selecting folder for ${pathver}`);
-      this.electronService.ipcRenderer.send('set-path', pathver);
+      console.log(`Selecting path and install for ${pathver}`);
+      this.electronService.ipcRenderer.send('set-path-and-install', this.Mode_State, this.BJ_State, this.optimize, this.forcelang, pathver);
     }
   }
 
