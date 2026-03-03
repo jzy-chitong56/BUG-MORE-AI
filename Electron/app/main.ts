@@ -31,7 +31,6 @@ const isDev = () => {
 }
 
 const createWindow = (): BrowserWindow => {
-
   const size = screen.getPrimaryDisplay().workAreaSize;
   // Create the browser window.
   win = new BrowserWindow({
@@ -111,7 +110,7 @@ const execInstall = async (signal, commander: number = 1, isMap: boolean = false
       response = dialog.showOpenDialogSync(win, {
         title: translations["PAGES.ELECTRON.OPEN_MAP"] || '',
         properties: ['openFile'] ,
-        filters:  [
+        filters: [
             { name: translations["PAGES.ELECTRON.MAPFILE"] || '', extensions: ['w3x', 'w3m'] },
         ],
         defaultPath: usepath,
@@ -253,36 +252,43 @@ const GetDefaultPath = () => {
 }
 
 const SetDefaultPath = () => {
-  ipcMain?.on('set-path', async (_event, pathver ) => {
+  ipcMain?.on('set-path-and-install', async (_event, toFolder: boolean, commander: number, optimize: boolean, forceLang: boolean, pathver: string = "REFORGED") => {
     const settingsPath = path.join(app.getPath('userData'), 'settings.json');
     let settings: Settings = {};
     let usepath = documentsPath;
-    win.webContents.send('on-install-console', `Selecting folder , version : ${pathver}`);
+    let result;
+    let signal = {};
+    win.webContents.send('on-install-console', `Selecting path and install , version : ${pathver}`);
+    if (toFolder) {
     if (fs.existsSync(settingsPath)) {
       win.webContents.send('on-install-console', `Get default path`);
       settings = JSON.parse(fs.readFileSync(settingsPath, 'utf8'));
       usepath = getversionpath(pathver, settings);
-      if (!usepath ||  usepath === '' ||  usepath === null || !fs.existsSync(usepath)) {
+        if (!usepath || usepath === '' || usepath === null || !fs.existsSync(usepath)) {
         usepath = documentsPath;
       }
     }
-    const result = dialog.showOpenDialogSync(win, {
+      result = dialog.showOpenDialogSync(win, {
       title: translations["PAGES.ELECTRON.OPEN_DIR"] || '',
       properties: ['openDirectory'],
         defaultPath: usepath
     });
     if (result && (result?.length > 0)) {
-      usepath = result[0] ? path.resolve(result[0]) : null;
+        usepath = result[0] ? path.resolve(result[0]) : documentsPath;
       settings[`${pathver}_PATH`] = usepath;
       win.webContents.send('on-install-console', `Set path : ${usepath}`);
       try {
         fs.writeFileSync(settingsPath, JSON.stringify(settings));
         win.webContents.send('path-updated', { pathver: pathver, path: usepath });
+          execInstall(signal, commander, !toFolder, optimize ? `OPT${pathver}` : pathver, forceLang, pathver);
       } catch (err) {
         win.webContents.send('on-install-console', `Set path failed: ${err.message}`);
       }
     } else {
-        win.webContents.send('on-install-console', `Folder selection was cancelled`);
+        win.webContents.send('on-install-console', `Path selection was cancelled`);
+      }
+    } else {
+      execInstall(signal, commander, !toFolder, optimize ? `OPT${pathver}` : pathver, forceLang, pathver);
     }
   });
 }
