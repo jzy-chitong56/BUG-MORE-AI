@@ -170,7 +170,7 @@ const execInstall = async (signal, commander: number = 1, isMap: boolean = false
     return;
   }
 
-  if (usepath === null) {
+  if (usepath !== null && usepath !== undefined && usepath !== '') {
     if (!isMap) {
       usepath = response[0];
     } else {
