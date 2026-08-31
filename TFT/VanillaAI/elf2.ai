@@ -33,6 +33,7 @@ globals
     integer c_hero1_done        = 0
     integer c_hero2_done        = 0
     integer c_hero3_done        = 0
+    integer c_hero4_done        = 0
     integer c_hunt_hall_done    = 0
     integer c_huntress          = 0
     integer c_huntress_done     = 0
@@ -58,6 +59,8 @@ globals
     integer c_zeps              = 0
     integer hero_id4            = 0
     integer array skills4
+    boolean array fixskill_1_2
+    boolean array fixskill_1
     boolean HarvestFix          = false
     unit array laboratory
     unit array herounit
@@ -68,210 +71,25 @@ endglobals
 //--------------------------------------------------------------------------------------------------
 //  set_skills
 //--------------------------------------------------------------------------------------------------
-function set_skills takes nothing returns nothing
-
-    set skill[ 1] = TRUESHOT
-    set skill[ 2] = SEARING_ARROWS
-    set skill[ 3] = TRUESHOT
-    set skill[ 4] = SEARING_ARROWS
-    set skill[ 5] = TRUESHOT
-    set skill[ 6] = STARFALL
-    set skill[ 7] = SEARING_ARROWS
-    set skill[ 8] = SCOUT
-    set skill[ 9] = SCOUT
-    set skill[10] = SCOUT
-    call SetSkillArray(1,MOON_CHICK)
-
-    set skill[ 1] = SEARING_ARROWS
-    set skill[ 2] = TRUESHOT
-    set skill[ 3] = SEARING_ARROWS
-    set skill[ 4] = TRUESHOT
-    set skill[ 5] = SEARING_ARROWS
-    set skill[ 6] = STARFALL
-    set skill[ 7] = TRUESHOT
-    set skill[ 8] = SCOUT
-    set skill[ 9] = SCOUT
-    set skill[10] = SCOUT
-    call SetSkillArray(2,MOON_BABE)
-    call SetSkillArray(3,MOON_HONEY)
-
-    set skill[ 1] = FORCE_NATURE
-    set skill[ 2] = ENT_ROOTS
-    set skill[ 3] = FORCE_NATURE
-    set skill[ 4] = ENT_ROOTS
-    set skill[ 5] = FORCE_NATURE
-    set skill[ 6] = TRANQUILITY
-    set skill[ 7] = ENT_ROOTS
-    set skill[ 8] = THORNS_AURA
-    set skill[ 9] = THORNS_AURA
-    set skill[10] = THORNS_AURA
-
-    call SetSkillArray(1,KEEPER)
-
-    set skill[ 1] = ENT_ROOTS
-    set skill[ 2] = THORNS_AURA
-    set skill[ 3] = ENT_ROOTS
-    set skill[ 4] = THORNS_AURA
-    set skill[ 5] = ENT_ROOTS
-    set skill[ 6] = TRANQUILITY
-    set skill[ 7] = THORNS_AURA
-    set skill[ 8] = FORCE_NATURE
-    set skill[ 9] = FORCE_NATURE
-    set skill[10] = FORCE_NATURE
-
-    call SetSkillArray(2,KEEPER)
-
-    set skill[ 1] = FORCE_NATURE
-    set skill[ 2] = ENT_ROOTS
-    set skill[ 3] = FORCE_NATURE
-    set skill[ 4] = THORNS_AURA
-    set skill[ 5] = ENT_ROOTS
-    set skill[ 6] = TRANQUILITY
-    set skill[ 7] = THORNS_AURA
-    set skill[ 8] = ENT_ROOTS
-    set skill[ 9] = THORNS_AURA
-    set skill[10] = FORCE_NATURE
-    call SetSkillArray(3,KEEPER)
-
-    set skill[ 1] = MANA_BURN
-    set skill[ 2] = EVASION
-    set skill[ 3] = IMMOLATION
-    set skill[ 4] = EVASION
-    set skill[ 5] = MANA_BURN
-    set skill[ 6] = METAMORPHOSIS
-    set skill[ 7] = EVASION
-    set skill[ 8] = IMMOLATION
-    set skill[ 9] = MANA_BURN
-    set skill[10] = IMMOLATION
-    call SetSkillArray(1,DEMON_HUNTER)
-
-    set skill[ 1] = MANA_BURN
-    set skill[ 2] = EVASION
-    set skill[ 3] = MANA_BURN
-    set skill[ 4] = EVASION
-    set skill[ 5] = MANA_BURN
-    set skill[ 6] = METAMORPHOSIS
-    set skill[ 7] = EVASION
-    set skill[ 8] = IMMOLATION
-    set skill[ 9] = IMMOLATION
-    set skill[10] = IMMOLATION
-
-    call SetSkillArray(2,DEMON_HUNTER)
-
-    set skill[ 1] = IMMOLATION
-    set skill[ 2] = MANA_BURN
-    set skill[ 3] = EVASION
-    set skill[ 4] = MANA_BURN
-    set skill[ 5] = EVASION
-    set skill[ 6] = METAMORPHOSIS
-    set skill[ 7] = MANA_BURN
-    set skill[ 8] = EVASION
-    set skill[ 9] = IMMOLATION
-    set skill[10] = IMMOLATION
-    call SetSkillArray(3,DEMON_HUNTER)
-
-    set skill[ 1] = FAN_KNIVES
-    set skill[ 2] = SHADOW_TOUCH
-    set skill[ 3] = FAN_KNIVES
-    set skill[ 4] = BLINK
-    set skill[ 5] = FAN_KNIVES
-    set skill[ 6] = VENGEANCE
-    set skill[ 7] = SHADOW_TOUCH
-    set skill[ 8] = BLINK
-    set skill[ 9] = SHADOW_TOUCH
-    set skill[10] = BLINK
-    call SetSkillArray(1,WARDEN)
-
-    set skill[ 1] = SHADOW_TOUCH
-    set skill[ 2] = BLINK
-    set skill[ 3] = SHADOW_TOUCH
-    set skill[ 4] = FAN_KNIVES
-    set skill[ 5] = SHADOW_TOUCH
-    set skill[ 6] = VENGEANCE
-    set skill[ 7] = FAN_KNIVES
-    set skill[ 8] = BLINK
-    set skill[ 9] = FAN_KNIVES
-    set skill[10] = BLINK
-    call SetSkillArray(2,WARDEN)
-
-    set skill[ 1] = SHADOW_TOUCH
-    set skill[ 2] = FAN_KNIVES
-    set skill[ 3] = SHADOW_TOUCH
-    set skill[ 4] = FAN_KNIVES
-    set skill[ 5] = SHADOW_TOUCH
-    set skill[ 6] = VENGEANCE
-    set skill[ 7] = FAN_KNIVES
-    set skill[ 8] = BLINK
-    set skill[ 9] = BLINK
-    set skill[10] = BLINK
-    call SetSkillArray(3,WARDEN)
-
-    if hero_id != DEMON_HUNTER and hero_id2 != DEMON_HUNTER and hero_id3 != DEMON_HUNTER then
-        set hero_id4 = DEMON_HUNTER
-    elseif hero_id != KEEPER and hero_id2 != KEEPER and hero_id3 != KEEPER then
-        set hero_id4 = KEEPER
-    elseif hero_id != MOON_BABE and hero_id2 != MOON_BABE and hero_id3 != MOON_BABE then
-        set hero_id4 = MOON_BABE
-    elseif hero_id != WARDEN and hero_id2 != WARDEN and hero_id3 != WARDEN then
-        set hero_id4 = WARDEN
-    endif
-    if hero_id4 == KEEPER then
-        set skills4[ 1] = FORCE_NATURE
-        set skills4[ 2] = ENT_ROOTS
-        set skills4[ 3] = FORCE_NATURE
-        set skills4[ 4] = ENT_ROOTS
-        set skills4[ 5] = FORCE_NATURE
-        set skills4[ 6] = TRANQUILITY
-        set skills4[ 7] = ENT_ROOTS
-        set skills4[ 8] = THORNS_AURA
-        set skills4[ 9] = THORNS_AURA
-        set skills4[10] = THORNS_AURA
-    elseif hero_id4 == DEMON_HUNTER then
-        set skills4[ 1] = MANA_BURN
-        set skills4[ 2] = IMMOLATION
-        set skills4[ 3] = MANA_BURN
-        set skills4[ 4] = EVASION
-        set skills4[ 5] = MANA_BURN
-        set skills4[ 6] = METAMORPHOSIS
-        set skills4[ 7] = EVASION
-        set skills4[ 8] = IMMOLATION
-        set skills4[ 9] = EVASION
-        set skills4[10] = IMMOLATION
-    elseif hero_id4 == WARDEN then
-        set skills4[ 1] = SHADOW_TOUCH
-        set skills4[ 2] = FAN_KNIVES
-        set skills4[ 3] = SHADOW_TOUCH
-        set skills4[ 4] = BLINK
-        set skills4[ 5] = SHADOW_TOUCH
-        set skills4[ 6] = VENGEANCE
-        set skills4[ 7] = FAN_KNIVES
-        set skills4[ 8] = BLINK
-        set skills4[ 9] = FAN_KNIVES
-        set skills4[10] = BLINK
-    elseif hero_id4 == MOON_BABE then
-        set skills4[ 1] = SEARING_ARROWS
-        set skills4[ 2] = TRUESHOT
-        set skills4[ 3] = SEARING_ARROWS
-        set skills4[ 4] = TRUESHOT
-        set skills4[ 5] = SEARING_ARROWS
-        set skills4[ 6] = STARFALL
-        set skills4[ 7] = TRUESHOT
-        set skills4[ 8] = SCOUT
-        set skills4[ 9] = SCOUT
-        set skills4[10] = SCOUT
-    endif
-endfunction
-
 // fix 1.31 hero cannot Learning Skills
 function SetHeroUint takes unit u, integer id returns unit
     local group g = CreateGroup()
-    call GroupEnumUnitsOfPlayer(g, ai_player, null)
+    call GroupEnumUnitsOfPlayer(g, Player(GetAiPlayer()), null)
     loop
         set u = FirstOfGroup(g)
         exitwhen u == null
         if GetUnitTypeId(u) == id and UnitAlive(u) and not IsUnitHidden(u) then
             call DestroyGroup(g)
             set g = null
+            if id == hero_id then
+                set b_hero1_done = true
+            elseif id == hero_id2 then
+                set b_hero2_done = true
+            elseif id == hero_id3 then
+                set b_hero3_done = true
+            elseif id == hero_id4 then
+                set b_hero4_done = true
+            endif
             return u
         endif
         call GroupRemoveUnit(g, u )
@@ -281,40 +99,159 @@ function SetHeroUint takes unit u, integer id returns unit
     return u
 endfunction
 
-function SkillArraysfix takes nothing returns integer
+function SkillArraysfix takes nothing returns nothing
     local integer level = GetHeroLevelAI()
     local integer id = GetHeroId()
-    local integer i = 0
-    local integer sk = 0
+    local integer array sk
+    local integer array up
     if level > max_hero_level then
         set max_hero_level = level
     endif
-    if id == hero_id then
-        set i = 1
-        set sk = skills1[level]
-    elseif id == hero_id2 then
-        set i = 2
-        set sk = skills2[level]
-    elseif id == hero_id3 then
-        set i = 3
-        set sk = skills3[level]
-    elseif id == hero_id4 then
-        set i = 4
-        set sk = skills4[level]
-    else
-        return 0
-    endif
 
-    if herounit[i] == null then
-        set herounit[i] = SetHeroUint(herounit[i], id)
+    if id == hero_id then
+        set up[0] = 1
+        set sk[1] = skills1[1]
+        set sk[2] = skills1[2]
+        set sk[3] = skills1[3]
+        set sk[4] = skills1[4]
+    elseif id == hero_id2 then
+        set up[0] = 2
+        set sk[1] = skills2[1]
+        set sk[2] = skills2[2]
+        set sk[3] = skills2[3]
+        set sk[4] = skills2[4]
+    elseif id == hero_id3 then
+        set up[0] = 3
+        set sk[1] = skills3[1]
+        set sk[2] = skills3[2]
+        set sk[3] = skills3[3]
+        set sk[4] = skills3[4]
+    else
+        set up[0] = 4
+        set sk[1] = skills4[1]
+        set sk[2] = skills4[2]
+        set sk[3] = skills4[3]
+        set sk[4] = skills4[4]
     endif
-    if herounit[i] != null and UnitAlive(herounit[i]) then
-        call SelectHeroSkill(herounit[i], sk)
-        if level == 6 and id == DEATH_KNIGHT then
-            call SelectHeroSkill(herounit[i], 'AUa2')
+    if fixskill_1[up[0]] then  // skill 2 and 3 low
+        set up[1] = 1
+    elseif fixskill_1_2[up[0]] then  // skill 3 low
+        set up[1] = GetRandomInt(1, 2)
+    else
+        set up[1] = GetRandomInt(1, 3)
+    endif
+    if fixskill_1_2[up[0]] or GetRandomInt(0, 1) > 0 then
+        if up[1] == 1 then
+            set up[2] = 2
+            set up[3] = 3
+        elseif up[1] == 2 then
+            set up[2] = 1
+            set up[3] = 3
+        else
+            set up[2] = 1
+            set up[3] = 2
+        endif
+    else
+        if up[1] == 1 then
+            set up[2] = 3
+            set up[3] = 2
+        elseif up[1] == 2 then
+            set up[2] = 3
+            set up[3] = 1
+        else
+            set up[2] = 2
+            set up[3] = 1
         endif
     endif
-    return sk
+
+    if herounit[up[0]] == null then
+        set herounit[up[0]] = SetHeroUint(herounit[up[0]], id)
+    endif
+    if herounit[up[0]] != null and UnitAlive(herounit[up[0]]) then
+        if level == 6 then
+            call SelectHeroSkill(herounit[up[0]], sk[4])
+        else
+            call SelectHeroSkill(herounit[up[0]], sk[up[1]])
+            call SelectHeroSkill(herounit[up[0]], sk[up[2]])
+            call SelectHeroSkill(herounit[up[0]], sk[up[3]])
+        endif
+    endif
+endfunction
+
+function SetSkillArrayAtHero takes integer heroid, integer sikll1, integer sikll2, integer sikll3, integer sikll4, boolean fix_1_2, boolean fix_1 returns nothing
+    if hero_id == heroid then
+        set skills1[1] = sikll1
+        set skills1[2] = sikll2
+        set skills1[3] = sikll3
+        set skills1[4] = sikll4
+        set fixskill_1_2[1] = fix_1_2
+        set fixskill_1[1] = fix_1
+    elseif hero_id2 == heroid then
+        set skills2[1] = sikll1
+        set skills2[2] = sikll2
+        set skills2[3] = sikll3
+        set skills2[4] = sikll4
+        set fixskill_1_2[2] = fix_1_2
+        set fixskill_1[2] = fix_1
+    elseif hero_id3 == heroid then
+        set skills3[1] = sikll1
+        set skills3[2] = sikll2
+        set skills3[3] = sikll3
+        set skills3[4] = sikll4
+        set fixskill_1_2[3] = fix_1_2
+        set fixskill_1[3] = fix_1
+    elseif hero_id4 == heroid then
+        set skills4[1] = sikll1
+        set skills4[2] = sikll2
+        set skills4[3] = sikll3
+        set skills4[4] = sikll4
+        set fixskill_1_2[4] = fix_1_2
+        set fixskill_1[4] = fix_1
+    endif
+endfunction
+
+function set_skills takes nothing returns nothing
+    local integer i = hero_id
+    if hero_id != DEMON_HUNTER and hero_id2 != DEMON_HUNTER and hero_id3 != DEMON_HUNTER then
+        set hero_id4 = DEMON_HUNTER
+    elseif hero_id != KEEPER and hero_id2 != KEEPER and hero_id3 != KEEPER then
+        set hero_id4 = KEEPER
+    elseif hero_id != MOON_BABE and hero_id2 != MOON_BABE and hero_id3 != MOON_BABE then
+        set hero_id4 = MOON_BABE
+    elseif hero_id != WARDEN and hero_id2 != WARDEN and hero_id3 != WARDEN then
+        set hero_id4 = WARDEN
+    endif
+    if GetUnitCountDone(hero_id) > 0 then
+        set i = -1
+    elseif GetUnitCountDone(hero_id2) > 0 then  // check room open random
+        set hero_id = hero_id2
+        set hero_id2 = i
+        set i = -1
+    elseif GetUnitCountDone(hero_id3) > 0 then
+        set hero_id = hero_id3
+        set hero_id3 = i
+        set i = -1
+    elseif GetUnitCountDone(hero_id4) > 0 then
+        set hero_id = hero_id4
+        set hero_id4 = i
+        set i = -1
+    endif
+    call SetSkillArrayAtHero(DEMON_HUNTER, MANA_BURN, IMMOLATION, EVASION, METAMORPHOSIS, false, false)
+    call SetSkillArrayAtHero(KEEPER, FORCE_NATURE, ENT_ROOTS, THORNS_AURA, TRANQUILITY, true, false)
+    call SetSkillArrayAtHero(WARDEN, FAN_KNIVES, SHADOW_TOUCH, BLINK, VENGEANCE, true, false)
+    call SetSkillArrayAtHero(MOON_CHICK, SEARING_ARROWS, TRUESHOT, SCOUT, STARFALL, true, false)
+    if i < 0 then
+        set herounit[1] = SetHeroUint(herounit[1], hero_id)
+        if herounit[1] != null then
+            if fixskill_1[1] then  // skill 2 and 3 low
+                call SelectHeroSkill(herounit[1], skills1[1])
+            elseif fixskill_1_2[1] then  // skill 3 low
+                call SelectHeroSkill(herounit[1], skills1[GetRandomInt(1, 2)])
+            else
+                call SelectHeroSkill(herounit[1], skills1[GetRandomInt(1, 3)])
+            endif
+        endif
+    endif
 endfunction
 
 //--------------------------------------------------------------------------------------------------
@@ -362,6 +299,7 @@ function setup_force takes nothing returns nothing
     call SetMeleeGroup( KODO_BEAST      )
     call SetMeleeGroup( BATRIDER        )
     call SetMeleeGroup( SPIRIT_WALKER   )
+    call SetMeleeGroup( SPIRIT_WALKER_M )
 
     //human
     call SetMeleeGroup( FOOTMEN         )
@@ -417,7 +355,7 @@ function attack_sequence takes nothing returns nothing
     local integer level
 
     loop
-        exitwhen c_hero1_done > 0 and c_archer_done >= 2
+        exitwhen (not basic_opening and ((c_food_made - c_food_used < 15 and c_food_used > 22) or (c_hero1_done + c_hero2_done + c_hero3_done + c_hero4_done > 2))) or (basic_opening and c_hero1_done > 0 and c_archer_done + c_huntress_done > 5)
         call Sleep(2)
     endloop
 
@@ -468,10 +406,6 @@ endfunction
 function init_vars takes nothing returns nothing
 
     set b_acid_breath       = GetUpgradeLevel(UPG_CHIM_ACID) >= 1
-    set b_hero1_done        = b_hero1_done or GetUnitCountDone(hero_id) > 0
-    set b_hero2_done        = b_hero2_done or GetUnitCountDone(hero_id2) > 0
-    set b_hero3_done        = b_hero3_done or GetUnitCountDone(hero_id3) > 0
-    set b_hero4_done        = b_hero4_done or GetUnitCountDone(hero_id4) > 0
     set c_altar_done        = GetUnitCountDone(ELF_ALTAR)
     set c_archer            = GetUnitCount(ARCHER)
     set c_archer_done       = GetUnitCountDone(ARCHER)
@@ -490,6 +424,7 @@ function init_vars takes nothing returns nothing
     set c_hero1_done        = GetUnitCountDone(hero_id)
     set c_hero2_done        = GetUnitCountDone(hero_id2)
     set c_hero3_done        = GetUnitCountDone(hero_id3)
+    set c_hero4_done        = GetUnitCountDone(hero_id4)
     set c_hunt_hall_done    = GetUnitCountDone(HUNTERS_HALL)
     set c_huntress          = GetUnitCount(HUNTRESS)
     set c_huntress_done     = GetUnitCountDone(HUNTRESS)
@@ -712,6 +647,7 @@ function do_upgrades takes nothing returns nothing
                 endif
             endif
         endif
+        call SetBuildUpgr( 1, UPG_ULTRAVISION )
     endif
 
     if c_mtn_giant >= 1 and c_tree_etern_done >= 1 and c_wonders_done >= 1 and c_lore_done >= 1 then
@@ -743,9 +679,6 @@ function do_upgrades takes nothing returns nothing
             call SetBuildUpgr( 1, 'Repb'        )
         endif
     endif
-    if c_hunt_hall_done > 0 then
-        call SetBuildUpgr( 1, UPG_ULTRAVISION )
-    endif
 
     if c_lore_done >= 1 and c_bear >= 1 then
 
@@ -774,18 +707,15 @@ function build_hero_fix takes integer heronum, boolean herodone, integer heroid,
     local integer i = 0
     if heronum < 1 and c_altar_done > 0 then
       if herodone then  // resurrection no need wood, only can forcibly fix
-        set i = GetUnitGoldCost(heroid)
         if herounit[num] != null and c_food_made - c_food_used >= 5 then
-          set i = Min(i * 4, Min(i * R2I(0.4 + 0.1 * (GetHeroLevel(herounit[num]) - 1)), 700))
+          set i = 133 + 42 * GetHeroLevel(herounit[num])  // buy hero gold 270 + 90 * GetHeroLevel(herounit[num])  wood 65 + 20 * GetHeroLevel(herounit[num])
           if c_gold >= i then
             set total_gold = Max(0, total_gold - i) // compensation
             call SetProduce(1,heroid,-1)
             return
           endif
         endif
-        if c_gold >= GetUnitGoldCost(heroid) and GetWood() >= GetUnitWoodCost(heroid) then  // Prevent StartUnit function interruptions
-          call SetBuildUnit(1, heroid)  // only can add sequence
-        endif
+        call SetBuildUnit(1, heroid)  // only can add sequence
       else  // build
         if num == 1 and c_food_made - c_food_used >= 5 then  // build first hero no need gold and wood -- just melee map , cannot custom map
           call SetProduce(1,heroid,-1)
@@ -805,45 +735,52 @@ function build_sequence takes nothing returns nothing
     if basic_opening then
         call SetBuildUnit(  1, TREE_LIFE        )
         call SetBuildUnit(  2, WISP             )
-        call SetBuildUnit(  1, ELF_ALTAR        )
-        call SetBuildUnit(  7, WISP             )
-        call SetBuildUnit(  1, MOON_WELL        )
-        call SetBuildUnit(  8, WISP             )
         call SetBuildUnit(  1, ANCIENT_WAR      )
+        call SetBuildUnit(  6, WISP             )
+        call SetBuildUnit(  1, MOON_WELL        )
+        call SetBuildUnit(  1, ELF_ALTAR        )
+        call SetBuildUnit(  8, WISP             )
         call build_hero_fix(GetUnitCount(hero_id), b_hero1_done, hero_id, 1)
         call SetBuildUnit(  9, WISP             )
-        call SetBuildUnit(  2, MOON_WELL        )
-        call SetBuildUnit( 10, WISP             )
         call basics(2)// (  1, ARCHER           )
-        call basics(4)// (  2, ARCHER           )
+        call SetBuildUnit(  2, MOON_WELL        )
         call SetBuildUnit( 11, WISP             )
-        call basics(6)// (  3, ARCHER           )
+        call basics(4)// (  2, ARCHER           )
         call SetBuildUnit( 12, WISP             )
+        call basics(6)// (  3, ARCHER           )
         call SetBuildUnit(  1, HUNTERS_HALL     )
         call SetBuildUnit(  3, MOON_WELL        )
         call SetBuildUnit( 13, WISP             )
         call basics(8)// (  4, ARCHER           )
         call SetBuildUnit( 14, WISP             )
         call basics(10)//(  5, ARCHER           )
+        call SetBuildUnit(  4, MOON_WELL        )
         call SetBuildUnit( 15, WISP             )
         call basics(15)//(  6, ARCHER           )
                        //(  1, HUNTRESS         )
         call SetBuildUnit(  1, DEN_OF_WONDERS   )
         call SetBuildUnit(  1, TREE_AGES        )
         call BasicExpansion( c_mines < 2, TREE_LIFE )
-
-        if MeleeDifficulty() != MELEE_NEWBIE then
-            call GuardSecondary( 1, 2, ANCIENT_PROTECT )
-            call GuardSecondary( 1, 1, MOON_WELL )
-        endif
-        call GuardSecondary( 0, 2, ANCIENT_PROTECT )
-        call SetBuildUpgr(  1, UPG_STR_MOON     )
-        call SetBuildUpgr(  1, UPG_MOON_ARMOR   )
-        call SetBuildUnit(  4, MOON_WELL        )
-
         if c_tree_ages_done > 0 and MeleeDifficulty() != MELEE_NEWBIE then
             call build_hero_fix(GetUnitCount(hero_id2), b_hero2_done, hero_id2, 2)
         endif
+        if GetUnitCount(TREE_AGES) > 0 and MeleeDifficulty() != MELEE_NEWBIE then
+            call BuildFactory( ANCIENT_WAR      )
+        endif
+        if c_hero1_done > 0 and c_gold > 800 then
+            if c_hunt_hall_done > 0 then
+                call SetBuildNext(  6, HUNTRESS )
+            endif
+            call SetBuildNext(  8, ARCHER       )
+        endif
+        if c_tree_life_done > 1 then
+            call GuardSecondary( 1, 2, ANCIENT_PROTECT )
+            call GuardSecondary( 1, 1, MOON_WELL)
+            call GuardSecondary( 0, 2, ANCIENT_PROTECT )
+        endif
+        call SetBuildUnit(  5, MOON_WELL        )
+        call SetBuildUpgr(  1, UPG_STR_MOON     )
+        call SetBuildUpgr(  1, UPG_MOON_ARMOR   )
 
         return
     endif
@@ -882,7 +819,7 @@ function build_sequence takes nothing returns nothing
 
     // having enough gold is the highest priority
     //
-    if c_gold_owned < 2000 then
+    if c_gold_owned < 2000 or (c_gold < 500 and c_food_made - c_food_used < 10 and c_food_made > 42) then
         call BasicExpansion( c_mines < 2, TREE_LIFE )
         call GuardSecondary( 1, 1, ANCIENT_PROTECT )
         call GuardSecondary( 1, 2, ANCIENT_PROTECT )
@@ -916,7 +853,7 @@ function build_sequence takes nothing returns nothing
 
     // the primary melee force is the mountain giant
     //
-   set primary_melee = c_lore_done >= 1 and c_wonders_done >= 1 and c_tree_ages_done >= 1
+    set primary_melee = c_lore_done >= 1 and c_wonders_done >= 1 and c_tree_ages_done >= 1
     if primary_melee then
         call SetBuildUnit( 1, MOUNTAIN_GIANT )
 
@@ -981,10 +918,12 @@ function build_sequence takes nothing returns nothing
         call do_upgrades()
     endif
     call BasicExpansion( c_mines < 2, TREE_LIFE )
-    call GuardSecondary( 1, 1, ANCIENT_PROTECT )
-    call GuardSecondary( 1, 2, ANCIENT_PROTECT )
-    call GuardSecondary( 1, 2, MOON_WELL )
-    call GuardSecondary( 1, 1, DEN_OF_WONDERS )
+    if c_tree_life_done > 1 then
+        call GuardSecondary( 1, 1, ANCIENT_PROTECT )
+        call GuardSecondary( 1, 2, ANCIENT_PROTECT )
+        call GuardSecondary( 1, 1, DEN_OF_WONDERS )
+        call GuardSecondary( 1, 2, MOON_WELL )
+    endif
     if c_food_used >= UPKEEP_TIER2 - 10 and c_gold < 2000 then
         return
     endif
@@ -1249,9 +1188,9 @@ function peon_assignment takes nothing returns nothing
                 call MineCheck()
             endif
         else
-            call HarvestGold(T,4)
+            call HarvestGold(T,3)
             call HarvestWood(0,1)
-            call HarvestGold(T,1)
+            call HarvestGold(T,2)
             call HarvestWood(0,2)
         endif
         set c = c + 1
