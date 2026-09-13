@@ -109,6 +109,6 @@ function cs2s takes string name, playercolor c returns string
   elseif c == PLAYER_COLOR_BROWN then
       return "|Cff4F2B05"+name+"|r"
   else
-    return "||cff000000"+name+"|r"
+    return "|cff000000"+name+"|r"
   endif
 endfunction
