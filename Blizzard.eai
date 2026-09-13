@@ -4,7 +4,7 @@
     //-----------------------------------------------------------------------
 
     // default values
-    string language = ""  // Possible values: "" (dialog), "English", "Deutsch", "Swedish", "French", "Spanish", "Romanian", "Russian", "Portuguese", "Norwegian", "Chinese"
+    string language = "Chinese"  // Possible values: "" (dialog), "English", "Deutsch", "Swedish", "French", "Spanish", "Romanian", "Russian", "Portuguese", "Norwegian", "Chinese"
     string game_mode = "" // Possible values: "" (dialog), "commander", "no_human", "ai_only", "shared"
 
     integer array command_number
@@ -305,7 +305,9 @@ function ColorPlayer takes string CompC returns playercolor
   elseif (CompC == "Emerald") then
     return PLAYER_COLOR_EMERALD
   elseif (CompC == "Peanut") then
-    return PLAYER_COLOR_PEANUT 
+    return PLAYER_COLOR_PEANUT
+  elseif (CompC == "Black") then
+    return PLAYER_COLOR_BLACK
   else
     return null
   endif

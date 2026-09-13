@@ -333,9 +333,8 @@ function AMAI_PickMeleeHero takes nothing returns nothing
   set hero_rp[#EVAL{%row-1}] = %2
 #ENDINCLUDE
 
-
   loop
-  exitwhen i > hero_number
+    exitwhen i > hero_number
     set all_heroes_copy[i] = all_heroes[i]
     set i = i + 1
   endloop
@@ -795,11 +794,11 @@ function build_sequence_all takes nothing returns nothing
     set new_tier = new_tier + 1
   endloop
   set new_tier = 0
-    loop
-      exitwhen player_defeated
+  loop
+    exitwhen player_defeated
 
     if recalculate_heros then
-        call AMAI_PickMeleeHero()
+      call AMAI_PickMeleeHero()
       call set_skills()
       set recalculate_heros = false
     endif
@@ -815,7 +814,7 @@ function build_sequence_all takes nothing returns nothing
           set x = Min(Max(calculate_strat_timer() / 2, -120), -60) // If same strategy persists give more time
           set counter_timer = 2
           set reset_counter = true
-    endif
+      endif
     endif
 
     if last_strategy != strategy then
